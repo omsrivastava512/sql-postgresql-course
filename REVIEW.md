@@ -15,6 +15,28 @@ Suggested times: next study session, roughly one week later, roughly one month l
 | A visit was committed yesterday. Today's invoice transaction fails. Does yesterday's visit disappear? | [Transactions](articles/06-transaction-boundaries.md): no, it lies outside today's transaction. |
 | The request times out after commit. Is a rollback guaranteed? | [Transactions](articles/06-transaction-boundaries.md): no; response delivery does not determine committed state. |
 
+## Another setting for the transaction boundary
+
+A booking transaction creates a reservation and reduces the available-seat count. A constraint then rejects the reservation. Assume both writes are ordinary table writes in that same transaction. Predict which changes remain after rollback, then compare with the [invoice example](articles/06-transaction-boundaries.md).
+
+Answer: neither write persists. Now change one detail: the seat count was committed in an earlier transaction. Rolling back the later reservation does not undo that earlier count. Finally, suppose both writes committed but the confirmation response vanished. Neither rollback conclusion applies merely because the caller saw a timeout; a retry needs a way to identify the same operation. This is a reasoning prompt, not a verified reservation SQL lab.
+
+## Return prompts for planned routes
+
+These become useful after their lessons are written. They are authoring commitments, not exercises with missing prerequisite lessons that readers are expected to solve now.
+
+| Planned route | Later retrieval and transfer prompt | Feedback target |
+|---|---|---|
+| Values and identity | A signup sends empty text; another omits the value. Predict the stored values before running a subscriptions variant. | Distinguish absent input, NULL, defaults and the chosen constraint. |
+| Relationships and modelling | Model a club membership after studying shop customers. Can one membership row describe two members? | State row grain, cardinality and key choices; test counterexamples. |
+| Query meaning and reporting | Add a second payment and explain why a joined subscription total changed. | Account for rows before aggregation rather than patching with DISTINCT blindly. |
+| Rules and automation | Move an eligibility check from creation to every update in a lending example. | Name all operations that can invalidate the intended rule. |
+| Transactions and concurrency | Two callers reserve the final seat. Where can each observe or change state? | Trace interleaving and retry scope; one-session rollback is insufficient evidence. |
+| Identity and access | Switch from workspace members to clinic staff. What changes in the identity-to-visible-row trace? | Separate authentication, grants, row policy and privileged function execution. |
+| Data over time | Change a current catalog price after an order was paid. | Explain which value is historical and which is recomputed. |
+| Performance and recovery | A slow query and an accidental deletion both occur. Which measurement or recovery tool answers each problem? | Use query evidence for performance; prove restoration separately from rollback. |
+| Evolution and integration | Add a required field while an older caller is still running. | Explain compatibility, backfill, validation and the user's failure/recovery path. |
+
 ## Transfer problem
 
 A library stores members, loans and fines. A loan must refer to a member; only active members may borrow; a fine number is allocated when a fine is inserted.

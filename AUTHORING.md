@@ -39,6 +39,16 @@ Offer reviews at the next study session, around a week later, and around a month
 
 The [IES practice guide](https://ies.ed.gov/ncee/wwc/practiceguide/1) supports spacing and combining examples with problems. [Karpicke and Blunt (2011)](https://pubmed.ncbi.nlm.nih.gov/21252317/) found benefits from retrieval on conceptual questions in their science-text experiments. Neither establishes that our particular course, graph, or review schedule is effective. We will evaluate that with actual reader attempts.
 
+## Standalone scope and labels
+
+Teach one complete question without requiring the source application, private conversations or historical study numbering. Supply every table, row and rule needed to understand the example. Repository provenance and the source-study cross-reference belong in author records, never in a reader's prerequisites.
+
+Label the scope of each explanation: **General SQL idea**, **PostgreSQL behaviour**, or **Supabase integration**. A lesson can contain more than one, but name the boundary where it changes. Portability is a separate claim requiring another database's evidence. Existing article scopes are indexed in the course map.
+
+Keep the clinic as one fictional case study. Use shops, reservations, subscriptions, libraries and team workspaces for changed-context practice. The [course map](COURSE_MAP.md#follow-a-question-across-settings) assigns first encounters and returns; every new route must have a transfer prompt, feedback and a later retrieval prompt. A company account must be attributed and clearly separated from our synthetic examples.
+
+Use the [inventory's evidence rules](TOPIC_INVENTORY.md#how-to-read-coverage): planned, introduced, explained and practised describe an exact objective, not a whole bundled topic or a learner's mastery. Link the relevant section/task when changing a status. Record execution environment and outcome separately in the verification record.
+
 ## Evidence and publication
 
 Every technical claim needs an executed example or an authoritative reference. Every company anecdote needs the original account, attribution, date, and a clear limit on the inference.

@@ -1,51 +1,56 @@
 # SQL that holds up
 
-A course about what databases promise, where those promises end, and how to find out for yourself.
+A standalone course about storing facts, asking questions, and understanding what a database can guarantee.
 
-You can know what a foreign key is and still be surprised when an application saves the wrong owner. You can understand `ROLLBACK` and still be unsure what to do when a payment screen says "Try again."
+**For:** programmers new to databases. **Focus:** SQL and PostgreSQL, with backend context where it helps explain the database. **Format:** connected short articles and separate, resettable labs.
 
-Those gaps are where this course begins.
-
-We use a fictional clinic because patients, visits, notes, and invoices give us concrete things to reason about. You do not need medical knowledge or access to the original application. Later exercises change the setting so that the ideas travel with you.
-
-**Audience:** programmers new to databases. **Focus:** SQL and PostgreSQL, with backend context when it explains the database's behavior. **Format:** connected articles and separate, resettable labs.
+The examples use fictional applications. The first drafts use a clinic; the wider curriculum also uses shops, reservations, subscriptions, and shared workspaces. Everything needed for a lab is supplied here. You need no existing application, private notes, or medical knowledge.
 
 ## Choose a way in
 
-- **New to SQL:** start with [Reading the examples](articles/00-reading-the-examples.md), then [What a foreign key actually promises](articles/01-foreign-keys.md).
-- **Returning to Module 2:** use the [first learning route](COURSE_MAP.md#the-first-route) and the return notes at the end of each article.
-- **Following a particular question:** browse the [concept map](COURSE_MAP.md). A prerequisite is a reasoned suggestion, not a locked gate.
-- **Ready to experiment:** choose either setup in the [lab guide](labs/README.md).
+- **New to databases:** see the [beginner route](COURSE_MAP.md#the-beginner-route). It distinguishes available drafts from lessons still to be written. The [SQL onramp](articles/00-reading-the-examples.md) is available now.
+- **Ready to explore the current drafts:** follow the [first route](COURSE_MAP.md#the-first-route), starting with foreign keys.
+- **Returning after a gap:** choose a [review prompt](REVIEW.md), then revisit the relevant article's return note.
+- **Following a question:** use the [course map](COURSE_MAP.md). Related ideas are linked; there is no locked sequence.
+- **Ready to run SQL:** choose local PostgreSQL or Supabase in the [lab guide](labs/README.md).
 
 ## Available drafts
 
 | Article | What you should be able to do afterward |
 |---|---|
 | [Reading the examples](articles/00-reading-the-examples.md) | Read a small table definition and inspect or change a row. |
-| [What a foreign key actually promises](articles/01-foreign-keys.md) | Separate "that row exists" from "that row is suitable." |
-| [An existing person can still be the wrong owner](articles/02-business-rules.md) | Explain what an owner-check trigger checks, and what it misses. |
-| [Who put that owner on the note?](articles/03-derived-values.md) | Trace a supplied value through a BEFORE trigger. |
+| [What a foreign key actually promises](articles/01-foreign-keys.md) | Separate existence from suitability and permission. |
+| [An existing person can still be the wrong owner](articles/02-business-rules.md) | Trace a validation trigger and identify a write it does not cover. |
+| [Who put that owner on the note?](articles/03-derived-values.md) | Trace supplied input through a BEFORE trigger and spot a stale copy. |
 | [Deleting a patient with visits](articles/04-deleting-related-rows.md) | Predict rejection, cascading deletion, and clearing a reference. |
-| [Can the database wait until I am finished?](articles/05-deferred-checks.md) | Compare immediate and deferred checks with a complete transaction. |
-| [The invoice failed. Did its number disappear?](articles/06-transaction-boundaries.md) | Locate a rollback boundary and distinguish it from a missing response. |
+| [Can the database wait until I am finished?](articles/05-deferred-checks.md) | Compare immediate and deferred checks in a complete transaction. |
+| [The invoice failed. Did its number disappear?](articles/06-transaction-boundaries.md) | Locate rollback boundaries and distinguish them from a lost response. |
 
-These are editorial drafts, not a claim that a complete course has been published. See [verification status](VERIFICATION.md) before treating the labs as release-ready.
+There are **seven article drafts and six labs**, not a finished course. Querying, data modelling, access control, performance, migrations, and other areas still need substantial lessons. The [topic inventory](TOPIC_INVENTORY.md) records evidence and gaps; a topic being listed does not mean it has been taught.
 
-## How the course grows
+These are editorial drafts. Embedded PostgreSQL checks have passed historically; local Docker testing remains pending and hosted Supabase testing is deferred. See the [verification record](VERIFICATION.md) for dates and limits.
 
-The whole [topic inventory](TOPIC_INVENTORY.md) is mapped, but articles are published as the author learns and verifies them. A planned topic is marked planned. An available article links only to existing files.
+## How the ideas connect
 
-Read a worked example, predict a change, run it, and explain the result. In a later article, you meet the idea again in a different problem. Use the [review prompts](REVIEW.md) when returning after a gap.
+Read a worked example, predict a change, run it, and explain the result. Later, meet the same idea in a different setting: a patient reference becomes a customer reference; an invoice rollback becomes a reservation rollback. Use [review prompts](REVIEW.md) after a gap, with hints and answers available whenever useful.
+
+The [map](COURSE_MAP.md) separates prerequisites from related questions. General SQL ideas, PostgreSQL features, and Supabase integration are labelled separately. PostgreSQL is our execution environment; identical-looking SQL is not a promise of identical behaviour in every database.
+
+Articles can be published as the author learns and verifies them. Planned lessons stay visibly planned, and links to articles appear only when those articles exist.
 
 ## Real engineering, with attribution
 
-The course includes short, attributed connections to engineers' own writing. Start with the [source notebook](SOURCES.md): Stripe on retries, Notion on related data, GitHub on database boundaries, and Brandur Leach on deletion and triggers.
+The [source notebook](SOURCES.md) connects specific questions to engineers' own accounts: retries at Stripe, related data at Notion, database boundaries at GitHub, and deletion tradeoffs discussed by Brandur Leach. Fictional exercises do not reproduce those companies' systems.
 
-The prose in this draft was prepared with AI assistance. Linked engineering accounts retain their authors' voices and credit. The course author should revise examples and explanations after doing the labs; we do not invent personal work experience or claim this draft was written entirely by a human.
+This draft was prepared with AI assistance. The course author should revise it after doing the labs; we do not invent personal experience or claim the draft was entirely human-written.
 
-## Author materials
+## For authors and maintainers
 
-[Teaching and editorial guide](AUTHORING.md) · [Repository evidence](REPOSITORY_EVIDENCE.md) · [Publication queue](PUBLICATION.md)
+Readers can skip these records:
 
-The SQL uses dedicated `course_*` schemas and synthetic data. Use a disposable learning database; the reset scripts remove only their named course schema.
+- [Teaching guide](AUTHORING.md) and [publication queue](PUBLICATION.md): how to develop and release lessons.
+- [Curriculum audit](CURRICULUM_AUDIT.md): source-study cross-reference, added topics, and evidence requirements.
+- [Repository evidence](REPOSITORY_EVIDENCE.md): historical provenance, not reader prerequisites.
+- [File guide](NEW_FILES.md): what the repository's supporting files are for.
 
+The SQL uses synthetic data in dedicated course schemas. Use a disposable learning database; setup scripts reset their named lab schema.

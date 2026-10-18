@@ -30,6 +30,17 @@ Each source contributes a short connection, not a retelling of the whole article
 
 Pin teaching claims to a documented version. Record actual execution versions in VERIFICATION.md rather than assuming a hosted database uses the same version.
 
+## Curriculum audit references
+
+Checked 2026-10-19 for the standalone curriculum revision:
+
+- [PostgreSQL tutorial overview](https://www.postgresql.org/docs/17/tutorial.html): independent check of beginner foundations and progression into views, relationships, transactions and windows.
+- [PostgreSQL SQL manual contents](https://www.postgresql.org/docs/17/sql.html): breadth check for query composition, expressions, indexing and concurrency. This selects topics; it does not validate unwritten lesson examples.
+- [Supabase RLS guide](https://supabase.com/docs/guides/database/postgres/row-level-security): reference for future exposure, identity and policy lessons; do not carry over broad claims from private study notes.
+- [PostgreSQL CREATE FUNCTION](https://www.postgresql.org/docs/17/sql-createfunction.html): execution identity and safe function definitions for future invoker/definer lessons.
+
+The [author audit](CURRICULUM_AUDIT.md) records the additions and limits. Recheck the relevant detailed documentation when each lesson is authored and tested.
+
 ## Learning format references
 
 [The Odin Project](https://www.theodinproject.com/lessons/foundations-how-this-course-will-work) connects lessons with projects. [SQLBolt](https://sqlbolt.com/) places exercises beside explanations. [Explorable Explanations](https://explorabl.es/faq/) offers examples of learning through manipulation. [Quantum Country](https://quantum.country/) embeds spaced review into essays.

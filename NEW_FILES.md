@@ -1,6 +1,22 @@
-# Files added for the course draft
+# Course file guide and original delivery record
 
-Created 2026-10-17. All listed files are new; every line is an addition. No pre-existing application or study file was edited.
+## What the files are for
+
+The original package contained 42 files. It now contains 43 after adding the author-only curriculum audit; this is a file count, not a lesson count.
+
+| Files | Purpose | Intended audience |
+|---|---|---|
+| 7 article files | One SQL onramp and six mechanism-focused lessons | Readers |
+| 19 lab files | Shared instructions plus six sets of tasks, setup SQL and solutions | Readers; authors verifying examples |
+| 11 top-level Markdown files | Navigation, review, sources, curriculum, authoring and verification records | Mixed; author records are labelled |
+| 6 tooling files | Git ignore rules, package files and three verification files | Maintainers |
+| 43 total | Current source package, excluding Git metadata and installed dependencies | Not 43 lessons |
+
+Readers start at the [README](README.md), [course map](COURSE_MAP.md), articles, labs and [review prompts](REVIEW.md). Authors additionally use the [curriculum audit](CURRICULUM_AUDIT.md), teaching guide, publication queue, provenance and verification records. No reader needs the private source application.
+
+## Original delivery on 2026-10-17
+
+The following line counts are historical, not the current diff. At initial delivery every listed file was new and no pre-existing application or study file was edited. Later revisions are tracked by Git.
 
 | File | Lines added |
 |---|---:|
@@ -46,6 +62,6 @@ Created 2026-10-17. All listed files are new; every line is an addition. No pre-
 | [TOPIC_INVENTORY.md](TOPIC_INVENTORY.md) | 171 |
 | [VERIFICATION.md](VERIFICATION.md) | 42 |
 
-This inventory file, NEW_FILES.md, is also new. Temporary runtime dependencies and node_modules are excluded from delivery.
+This delivery record itself was the 42nd file. Temporary runtime dependencies and node_modules were excluded. The curriculum audit was added on 2026-10-19; the table above remains the original delivery snapshot.
 
 See VERIFICATION.md for executed checks and outstanding release gates. These files are saved drafts, not a public deployment.
