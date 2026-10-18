@@ -1,0 +1,15 @@
+{
+  "name": "sql-that-holds-up-course",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "check:links": "node tests/check-links.mjs",
+    "test:embedded": "node tests/verify.mjs --embedded",
+    "test:database": "node tests/verify.mjs --database"
+  },
+  "devDependencies": {
+    "@electric-sql/pglite": "0.5.10",
+    "pg": "8.16.3"
+  }
+}
+

@@ -1,0 +1,609 @@
+[
+  {
+    "lab": "01-foreign-keys",
+    "steps": [
+      {
+        "sql": "INSERT INTO course_fk.visits VALUES (100, 10)"
+      },
+      {
+        "sql": "INSERT INTO course_fk.visits VALUES (101, 999)",
+        "error": "23503"
+      },
+      {
+        "sql": "INSERT INTO course_fk.visits VALUES (102, NULL)",
+        "error": "23502"
+      },
+      {
+        "sql": "INSERT INTO course_fk.visits VALUES (100, 10)",
+        "error": "23505"
+      },
+      {
+        "sql": "INSERT INTO course_fk.patients VALUES (20, 'Sam', 2)"
+      },
+      {
+        "query": "SELECT id, patient_id FROM course_fk.visits ORDER BY id",
+        "rows": [
+          {
+            "id": 100,
+            "patient_id": 10
+          }
+        ]
+      },
+      {
+        "query": "SELECT owner_id FROM course_fk.patients WHERE id=20",
+        "rows": [
+          {
+            "owner_id": 2
+          }
+        ]
+      },
+      {
+        "sql": "DELETE FROM course_fk.patients WHERE id=10",
+        "error": "23503"
+      },
+      {
+        "sql": "UPDATE course_fk.patients SET id=11 WHERE id=10",
+        "error": "23503"
+      },
+      {
+        "query": "SELECT id FROM course_fk.patients ORDER BY id",
+        "rows": [
+          {
+            "id": 10
+          },
+          {
+            "id": 20
+          }
+        ]
+      }
+    ],
+    "solution": [
+      {
+        "query": "SELECT count(*)::integer AS n FROM course_fk.visits",
+        "rows": [
+          {
+            "n": 1
+          }
+        ]
+      },
+      {
+        "query": "SELECT owner_id FROM course_fk.patients WHERE id=20",
+        "rows": [
+          {
+            "owner_id": 2
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "lab": "02-business-rules",
+    "steps": [
+      {
+        "sql": "INSERT INTO course_rules.patients VALUES (10, 'Riya', 1)"
+      },
+      {
+        "sql": "INSERT INTO course_rules.patients VALUES (20, 'Sam', 2)",
+        "error": "P0001"
+      },
+      {
+        "sql": "UPDATE course_rules.patients SET owner_id=2 WHERE id=10",
+        "error": "P0001"
+      },
+      {
+        "query": "SELECT owner_id FROM course_rules.patients WHERE id=10",
+        "rows": [
+          {
+            "owner_id": 1
+          }
+        ]
+      },
+      {
+        "sql": "UPDATE course_rules.profiles SET role='receptionist' WHERE id=1"
+      },
+      {
+        "query": "SELECT r.role FROM course_rules.patients p JOIN course_rules.profiles r ON r.id=p.owner_id WHERE p.id=10",
+        "rows": [
+          {
+            "role": "receptionist"
+          }
+        ]
+      },
+      {
+        "sql": "UPDATE course_rules.patients SET name='Riya edited' WHERE id=10",
+        "error": "P0001"
+      },
+      {
+        "query": "SELECT name FROM course_rules.patients WHERE id=10",
+        "rows": [
+          {
+            "name": "Riya"
+          }
+        ]
+      }
+    ],
+    "solution": [
+      {
+        "query": "SELECT r.role FROM course_rules.patients p JOIN course_rules.profiles r ON r.id=p.owner_id",
+        "rows": [
+          {
+            "role": "receptionist"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "lab": "03-derived-values",
+    "steps": [
+      {
+        "sql": "INSERT INTO course_derive.notes (id,patient_id,owner_id,body) VALUES (100,10,2,'First')"
+      },
+      {
+        "sql": "INSERT INTO course_derive.notes (id,patient_id,body) VALUES (101,10,'Second')"
+      },
+      {
+        "query": "SELECT id,owner_id FROM course_derive.notes ORDER BY id",
+        "rows": [
+          {
+            "id": 100,
+            "owner_id": 1
+          },
+          {
+            "id": 101,
+            "owner_id": 1
+          }
+        ]
+      },
+      {
+        "sql": "INSERT INTO course_derive.notes (id,patient_id,body) VALUES (102,999,'Missing')",
+        "error": "23502"
+      },
+      {
+        "sql": "UPDATE course_derive.patients SET owner_id=2 WHERE id=10"
+      },
+      {
+        "query": "SELECT id,owner_id FROM course_derive.notes ORDER BY id",
+        "rows": [
+          {
+            "id": 100,
+            "owner_id": 1
+          },
+          {
+            "id": 101,
+            "owner_id": 1
+          }
+        ]
+      },
+      {
+        "sql": "UPDATE course_derive.notes SET body='Edited' WHERE id=100"
+      },
+      {
+        "query": "SELECT id,owner_id FROM course_derive.notes ORDER BY id",
+        "rows": [
+          {
+            "id": 100,
+            "owner_id": 2
+          },
+          {
+            "id": 101,
+            "owner_id": 1
+          }
+        ]
+      }
+    ],
+    "solution": [
+      {
+        "query": "SELECT id,owner_id FROM course_derive.notes ORDER BY id",
+        "rows": [
+          {
+            "id": 100,
+            "owner_id": 1
+          },
+          {
+            "id": 101,
+            "owner_id": 1
+          }
+        ]
+      },
+      {
+        "query": "SELECT owner_id FROM course_derive.patients WHERE id=10",
+        "rows": [
+          {
+            "owner_id": 2
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "lab": "04-deleting-related-rows",
+    "steps": [
+      {
+        "sql": "DELETE FROM course_delete.patients WHERE id=10",
+        "error": "23503"
+      },
+      {
+        "query": "SELECT count(*)::integer AS n FROM course_delete.patients",
+        "rows": [
+          {
+            "n": 1
+          }
+        ]
+      },
+      {
+        "query": "SELECT patient_id FROM course_delete.visits",
+        "rows": [
+          {
+            "patient_id": 10
+          }
+        ]
+      },
+      {
+        "sql": "ALTER TABLE course_delete.visits DROP CONSTRAINT visit_patient_fk; ALTER TABLE course_delete.visits ADD CONSTRAINT visit_patient_fk FOREIGN KEY(patient_id) REFERENCES course_delete.patients(id) ON DELETE CASCADE"
+      },
+      {
+        "sql": "DELETE FROM course_delete.patients WHERE id=10"
+      },
+      {
+        "query": "SELECT count(*)::integer AS n FROM course_delete.visits",
+        "rows": [
+          {
+            "n": 0
+          }
+        ]
+      },
+      {
+        "reset": true
+      },
+      {
+        "sql": "ALTER TABLE course_delete.visits DROP CONSTRAINT visit_patient_fk; ALTER TABLE course_delete.visits ADD CONSTRAINT visit_patient_fk FOREIGN KEY(patient_id) REFERENCES course_delete.patients(id) ON DELETE SET NULL"
+      },
+      {
+        "sql": "DELETE FROM course_delete.patients WHERE id=10"
+      },
+      {
+        "query": "SELECT id,patient_id FROM course_delete.visits",
+        "rows": [
+          {
+            "id": 100,
+            "patient_id": null
+          }
+        ]
+      },
+      {
+        "reset": true
+      },
+      {
+        "sql": "ALTER TABLE course_delete.visits ALTER COLUMN patient_id SET NOT NULL; ALTER TABLE course_delete.visits DROP CONSTRAINT visit_patient_fk; ALTER TABLE course_delete.visits ADD CONSTRAINT visit_patient_fk FOREIGN KEY(patient_id) REFERENCES course_delete.patients(id) ON DELETE SET NULL"
+      },
+      {
+        "sql": "DELETE FROM course_delete.patients WHERE id=10",
+        "error": "23502"
+      },
+      {
+        "query": "SELECT id FROM course_delete.patients",
+        "rows": [
+          {
+            "id": 10
+          }
+        ]
+      },
+      {
+        "query": "SELECT patient_id FROM course_delete.visits",
+        "rows": [
+          {
+            "patient_id": 10
+          }
+        ]
+      }
+    ],
+    "solution": [
+      {
+        "query": "SELECT count(*)::integer AS n FROM course_delete.patients",
+        "rows": [
+          {
+            "n": 0
+          }
+        ]
+      },
+      {
+        "query": "SELECT id,patient_id FROM course_delete.visits",
+        "rows": [
+          {
+            "id": 100,
+            "patient_id": null
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "lab": "05-deferred-checks",
+    "steps": [
+      {
+        "sql": "DELETE FROM course_defer.patients WHERE id=10",
+        "error": "23503"
+      },
+      {
+        "sql": "BEGIN; SET CONSTRAINTS course_defer.visit_patient_fk DEFERRED; DELETE FROM course_defer.patients WHERE id=10"
+      },
+      {
+        "query": "SELECT count(*)::integer AS n FROM course_defer.patients",
+        "rows": [
+          {
+            "n": 0
+          }
+        ]
+      },
+      {
+        "sql": "DELETE FROM course_defer.visits WHERE id=100; COMMIT"
+      },
+      {
+        "query": "SELECT count(*)::integer AS n FROM course_defer.visits",
+        "rows": [
+          {
+            "n": 0
+          }
+        ]
+      },
+      {
+        "reset": true
+      },
+      {
+        "sql": "BEGIN; SET CONSTRAINTS course_defer.visit_patient_fk DEFERRED; DELETE FROM course_defer.patients WHERE id=10"
+      },
+      {
+        "sql": "COMMIT",
+        "error": "23503"
+      },
+      {
+        "sql": "ROLLBACK"
+      },
+      {
+        "query": "SELECT id FROM course_defer.patients",
+        "rows": [
+          {
+            "id": 10
+          }
+        ]
+      },
+      {
+        "query": "SELECT patient_id FROM course_defer.visits",
+        "rows": [
+          {
+            "patient_id": 10
+          }
+        ]
+      },
+      {
+        "sql": "BEGIN; SET CONSTRAINTS course_defer.visit_patient_fk DEFERRED; DELETE FROM course_defer.patients WHERE id=10"
+      },
+      {
+        "sql": "SET CONSTRAINTS course_defer.visit_patient_fk IMMEDIATE",
+        "error": "23503"
+      },
+      {
+        "sql": "ROLLBACK"
+      },
+      {
+        "query": "SELECT id FROM course_defer.patients",
+        "rows": [
+          {
+            "id": 10
+          }
+        ]
+      },
+      {
+        "sql": "BEGIN; SET CONSTRAINTS course_defer.restricted_patient_fk DEFERRED"
+      },
+      {
+        "sql": "DELETE FROM course_defer.restricted_patients WHERE id=10",
+        "error": ["23503", "23001"]
+      },
+      {
+        "sql": "ROLLBACK"
+      },
+      {
+        "query": "SELECT id FROM course_defer.restricted_patients",
+        "rows": [
+          {
+            "id": 10
+          }
+        ]
+      }
+    ],
+    "solution": [
+      {
+        "query": "SELECT count(*)::integer AS n FROM course_defer.patients",
+        "rows": [
+          {
+            "n": 0
+          }
+        ]
+      },
+      {
+        "query": "SELECT count(*)::integer AS n FROM course_defer.visits",
+        "rows": [
+          {
+            "n": 0
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "lab": "06-transaction-boundaries",
+    "steps": [
+      {
+        "sql": "INSERT INTO course_tx.invoices (id,clinic_id,visit_id,amount) VALUES (100,999,10,500)",
+        "error": "P0001"
+      },
+      {
+        "query": "SELECT invoice_counter FROM course_tx.clinics",
+        "rows": [
+          {
+            "invoice_counter": 42
+          }
+        ]
+      },
+      {
+        "sql": "INSERT INTO course_tx.invoices (id,clinic_id,visit_id,amount) VALUES (100,1,999,500)",
+        "error": "23503"
+      },
+      {
+        "query": "SELECT invoice_counter FROM course_tx.clinics",
+        "rows": [
+          {
+            "invoice_counter": 42
+          }
+        ]
+      },
+      {
+        "sql": "INSERT INTO course_tx.invoices (id,clinic_id,visit_id,amount) VALUES (100,1,10,-1)",
+        "error": "23514"
+      },
+      {
+        "query": "SELECT invoice_counter FROM course_tx.clinics",
+        "rows": [
+          {
+            "invoice_counter": 42
+          }
+        ]
+      },
+      {
+        "query": "SELECT count(*)::integer AS n FROM course_tx.invoices",
+        "rows": [
+          {
+            "n": 0
+          }
+        ]
+      },
+      {
+        "sql": "INSERT INTO course_tx.invoices (id,clinic_id,visit_id,amount) VALUES (100,1,10,500)"
+      },
+      {
+        "query": "SELECT invoice_counter FROM course_tx.clinics",
+        "rows": [
+          {
+            "invoice_counter": 43
+          }
+        ]
+      },
+      {
+        "query": "SELECT invoice_number FROM course_tx.invoices",
+        "rows": [
+          {
+            "invoice_number": 43
+          }
+        ]
+      },
+      {
+        "sql": "UPDATE course_tx.clinics SET invoice_counter=42 WHERE id=1"
+      },
+      {
+        "sql": "INSERT INTO course_tx.invoices (id,clinic_id,visit_id,amount) VALUES (101,1,10,500)",
+        "error": "23505"
+      },
+      {
+        "query": "SELECT invoice_counter FROM course_tx.clinics",
+        "rows": [
+          {
+            "invoice_counter": 42
+          }
+        ]
+      },
+      {
+        "reset": true
+      },
+      {
+        "sql": "INSERT INTO course_tx.visits VALUES (20,'Sam')"
+      },
+      {
+        "sql": "INSERT INTO course_tx.invoices (id,clinic_id,visit_id,amount) VALUES (100,1,20,-1)",
+        "error": "23514"
+      },
+      {
+        "query": "SELECT id FROM course_tx.visits ORDER BY id",
+        "rows": [
+          {
+            "id": 10
+          },
+          {
+            "id": 20
+          }
+        ]
+      },
+      {
+        "reset": true
+      },
+      {
+        "sql": "BEGIN; INSERT INTO course_tx.visits VALUES (20,'Sam')"
+      },
+      {
+        "sql": "INSERT INTO course_tx.invoices (id,clinic_id,visit_id,amount) VALUES (100,1,20,-1)",
+        "error": "23514"
+      },
+      {
+        "sql": "ROLLBACK"
+      },
+      {
+        "query": "SELECT id FROM course_tx.visits ORDER BY id",
+        "rows": [
+          {
+            "id": 10
+          }
+        ]
+      },
+      {
+        "query": "SELECT invoice_counter FROM course_tx.clinics",
+        "rows": [
+          {
+            "invoice_counter": 42
+          }
+        ]
+      },
+      {
+        "query": "SELECT count(*)::integer AS n FROM course_tx.invoices",
+        "rows": [
+          {
+            "n": 0
+          }
+        ]
+      }
+    ],
+    "solution": [
+      {
+        "query": "SELECT invoice_counter FROM course_tx.clinics",
+        "rows": [
+          {
+            "invoice_counter": 44
+          }
+        ]
+      },
+      {
+        "query": "SELECT invoice_number FROM course_tx.invoices ORDER BY invoice_number",
+        "rows": [
+          {
+            "invoice_number": 43
+          },
+          {
+            "invoice_number": 44
+          }
+        ]
+      },
+      {
+        "query": "SELECT id FROM course_tx.visits ORDER BY id",
+        "rows": [
+          {
+            "id": 10
+          },
+          {
+            "id": 20
+          }
+        ]
+      }
+    ]
+  }
+]
+
