@@ -10,25 +10,25 @@ The source-study objectives are a minimum baseline, documented in the [author au
 
 ## Current package
 
-Seven article drafts, six independent labs, and a curriculum of 132 topic groups with explicit evidence and gaps. The onramp and six mechanism-focused lessons are useful opening material; they do not complete the foundations or the course. All remain drafts.
+Ten article drafts, nine independent labs, and a curriculum of 132 topic groups with explicit evidence and gaps. The onramp, six mechanism-focused lessons and three foundation lessons are useful opening material; further foundations and later routes remain unfinished. All remain drafts.
 
-The [first route](COURSE_MAP.md#the-first-route) remains usable now. The [beginner route](COURSE_MAP.md#the-beginner-route) identifies the missing foundations. Existing numbers and URLs stay stable.
+The [first route](COURSE_MAP.md#the-first-route) remains usable now. The [beginner route](COURSE_MAP.md#the-beginner-route) connects the available foundations and identifies the missing steps. Existing numbers and URLs stay stable.
 
-## Next writing batch
+## First foundation batch
 
-Write these three foundation articles and separate labs next, one at a time. They are specifications, not files created in this pass. An article may publish independently once its own release checks pass.
+Drafted 2026-10-20 using the existing article/lab structure. Embedded execution passed; supported-environment and reader trials remain release gates. An article may publish independently once its own checks pass.
 
 | Working article question | Objectives and setting | Required experiment and transfer |
 |---|---|---|
-| What value did I actually store? | F04–F07, F15, Q05–Q07; a shop's product row | Compare omitted input, explicit NULL, empty text and a default; inspect stored values and predicate results. Transfer to a missing reservation contact. |
-| Which rows did I ask for? | Q01, Q13–Q16, Q21; shop orders | Predict filtered and ordered results, break a tie deliberately, compare row filters with group filters, and inspect writes selected by WHERE. Transfer to a subscription report; introduce pagination and leave concurrent paging depth for later. |
-| What identifies this row? | F08–F10, F14, F16, R03–R05; workspace members | Test primary keys and scoped duplicates, model a membership junction, distinguish at-most-one from existence, and reconnect to the FK draft. Transfer to customers joining loyalty programmes. |
+| [What value did I actually store?](articles/07-stored-values.md) | F04–F07, F15, Q05–Q07; a shop's product row | Compare omitted input, explicit NULL, empty text and a default; inspect stored values and predicate results. Transfer to a missing reservation contact. |
+| [Which rows did I ask for?](articles/08-selecting-rows.md) | Q01, Q13–Q14, Q16, Q21; shop orders | Predict filtered and ordered results, break a tie deliberately and inspect writes selected by WHERE. Group filters (Q15) follow grouping in the next batch. Transfer to a subscription report; introduce pagination and leave concurrent paging depth for later. |
+| [What identifies this row?](articles/09-row-identity.md) | F08–F10, F14, F16, R03–R05; workspace members | Test primary keys and scoped duplicates, model a membership junction, distinguish at-most-one from existence, and reconnect to the FK draft. Transfer to customers joining loyalty programmes. |
 
 For each: provide a worked example before the task, resettable synthetic setup, prediction feedback, accessible hints/solution, a return prompt and evidence-backed inventory updates. Use exact outcomes to keep the lesson short; split a draft if its single main question becomes unmanageable.
 
 ## Later branches
 
-After foundations, build joins and grouping before ledger views and performance work. Then choose from the reader's actual question while respecting prerequisites:
+Next, build joins and grouping around a doubled report total, then introduce a small data handoff and reusable report. Pilot query correctness, concurrency and an operational change before committing to the full production schedule. Record actual reader effort and revise confusing steps; embedded SQL success alone does not validate the teaching. Build ledger views and performance work after their query prerequisites. Then choose from the reader's actual question while respecting prerequisites:
 
 - A dashboard total doubles: joins and grain, then views, windows and query plans.
 - Two people reserve the same resource: transactions, locks, isolation and retry boundaries.

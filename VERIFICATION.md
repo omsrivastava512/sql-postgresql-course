@@ -1,10 +1,10 @@
 # Verification record
 
-Status: draft. SQL execution record dated 2026-10-17 (Asia/Kolkata); documentation audit added 2026-10-19.
+Status: draft. Initial SQL execution dated 2026-10-17 (Asia/Kolkata); documentation audit added 2026-10-19; foundation execution added 2026-10-20.
 
 | Check | Result |
 |---|---|
-| Embedded PostgreSQL execution | PASS: 65 assertions across 6 labs on PostgreSQL 18.6 / PGlite 0.5.10 |
+| Embedded PostgreSQL execution | PASS: 149 assertions across 9 labs on PostgreSQL 18.6 / PGlite 0.5.10 (2026-10-20) |
 | Local Docker PostgreSQL 17.11 | Not run; Docker is not installed on this host |
 | Hosted Supabase | Deferred at the user's request on 2026-10-17; not tested |
 | Local Markdown links, original package | Historical PASS: 161 local links across 24 Markdown files; current revision checked below |
@@ -16,6 +16,22 @@ The embedded runtime tests SQL behavior only. It cannot establish Docker setup, 
 The six initial labs cover foreign-key failures, role validation and its update gap, derived values and stale copies, delete actions, deferred-check timing, and invoice failure rollback. The test cases also run every successful solution after a fresh setup and exercise setup reset twice.
 
 No test in this package claims to verify concurrent requests, API retries, production authorization, or a deployed clinic schema.
+
+## Foundation implementation — 2026-10-20
+
+Added three articles and nine lab files. The existing runner now checks nine lab suites, including setup reset twice and each successful solution from a fresh setup. All 149 assertions passed, including 84 assertions added in this batch. The original six suites still pass.
+
+| New suite | Observed behaviour checked | Not established |
+|---|---|---|
+| 07-stored-values | Omitted/default/NULL/empty input; COALESCE without storage changes; NULL-safe comparisons; rejected types and row rules; independent stock/contact policies | Complete type selection, contact validation or application payload handling |
+| 08-selecting-rows | Exact predicate results; CASE and text matching; deterministic tie ordering; offset/keyset pages across an explicit insert; selected writes; changed subscription policy | Concurrent paging, a frozen dataset, grouping/report correctness or performance |
+| 09-row-identity | Pair/scoped duplicates; NULL uniqueness policies; optional shared-key profiles; identity generation versus constraints; rollback gap; UUID duplicate rejection; independent loyalty junction | Authorization, collision probabilities, production numbering or historical membership design |
+
+These checks validate reference examples and solutions, not arbitrary learner submissions or independent learner mastery. All new SQL runs in dedicated disposable course schemas. No dependency, test-runner architecture or existing setup/solution files changed.
+
+Local navigation passed: 315 links across 31 Markdown files, including heading targets. There are 55 source files, including ten articles and nine independent labs. All 132 topic IDs remain intact.
+
+Existing pinned test dependencies were installed with npm ci to run the embedded checks. Docker and psql were unavailable; no server or hosted test is claimed. Author/new-reader trials remain pending. The query, concurrency and operational pilots are still planned; this first batch does not complete the course.
 
 ## Findings from execution
 

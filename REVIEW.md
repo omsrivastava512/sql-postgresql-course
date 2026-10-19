@@ -6,6 +6,13 @@ Suggested times: next study session, roughly one week later, roughly one month l
 
 | Prompt | Check and revisit |
 |---|---|
+| A product omits stock; another explicitly supplies NULL; a third supplies zero. Which receives the default? | [Stored values](articles/07-stored-values.md): omission uses the default; explicit NULL stays NULL when allowed; zero is a value. |
+| CHECK (stock > 0) is present without NOT NULL. Is NULL rejected? | [Stored values](articles/07-stored-values.md): no; unknown passes CHECK. Zero fails this particular check. |
+| A display uses COALESCE(contact, 'missing'). Has the stored contact changed? | [Stored values](articles/07-stored-values.md): no; the expression changes the query result. |
+| A query says paid OR pending AND customer = 'Sam'. Which part does the customer condition restrict? | [Selecting rows](articles/08-selecting-rows.md): only the pending branch; parentheses are needed to restrict both statuses. |
+| Two orders share a date. Is ORDER BY date enough for a repeatable page boundary? | [Selecting rows](articles/08-selecting-rows.md): add a unique tie-breaker; changes between requests can still move offset pages. |
+| A membership's handle may repeat in another workspace. Which pair must remain unique? | [Row identity](articles/09-row-identity.md): workspace and handle; the member/workspace pair identifies membership separately. |
+| A rolled-back insert consumed an identity value. Must the next insert reuse it? | [Row identity](articles/09-row-identity.md): no; identity allocation can leave gaps, unlike the ordinary table counter in lab 06. |
 | A note refers to profile 2. Profile 2 exists but is a receptionist. What does a plain FK know? | [Foreign keys](articles/01-foreign-keys.md): it knows the referenced key exists, not whether the role is appropriate. |
 | The patient trigger accepted an admin yesterday. Today that profile is changed to receptionist. Does writing profiles rerun the patient trigger? | [Business rules](articles/02-business-rules.md): no; enforcement must cover the operations that can violate the rule. |
 | A note INSERT supplied owner 2 but stored owner 1. Where could the change have happened? | [Derived values](articles/03-derived-values.md): its BEFORE trigger assigns NEW.owner_id before storage. |
@@ -27,7 +34,7 @@ These become useful after their lessons are written. They are authoring commitme
 
 | Planned route | Later retrieval and transfer prompt | Feedback target |
 |---|---|---|
-| Values and identity | A signup sends empty text; another omits the value. Predict the stored values before running a subscriptions variant. | Distinguish absent input, NULL, defaults and the chosen constraint. |
+| Wider values and identity | Choose representations for exact amounts, time zones and business document numbers in a subscriptions variant. | Apply type and lifecycle requirements; the first values/identity labs do not cover all these choices. |
 | Relationships and modelling | Model a club membership after studying shop customers. Can one membership row describe two members? | State row grain, cardinality and key choices; test counterexamples. |
 | Query meaning and reporting | Add a second payment and explain why a joined subscription total changed. | Account for rows before aggregation rather than patching with DISTINCT blindly. |
 | Rules and automation | Move an eligibility check from creation to every update in a lending example. | Name all operations that can invalidate the intended rule. |

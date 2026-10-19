@@ -41,6 +41,21 @@ Checked 2026-10-19 for the standalone curriculum revision:
 
 The [author audit](CURRICULUM_AUDIT.md) records the additions and limits. Recheck the relevant detailed documentation when each lesson is authored and tested.
 
+## Practical-course reference decisions
+
+Reviewed 2026-10-20 from public course pages, visible lessons and project/workshop specifications. Paid playback and unexecuted course checks are not claimed as reviewed learning experiences. These are teaching-design inspirations; technical PostgreSQL behaviour is verified separately.
+
+| Reference | Selected use | Boundary |
+|---|---|---|
+| [Stephen Grider: SQL and PostgreSQL](https://www.udemy.com/course/sql-and-postgresql/) | Revisit a familiar application while supplying a complete starting snapshot for each lab. | Public curriculum review; no reproduction of paid lectures or exercises. |
+| [Boot.dev: Learn SQL](https://www.boot.dev/courses/learn-sql) | Progress from prediction and repair to independent writing; give useful feedback and accept equivalent correct SQL. | Adapt to PostgreSQL and the declared task, rather than copying a provider's syntax-specific checker. |
+| [freeCodeCamp relational databases v9](https://www.freecodecamp.org/learn/relational-databases-v9/) | Inspect schema/data after changes; separate guided workshops from independent briefs. | Database work stays central; a shell/editor curriculum is not added to the core. |
+| [8 Week SQL Challenge](https://8weeksqlchallenge.com/getting-started/) | Use a business question and then change an assumption; later add a reconciled data handoff and reusable report. | The first three foundation labs use original synthetic data. Later report/import work remains planned; paid official solutions are not part of this reference review. |
+
+The first foundation batch applies inspection, repair, independent practice and changed-setting prompts. It adds no company case study: basic NULL and key behaviour does not need a decorative company anecdote. The existing engineering accounts remain available where their reported tradeoffs answer a real lesson question.
+
+Technical references for this batch also include PostgreSQL 17 [defaults](https://www.postgresql.org/docs/17/ddl-default.html), [comparisons](https://www.postgresql.org/docs/17/functions-comparison.html), [identity columns](https://www.postgresql.org/docs/17/ddl-identity-columns.html), [UUID functions](https://www.postgresql.org/docs/17/functions-uuid.html), [ordering](https://www.postgresql.org/docs/17/queries-order.html), [pagination](https://www.postgresql.org/docs/17/queries-limit.html) and [RETURNING](https://www.postgresql.org/docs/17/dml-returning.html). Each article links its more specific authorities. Actual execution versions belong in the verification record.
+
 ## Learning format references
 
 [The Odin Project](https://www.theodinproject.com/lessons/foundations-how-this-course-will-work) connects lessons with projects. [SQLBolt](https://sqlbolt.com/) places exercises beside explanations. [Explorable Explanations](https://explorabl.es/faq/) offers examples of learning through manipulation. [Quantum Country](https://quantum.country/) embeds spaced review into essays.

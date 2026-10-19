@@ -604,6 +604,938 @@
         ]
       }
     ]
+  },
+  {
+    "lab": "07-stored-values",
+    "steps": [
+      {
+        "query": "SELECT id, stock, note IS NULL AS missing, note = '' AS empty, COALESCE(stock, 0) AS displayed FROM course_values.products ORDER BY id",
+        "rows": [
+          {
+            "id": 10,
+            "stock": 0,
+            "missing": false,
+            "empty": false,
+            "displayed": 0
+          },
+          {
+            "id": 20,
+            "stock": null,
+            "missing": true,
+            "empty": null,
+            "displayed": 0
+          },
+          {
+            "id": 30,
+            "stock": 0,
+            "missing": false,
+            "empty": true,
+            "displayed": 0
+          }
+        ]
+      },
+      {
+        "query": "SELECT stock FROM course_values.products WHERE id=20",
+        "rows": [
+          {
+            "stock": null
+          }
+        ]
+      },
+      {
+        "query": "SELECT id FROM course_values.products WHERE stock = NULL",
+        "rows": []
+      },
+      {
+        "query": "SELECT id FROM course_values.products WHERE stock <> 0",
+        "rows": []
+      },
+      {
+        "query": "SELECT id FROM course_values.products WHERE stock IS NULL",
+        "rows": [
+          {
+            "id": 20
+          }
+        ]
+      },
+      {
+        "query": "SELECT id FROM course_values.products WHERE stock IS DISTINCT FROM 0",
+        "rows": [
+          {
+            "id": 20
+          }
+        ]
+      },
+      {
+        "query": "SELECT NULL IS DISTINCT FROM NULL AS different",
+        "rows": [
+          {
+            "different": false
+          }
+        ]
+      },
+      {
+        "sql": "INSERT INTO course_values.products (id,name,stock) VALUES (40,'Bowl',NULL)"
+      },
+      {
+        "sql": "INSERT INTO course_values.products (id,name,stock) VALUES (41,'Plate',-1)",
+        "error": "23514"
+      },
+      {
+        "sql": "INSERT INTO course_values.products (id,name,stock) VALUES (42,NULL,3)",
+        "error": "23502"
+      },
+      {
+        "sql": "INSERT INTO course_values.products (id,name,stock) VALUES (43,'',3)"
+      },
+      {
+        "query": "SELECT id FROM course_values.products ORDER BY id",
+        "rows": [
+          {
+            "id": 10
+          },
+          {
+            "id": 20
+          },
+          {
+            "id": 30
+          },
+          {
+            "id": 40
+          },
+          {
+            "id": 43
+          }
+        ]
+      },
+      {
+        "query": "SELECT '12'::integer AS stock, DATE '2026-10-20'::text AS sale_date, true AS active",
+        "rows": [
+          {
+            "stock": 12,
+            "sale_date": "2026-10-20",
+            "active": true
+          }
+        ]
+      },
+      {
+        "sql": "SELECT 'twelve'::integer",
+        "error": "22P02"
+      },
+      {
+        "sql": "SELECT \"Mug\" FROM course_values.products",
+        "error": "42703"
+      },
+      {
+        "reset": true
+      },
+      {
+        "sql": "INSERT INTO course_values.products (id,name,stock,note) VALUES (40,'Bowl',2,DEFAULT)"
+      },
+      {
+        "sql": "UPDATE course_values.products SET stock=4 WHERE id=20"
+      },
+      {
+        "sql": "ALTER TABLE course_values.products ALTER COLUMN stock SET NOT NULL"
+      },
+      {
+        "sql": "ALTER TABLE course_values.products ADD CONSTRAINT product_name_nonblank CHECK (length(btrim(name)) > 0)"
+      },
+      {
+        "sql": "INSERT INTO course_values.products (id,name,stock) VALUES (41,'Plate',NULL)",
+        "error": "23502"
+      },
+      {
+        "sql": "INSERT INTO course_values.products (id,name,stock) VALUES (42,'Plate',-1)",
+        "error": "23514"
+      },
+      {
+        "sql": "INSERT INTO course_values.products (id,name,stock) VALUES (43,NULL,1)",
+        "error": "23502"
+      },
+      {
+        "sql": "INSERT INTO course_values.products (id,name,stock) VALUES (44,'',1)",
+        "error": "23514"
+      },
+      {
+        "sql": "INSERT INTO course_values.products (id,name,stock) VALUES (45,'   ',1)",
+        "error": "23514"
+      },
+      {
+        "sql": "INSERT INTO course_values.products (id,name) VALUES (46,'Cup')"
+      },
+      {
+        "query": "SELECT id,stock FROM course_values.products ORDER BY id",
+        "rows": [
+          {
+            "id": 10,
+            "stock": 0
+          },
+          {
+            "id": 20,
+            "stock": 4
+          },
+          {
+            "id": 30,
+            "stock": 0
+          },
+          {
+            "id": 40,
+            "stock": 2
+          },
+          {
+            "id": 46,
+            "stock": 0
+          }
+        ]
+      },
+      {
+        "sql": "UPDATE course_values.reservations SET contact=NULL WHERE btrim(contact)=''"
+      },
+      {
+        "sql": "ALTER TABLE course_values.reservations ADD CONSTRAINT contact_nonblank CHECK (contact IS NULL OR length(btrim(contact)) > 0)"
+      },
+      {
+        "sql": "INSERT INTO course_values.reservations VALUES (4,NULL)"
+      },
+      {
+        "sql": "INSERT INTO course_values.reservations VALUES (5,'')",
+        "error": "23514"
+      },
+      {
+        "sql": "INSERT INTO course_values.reservations VALUES (6,'   ')",
+        "error": "23514"
+      },
+      {
+        "query": "SELECT id,contact FROM course_values.reservations ORDER BY id",
+        "rows": [
+          {
+            "id": 1,
+            "contact": null
+          },
+          {
+            "id": 2,
+            "contact": null
+          },
+          {
+            "id": 3,
+            "contact": "sam@example.test"
+          },
+          {
+            "id": 4,
+            "contact": null
+          }
+        ]
+      },
+      {
+        "sql": "CREATE TABLE course_values.positive_stock (stock integer CHECK (stock > 0))"
+      },
+      {
+        "sql": "INSERT INTO course_values.positive_stock VALUES (NULL)"
+      },
+      {
+        "query": "SELECT stock FROM course_values.positive_stock",
+        "rows": [
+          {
+            "stock": null
+          }
+        ]
+      },
+      {
+        "sql": "INSERT INTO course_values.positive_stock VALUES (0)",
+        "error": "23514"
+      }
+    ],
+    "solution": [
+      {
+        "query": "SELECT id,stock,note FROM course_values.products ORDER BY id",
+        "rows": [
+          {
+            "id": 10,
+            "stock": 0,
+            "note": "not supplied"
+          },
+          {
+            "id": 20,
+            "stock": 4,
+            "note": null
+          },
+          {
+            "id": 30,
+            "stock": 0,
+            "note": ""
+          },
+          {
+            "id": 40,
+            "stock": 2,
+            "note": "not supplied"
+          }
+        ]
+      },
+      {
+        "query": "SELECT id,contact FROM course_values.reservations ORDER BY id",
+        "rows": [
+          {
+            "id": 1,
+            "contact": null
+          },
+          {
+            "id": 2,
+            "contact": null
+          },
+          {
+            "id": 3,
+            "contact": "sam@example.test"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "lab": "08-selecting-rows",
+    "steps": [
+      {
+        "query": "SELECT id FROM course_filter.orders WHERE status='paid' OR status='pending' AND total>=20 ORDER BY id",
+        "rows": [
+          {
+            "id": 101
+          },
+          {
+            "id": 102
+          },
+          {
+            "id": 104
+          },
+          {
+            "id": 107
+          }
+        ]
+      },
+      {
+        "query": "SELECT id FROM course_filter.orders WHERE (status='paid' OR status='pending') AND total>=20 ORDER BY id",
+        "rows": [
+          {
+            "id": 101
+          },
+          {
+            "id": 102
+          },
+          {
+            "id": 104
+          }
+        ]
+      },
+      {
+        "query": "SELECT id FROM course_filter.orders WHERE status IN ('paid','pending') AND total>=20 ORDER BY id",
+        "rows": [
+          {
+            "id": 101
+          },
+          {
+            "id": 102
+          },
+          {
+            "id": 104
+          }
+        ]
+      },
+      {
+        "query": "SELECT id FROM course_filter.orders WHERE status <> 'cancelled' OR status IS NULL ORDER BY id",
+        "rows": [
+          {
+            "id": 101
+          },
+          {
+            "id": 102
+          },
+          {
+            "id": 104
+          },
+          {
+            "id": 105
+          },
+          {
+            "id": 106
+          },
+          {
+            "id": 107
+          }
+        ]
+      },
+      {
+        "query": "SELECT id FROM course_filter.orders WHERE status NOT IN ('cancelled',NULL)",
+        "rows": []
+      },
+      {
+        "query": "SELECT id,customer FROM course_filter.orders WHERE customer LIKE 'r%'",
+        "rows": []
+      },
+      {
+        "query": "SELECT id,customer FROM course_filter.orders WHERE customer ILIKE 'r%' ORDER BY id",
+        "rows": [
+          {
+            "id": 101,
+            "customer": "Riya"
+          },
+          {
+            "id": 103,
+            "customer": "Riya"
+          },
+          {
+            "id": 106,
+            "customer": "Riya"
+          },
+          {
+            "id": 107,
+            "customer": "Rena"
+          }
+        ]
+      },
+      {
+        "query": "SELECT id, CASE WHEN status IS NULL THEN 'review' WHEN status='cancelled' THEN 'closed' ELSE 'open' END AS queue FROM course_filter.orders ORDER BY id",
+        "rows": [
+          {
+            "id": 101,
+            "queue": "open"
+          },
+          {
+            "id": 102,
+            "queue": "open"
+          },
+          {
+            "id": 103,
+            "queue": "closed"
+          },
+          {
+            "id": 104,
+            "queue": "open"
+          },
+          {
+            "id": 105,
+            "queue": "review"
+          },
+          {
+            "id": 106,
+            "queue": "open"
+          },
+          {
+            "id": 107,
+            "queue": "open"
+          }
+        ]
+      },
+      {
+        "query": "SELECT status FROM course_filter.orders WHERE id=105",
+        "rows": [
+          {
+            "status": null
+          }
+        ]
+      },
+      {
+        "query": "SELECT id FROM course_filter.orders ORDER BY ordered_on DESC,id DESC LIMIT 2",
+        "rows": [
+          {
+            "id": 105
+          },
+          {
+            "id": 107
+          }
+        ]
+      },
+      {
+        "query": "SELECT id FROM course_filter.orders ORDER BY ordered_on DESC,id DESC LIMIT 2 OFFSET 2",
+        "rows": [
+          {
+            "id": 106
+          },
+          {
+            "id": 104
+          }
+        ]
+      },
+      {
+        "sql": "INSERT INTO course_filter.orders VALUES (108,'Uma','pending','2026-10-03',25)"
+      },
+      {
+        "query": "SELECT id FROM course_filter.orders ORDER BY ordered_on DESC,id DESC LIMIT 2 OFFSET 2",
+        "rows": [
+          {
+            "id": 107
+          },
+          {
+            "id": 106
+          }
+        ]
+      },
+      {
+        "query": "SELECT id FROM course_filter.orders WHERE ordered_on < DATE '2026-10-02' OR (ordered_on = DATE '2026-10-02' AND id < 107) ORDER BY ordered_on DESC,id DESC LIMIT 2",
+        "rows": [
+          {
+            "id": 106
+          },
+          {
+            "id": 104
+          }
+        ]
+      },
+      {
+        "query": "SELECT id,status FROM course_filter.orders WHERE id=102 AND status='pending'",
+        "rows": [
+          {
+            "id": 102,
+            "status": "pending"
+          }
+        ]
+      },
+      {
+        "query": "UPDATE course_filter.orders SET status='paid' WHERE id=102 AND status='pending' RETURNING id,status",
+        "rows": [
+          {
+            "id": 102,
+            "status": "paid"
+          }
+        ]
+      },
+      {
+        "query": "UPDATE course_filter.orders SET status='paid' WHERE id=102 AND status='pending' RETURNING id,status",
+        "rows": []
+      },
+      {
+        "query": "DELETE FROM course_filter.orders WHERE id=103 AND status='cancelled' RETURNING id",
+        "rows": [
+          {
+            "id": 103
+          }
+        ]
+      },
+      {
+        "query": "SELECT id,status FROM course_filter.orders ORDER BY id",
+        "rows": [
+          {
+            "id": 101,
+            "status": "paid"
+          },
+          {
+            "id": 102,
+            "status": "paid"
+          },
+          {
+            "id": 104,
+            "status": "paid"
+          },
+          {
+            "id": 105,
+            "status": null
+          },
+          {
+            "id": 106,
+            "status": "pending"
+          },
+          {
+            "id": 107,
+            "status": "paid"
+          },
+          {
+            "id": 108,
+            "status": "pending"
+          }
+        ]
+      },
+      {
+        "query": "SELECT id,customer,renew_on::text AS renew_on FROM course_filter.subscriptions WHERE active AND plan='pro' AND renew_on<=DATE '2026-10-31' ORDER BY renew_on,id LIMIT 2",
+        "rows": [
+          {
+            "id": 5,
+            "customer": "Eli",
+            "renew_on": "2026-10-31"
+          },
+          {
+            "id": 6,
+            "customer": "Fay",
+            "renew_on": "2026-10-31"
+          }
+        ]
+      },
+      {
+        "query": "SELECT id FROM course_filter.subscriptions WHERE active AND plan='pro' AND (renew_on<=DATE '2026-10-31' OR renew_on IS NULL) ORDER BY renew_on ASC NULLS LAST,id",
+        "rows": [
+          {
+            "id": 5
+          },
+          {
+            "id": 6
+          },
+          {
+            "id": 2
+          }
+        ]
+      },
+      {
+        "query": "SELECT id FROM course_filter.subscriptions WHERE active AND plan='pro' AND renew_on<=DATE '2026-10-30'",
+        "rows": []
+      },
+      {
+        "sql": "INSERT INTO course_filter.orders VALUES (109,'Bad','shipped','2026-10-04',20)",
+        "error": "23514"
+      },
+      {
+        "query": "SELECT id FROM course_filter.orders WHERE id=109",
+        "rows": []
+      }
+    ],
+    "solution": [
+      {
+        "query": "SELECT id,status FROM course_filter.orders ORDER BY id",
+        "rows": [
+          {
+            "id": 101,
+            "status": "paid"
+          },
+          {
+            "id": 102,
+            "status": "paid"
+          },
+          {
+            "id": 104,
+            "status": "paid"
+          },
+          {
+            "id": 105,
+            "status": null
+          },
+          {
+            "id": 106,
+            "status": "pending"
+          },
+          {
+            "id": 107,
+            "status": "paid"
+          },
+          {
+            "id": 108,
+            "status": "pending"
+          }
+        ]
+      },
+      {
+        "query": "SELECT id FROM course_filter.subscriptions WHERE active AND plan='pro' AND renew_on<=DATE '2026-10-31' ORDER BY renew_on,id LIMIT 2",
+        "rows": [
+          {
+            "id": 5
+          },
+          {
+            "id": 6
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "lab": "09-row-identity",
+    "steps": [
+      {
+        "sql": "INSERT INTO course_identity.memberships VALUES (10,1,'asha')",
+        "error": "23505"
+      },
+      {
+        "sql": "INSERT INTO course_identity.memberships VALUES (20,2,'sam')",
+        "error": "23505"
+      },
+      {
+        "sql": "INSERT INTO course_identity.memberships VALUES (20,2,'bo')"
+      },
+      {
+        "sql": "INSERT INTO course_identity.memberships VALUES (10,999,'new')",
+        "error": "23503"
+      },
+      {
+        "sql": "INSERT INTO course_identity.memberships VALUES (NULL,2,'other')",
+        "error": "23502"
+      },
+      {
+        "query": "SELECT workspace_id,member_id,handle FROM course_identity.memberships ORDER BY workspace_id,member_id",
+        "rows": [
+          {
+            "workspace_id": 10,
+            "member_id": 1,
+            "handle": "sam"
+          },
+          {
+            "workspace_id": 10,
+            "member_id": 2,
+            "handle": "bo"
+          },
+          {
+            "workspace_id": 20,
+            "member_id": 1,
+            "handle": "sam"
+          },
+          {
+            "workspace_id": 20,
+            "member_id": 2,
+            "handle": "bo"
+          }
+        ]
+      },
+      {
+        "query": "SELECT id FROM course_identity.members WHERE external_ref IS NULL ORDER BY id",
+        "rows": [
+          {
+            "id": 1
+          },
+          {
+            "id": 2
+          }
+        ]
+      },
+      {
+        "sql": "UPDATE course_identity.members SET external_ref='ext-1' WHERE id=1"
+      },
+      {
+        "sql": "UPDATE course_identity.members SET external_ref='ext-1' WHERE id=2",
+        "error": "23505"
+      },
+      {
+        "query": "SELECT external_ref FROM course_identity.members WHERE id=2",
+        "rows": [
+          {
+            "external_ref": null
+          }
+        ]
+      },
+      {
+        "sql": "INSERT INTO course_identity.strict_refs VALUES (NULL)"
+      },
+      {
+        "sql": "INSERT INTO course_identity.strict_refs VALUES (NULL)",
+        "error": "23505"
+      },
+      {
+        "query": "SELECT count(*)::integer AS n FROM course_identity.profiles",
+        "rows": [
+          {
+            "n": 0
+          }
+        ]
+      },
+      {
+        "sql": "INSERT INTO course_identity.profiles VALUES (1,'Grows herbs')"
+      },
+      {
+        "sql": "INSERT INTO course_identity.profiles VALUES (1,'Second')",
+        "error": "23505"
+      },
+      {
+        "sql": "INSERT INTO course_identity.profiles VALUES (999,'Absent')",
+        "error": "23503"
+      },
+      {
+        "query": "SELECT member_id FROM course_identity.profiles ORDER BY member_id",
+        "rows": [
+          {
+            "member_id": 1
+          }
+        ]
+      },
+      {
+        "sql": "INSERT INTO course_identity.identity_only DEFAULT VALUES"
+      },
+      {
+        "sql": "INSERT INTO course_identity.identity_only (id) OVERRIDING SYSTEM VALUE VALUES (1)"
+      },
+      {
+        "query": "SELECT id FROM course_identity.identity_only ORDER BY id",
+        "rows": [
+          {
+            "id": 1
+          },
+          {
+            "id": 1
+          }
+        ]
+      },
+      {
+        "sql": "INSERT INTO course_identity.members (id,name) OVERRIDING SYSTEM VALUE VALUES (1,'Duplicate')",
+        "error": "23505"
+      },
+      {
+        "sql": "INSERT INTO course_identity.members (id,name) VALUES (99,'Explicit')",
+        "error": "428C9"
+      },
+      {
+        "reset": true
+      },
+      {
+        "sql": "BEGIN"
+      },
+      {
+        "query": "INSERT INTO course_identity.members (name) VALUES ('Temporary') RETURNING id",
+        "rows": [
+          {
+            "id": 3
+          }
+        ]
+      },
+      {
+        "sql": "ROLLBACK"
+      },
+      {
+        "query": "INSERT INTO course_identity.members (name) VALUES ('Kept') RETURNING id",
+        "rows": [
+          {
+            "id": 4
+          }
+        ]
+      },
+      {
+        "query": "SELECT id FROM course_identity.members ORDER BY id",
+        "rows": [
+          {
+            "id": 1
+          },
+          {
+            "id": 2
+          },
+          {
+            "id": 4
+          }
+        ]
+      },
+      {
+        "sql": "INSERT INTO course_identity.uuid_records (label) VALUES ('First'),('Second')"
+      },
+      {
+        "sql": "INSERT INTO course_identity.uuid_records (id,label) SELECT id,'Repeated ID' FROM course_identity.uuid_records ORDER BY label LIMIT 1",
+        "error": "23505"
+      },
+      {
+        "query": "SELECT count(*)::integer AS n, bool_and(id IS NOT NULL) AS generated FROM course_identity.uuid_records",
+        "rows": [
+          {
+            "n": 2,
+            "generated": true
+          }
+        ]
+      },
+      {
+        "sql": "CREATE TABLE course_identity.enrolments (customer_id integer REFERENCES course_identity.customers(id), program_id integer REFERENCES course_identity.programs(id), card_code text NOT NULL, PRIMARY KEY(customer_id,program_id), UNIQUE(program_id,card_code))"
+      },
+      {
+        "sql": "INSERT INTO course_identity.enrolments VALUES (1,10,'A'),(1,20,'A'),(2,10,'B')"
+      },
+      {
+        "sql": "INSERT INTO course_identity.enrolments VALUES (1,10,'C')",
+        "error": "23505"
+      },
+      {
+        "sql": "INSERT INTO course_identity.enrolments VALUES (2,20,'A')",
+        "error": "23505"
+      },
+      {
+        "sql": "INSERT INTO course_identity.enrolments VALUES (999,10,'Z')",
+        "error": "23503"
+      },
+      {
+        "sql": "INSERT INTO course_identity.enrolments VALUES (1,999,'Z')",
+        "error": "23503"
+      },
+      {
+        "sql": "INSERT INTO course_identity.enrolments VALUES (NULL,20,'C')",
+        "error": "23502"
+      },
+      {
+        "sql": "INSERT INTO course_identity.enrolments VALUES (2,NULL,'C')",
+        "error": "23502"
+      },
+      {
+        "sql": "INSERT INTO course_identity.enrolments VALUES (2,20,NULL)",
+        "error": "23502"
+      },
+      {
+        "query": "SELECT customer_id,program_id,card_code FROM course_identity.enrolments ORDER BY customer_id,program_id",
+        "rows": [
+          {
+            "customer_id": 1,
+            "program_id": 10,
+            "card_code": "A"
+          },
+          {
+            "customer_id": 1,
+            "program_id": 20,
+            "card_code": "A"
+          },
+          {
+            "customer_id": 2,
+            "program_id": 10,
+            "card_code": "B"
+          }
+        ]
+      }
+    ],
+    "solution": [
+      {
+        "query": "SELECT workspace_id,member_id,handle FROM course_identity.memberships ORDER BY workspace_id,member_id",
+        "rows": [
+          {
+            "workspace_id": 10,
+            "member_id": 1,
+            "handle": "sam"
+          },
+          {
+            "workspace_id": 10,
+            "member_id": 2,
+            "handle": "bo"
+          },
+          {
+            "workspace_id": 20,
+            "member_id": 1,
+            "handle": "sam"
+          },
+          {
+            "workspace_id": 20,
+            "member_id": 2,
+            "handle": "bo"
+          }
+        ]
+      },
+      {
+        "query": "SELECT member_id FROM course_identity.profiles",
+        "rows": [
+          {
+            "member_id": 1
+          }
+        ]
+      },
+      {
+        "query": "SELECT count(*)::integer AS n FROM course_identity.uuid_records",
+        "rows": [
+          {
+            "n": 2
+          }
+        ]
+      },
+      {
+        "query": "SELECT customer_id,program_id,card_code FROM course_identity.enrolments ORDER BY customer_id,program_id",
+        "rows": [
+          {
+            "customer_id": 1,
+            "program_id": 10,
+            "card_code": "A"
+          },
+          {
+            "customer_id": 1,
+            "program_id": 20,
+            "card_code": "A"
+          },
+          {
+            "customer_id": 2,
+            "program_id": 10,
+            "card_code": "B"
+          }
+        ]
+      }
+    ]
   }
 ]
 

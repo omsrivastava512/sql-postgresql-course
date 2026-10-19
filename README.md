@@ -8,7 +8,7 @@ The examples use fictional applications. The first drafts use a clinic; the wide
 
 ## Choose a way in
 
-- **New to databases:** see the [beginner route](COURSE_MAP.md#the-beginner-route). It distinguishes available drafts from lessons still to be written. The [SQL onramp](articles/00-reading-the-examples.md) is available now.
+- **New to databases:** see the [beginner route](COURSE_MAP.md#the-beginner-route). It distinguishes available drafts from lessons still to be written. The [SQL onramp](articles/00-reading-the-examples.md) and three foundation lessons are available now.
 - **Ready to explore the current drafts:** follow the [first route](COURSE_MAP.md#the-first-route), starting with foreign keys.
 - **Returning after a gap:** choose a [review prompt](REVIEW.md), then revisit the relevant article's return note.
 - **Following a question:** use the [course map](COURSE_MAP.md). Related ideas are linked; there is no locked sequence.
@@ -19,6 +19,9 @@ The examples use fictional applications. The first drafts use a clinic; the wide
 | Article | What you should be able to do afterward |
 |---|---|
 | [Reading the examples](articles/00-reading-the-examples.md) | Read a small table definition and inspect or change a row. |
+| [What value did I actually store?](articles/07-stored-values.md) | Distinguish omitted input, NULL and empty text, then enforce a chosen row rule. |
+| [Which rows did I ask for?](articles/08-selecting-rows.md) | Predict filters, ordering, pages and the rows selected for a write. |
+| [What identifies this row?](articles/09-row-identity.md) | Define scoped uniqueness and relationships, and separate generated keys from business numbering. |
 | [What a foreign key actually promises](articles/01-foreign-keys.md) | Separate existence from suitability and permission. |
 | [An existing person can still be the wrong owner](articles/02-business-rules.md) | Trace a validation trigger and identify a write it does not cover. |
 | [Who put that owner on the note?](articles/03-derived-values.md) | Trace supplied input through a BEFORE trigger and spot a stale copy. |
@@ -26,9 +29,9 @@ The examples use fictional applications. The first drafts use a clinic; the wide
 | [Can the database wait until I am finished?](articles/05-deferred-checks.md) | Compare immediate and deferred checks in a complete transaction. |
 | [The invoice failed. Did its number disappear?](articles/06-transaction-boundaries.md) | Locate rollback boundaries and distinguish them from a lost response. |
 
-There are **seven article drafts and six labs**, not a finished course. Querying, data modelling, access control, performance, migrations, and other areas still need substantial lessons. The [topic inventory](TOPIC_INVENTORY.md) records evidence and gaps; a topic being listed does not mean it has been taught.
+There are **ten article drafts and nine labs**. Joins and reporting, deeper modelling, access control, performance, migrations, and other areas still need substantial lessons. The [topic inventory](TOPIC_INVENTORY.md) records evidence and gaps; a topic being listed does not mean it has been taught.
 
-These are editorial drafts. Embedded PostgreSQL checks have passed historically; local Docker testing remains pending and hosted Supabase testing is deferred. See the [verification record](VERIFICATION.md) for dates and limits.
+These are editorial drafts. Embedded PostgreSQL checks passed on 2026-10-20; local Docker testing remains pending and hosted Supabase testing is deferred. See the [verification record](VERIFICATION.md) for dates and limits.
 
 ## How the ideas connect
 

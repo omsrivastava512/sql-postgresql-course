@@ -1,0 +1,12 @@
+SELECT id FROM course_filter.orders WHERE status IN ('paid', 'pending') AND total >= 20 ORDER BY id;
+SELECT id FROM course_filter.orders WHERE status <> 'cancelled' OR status IS NULL ORDER BY id;
+SELECT id, customer FROM course_filter.orders WHERE customer ILIKE 'r%' ORDER BY id;
+SELECT id, CASE WHEN status IS NULL THEN 'review' WHEN status = 'cancelled' THEN 'closed' ELSE 'open' END AS queue FROM course_filter.orders ORDER BY id;
+SELECT id FROM course_filter.orders ORDER BY ordered_on DESC, id DESC LIMIT 2;
+SELECT id FROM course_filter.orders ORDER BY ordered_on DESC, id DESC LIMIT 2 OFFSET 2;
+INSERT INTO course_filter.orders VALUES (108, 'Uma', 'pending', '2026-10-03', 25);
+SELECT id FROM course_filter.orders ORDER BY ordered_on DESC, id DESC LIMIT 2 OFFSET 2;
+SELECT id FROM course_filter.orders WHERE ordered_on < DATE '2026-10-02' OR (ordered_on = DATE '2026-10-02' AND id < 107) ORDER BY ordered_on DESC, id DESC LIMIT 2;
+UPDATE course_filter.orders SET status = 'paid' WHERE id = 102 AND status = 'pending' RETURNING id, status;
+DELETE FROM course_filter.orders WHERE id = 103 AND status = 'cancelled' RETURNING id;
+SELECT id, customer, renew_on FROM course_filter.subscriptions WHERE active AND plan = 'pro' AND renew_on <= DATE '2026-10-31' ORDER BY renew_on, id LIMIT 2;

@@ -70,7 +70,7 @@ For a real database run, set COURSE_DATABASE_URL in your local environment to th
 npm run test:database
 ```
 
-The runner uses one persistent connection and resets the six named course schemas. It prints server version and results, never the connection string. For Supabase, use a direct or session-mode connection string with the appropriate SSL settings. Do not paste passwords into chats or commit them.
+The runner uses one persistent connection and resets the nine named course schemas. It prints server version and results, never the connection string. For Supabase, use a direct or session-mode connection string with the appropriate SSL settings. Do not paste passwords into chats or commit them.
 
 The runner checks failure categories and stored state, including rejected writes and commit-time failures. See [verification](../VERIFICATION.md).
 

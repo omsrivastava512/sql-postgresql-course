@@ -49,6 +49,16 @@ Keep the clinic as one fictional case study. Use shops, reservations, subscripti
 
 Use the [inventory's evidence rules](TOPIC_INVENTORY.md#how-to-read-coverage): planned, introduced, explained and practised describe an exact objective, not a whole bundled topic or a learner's mastery. Link the relevant section/task when changing a status. Record execution environment and outcome separately in the verification record.
 
+## Practice progression and feedback
+
+For each major concept group, move from a complete worked example to a repair task, an independent task and a changed requirement or setting. Use enough practice to expose a different mistake; do not add repetitions to meet an exercise count. Begin by inspecting the supplied schema, row meaning and initial data.
+
+State expected rows, values, errors and unchanged state where relevant. Give an accessible hint and explained solution. Accept equivalent SQL when it preserves the specified values, duplicate counts and required ordering; matching a query's text is not the goal. The current automated suite checks our reference examples and solutions. It is not a general grader for arbitrary learner submissions.
+
+Distinguish completing with help from explaining and solving independently. Later reviews should require a new prediction or decision. A small data-quality handoff and reusable report belong after their values, keys and query prerequisites; inherited-database repair and request-level performance belong later.
+
+The [practical reference decisions](SOURCES.md#practical-course-reference-decisions) record the selected teaching ideas. The course uses its own synthetic datasets and exercises.
+
 ## Evidence and publication
 
 Every technical claim needs an executed example or an authoritative reference. Every company anecdote needs the original account, attribution, date, and a clear limit on the inference.

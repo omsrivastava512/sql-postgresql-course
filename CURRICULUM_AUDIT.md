@@ -14,14 +14,14 @@ The table below maps every named concept, exercise and domain question in the te
 
 | Source | Learning objective or exercise | Destination IDs | Current evidence and remaining work |
 |---|---|---|---|
-| 1 | Select data types | F04, F11, F12 | Planned; onramp examples are insufficient for type selection. |
-| 1 | Explain NOT NULL, UNIQUE and scoped/composite uniqueness | F07, F09, F10 | NOT NULL practised in lab 01; dedicated uniqueness lesson and duplicate-within-tenant exercise planned. |
-| 1 | Distinguish defaults, omitted input and explicit NULL | F05, F06 | NULL introduced; comparison lab planned. |
+| 1 | Select data types | F04, F11, F12 | Lab 07 practises integer/text input and cast failure; broad type selection and enums/domains remain planned. |
+| 1 | Explain NOT NULL, UNIQUE and scoped/composite uniqueness | F07, F09, F10 | Labs 07 and 09 practise required values, duplicate boundaries and NULL uniqueness policies. Tenant authorization remains separate. |
+| 1 | Distinguish defaults, omitted input and explicit NULL | F05, F06 | Lab 07 compares stored values after omitted input, DEFAULT, explicit NULL and empty text. |
 | 1 | Reject a conditional referral row, repair it, then insert successfully | F07, B13 | Negative amount CHECK practised in lab 06; conditional-row rule and repair exercise planned in an order/delivery setting. |
 | 1 | Represent money in integer minor units and examine alternatives | D05, D06 | Planned; compare integer minor units, NUMERIC and floating point with rounding boundaries. |
 | 2 | Explain REFERENCES and deletion cascade | R01, R08, R09 | Practised in labs 01 and 04; retain existing lessons. |
 | 2 | Distinguish catalog records from growing transaction records and choose keys | R07, F08, F14 | Planned; avoid teaching text versus UUID as an intrinsic distinction. |
-| 2 | Trace one event's patient, service/course and location relationships | R03, R04, R06, R14 | Planned; model an order, customer, product and workspace with explicit row grain. |
+| 2 | Trace one event's patient, service/course and location relationships | R03, R04, R06, R14 | Lab 09 practises membership grain and an independent loyalty junction. Multi-fact order modelling, join cardinality and report grain remain planned. |
 | 2 | Reject an event without membership/access, create prerequisite membership, then accept | A10, B10, B14 | General role-guard gap practised in lab 02; membership workflow and auto-creation trace still planned. |
 | 3 | Derive a stored generated total and reject a direct write | D01, D05 | Planned; order amounts supply the independent example. |
 | 3 | Explain a view versus a stored table and compare a ledger view with its underlying join | D02, Q02, Q08, Q09 | Planned; compare rows and totals, including unmatched rows and duplicate joins. |
@@ -75,6 +75,12 @@ This course is not an exhaustive PostgreSQL manual. Specialist extensions, repli
 Keep educational questions, not unverified assertions. In particular, do not copy claims that the Supabase Data API is a raw direct database connection, that RLS is the only security layer, or that SECURITY DEFINER always bypasses RLS. Verify platform exposure and identity using [Supabase's RLS guide](https://supabase.com/docs/guides/database/postgres/row-level-security); verify function execution identity and safe definitions using [PostgreSQL CREATE FUNCTION](https://www.postgresql.org/docs/17/sql-createfunction.html).
 
 Similarly, do not classify index creation or adding a CHECK as universally safe without examining locks and existing data. Do not infer a secure inner join solely from a non-null FK without considering policies, filters and row visibility. Future lessons must verify these boundaries for the documented engine and role.
+
+## Foundation implementation — 2026-10-20
+
+Three article/lab pairs now teach stored values, row selection and row identity. The [inventory](TOPIC_INVENTORY.md) updates only the demonstrated sub-outcomes; all 132 topic IDs are retained. Basic type choices do not complete time/money modelling, a between-page insert is not a concurrent-session test, and a workspace uniqueness constraint is not access control.
+
+The next query batch still needs joins, aggregation, group filters, report definitions and a small reconciled data handoff. The [publication queue](PUBLICATION.md) keeps those priorities separate from completed drafts. Learner trials and supported-environment execution remain pending.
 
 ## Coverage acceptance
 

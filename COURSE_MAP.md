@@ -4,22 +4,22 @@ Start with a question, then follow its connections. This map describes both avai
 
 ## The beginner route
 
-This is the intended foundation route. Only the onramp and some later branches exist today; the missing steps are not hidden prerequisites for a supposedly complete beginner course.
+The first five stops now have drafts. Follow the foreign-key lesson before row identity, where references are used to build memberships. Full type selection, grouping and deeper modelling remain planned.
 
 | Stop | Question and outcome | State |
 |---|---|---|
-| Read and change a row | What is a table, and which rows will this statement affect? | [Short onramp available](articles/00-reading-the-examples.md); full querying lesson planned |
-| Values and missing information | How do types, NULL, empty text, defaults, and comparisons differ? | Planned; F01–F07, F15, Q05–Q07 |
-| Identity and row rules | What identifies a row, and where are duplicates forbidden? | Planned; F08–F11, F14, F16, B13 |
-| Ask a precise question | Filter, order, page, and summarize rows without changing the question accidentally | Planned; Q01, Q08, Q13–Q16 |
-| Model relationships | Choose cardinality and keys, then test what the reference guarantees | [FK draft available](articles/01-foreign-keys.md); R03–R07 and modelling depth planned |
+| Read and change a row | What is a table, and which rows will this statement affect? | [SQL onramp](articles/00-reading-the-examples.md) |
+| Values and missing information | How do NULL, empty text, defaults and comparisons differ? | [Stored values](articles/07-stored-values.md); wider type selection remains planned |
+| Ask a precise question | Filter, order, page and select rows for a write | [Selecting rows](articles/08-selecting-rows.md); grouping follows later |
+| Follow a reference | What does an FK guarantee about a related row? | [Foreign keys](articles/01-foreign-keys.md) |
+| Identity and row rules | What identifies a row, and where are duplicates forbidden? | [Row identity](articles/09-row-identity.md); includes memberships and an independent junction-table task |
 | Combine facts | Preserve unmatched rows and avoid multiplying totals | Planned; Q02, Q03, Q08, Q09, R06, R14 |
 
 From there, branch into rules, transactions, access, reporting, or operational work below. A reader with the necessary background can enter at that branch; a prerequisite explains the knowledge needed, not a gate to unlock.
 
 ## The first route
 
-This shorter route uses only existing drafts. It explores guarantees and failures; it does not substitute for the planned foundation lessons.
+This shorter route uses only existing drafts. It explores guarantees and failures; it complements the beginner route above.
 
 [Read the SQL](articles/00-reading-the-examples.md) → [Foreign keys](articles/01-foreign-keys.md) → [Business rules](articles/02-business-rules.md) → [Derived values](articles/03-derived-values.md).
 
@@ -33,9 +33,9 @@ Topic IDs refer to the [inventory](TOPIC_INVENTORY.md), which records the narrow
 
 | Route | Destination and topic families | Prior knowledge | State |
 |---|---|---|---|
-| Values and identity | Select types, distinguish missing values, define keys and row constraints; F, Q05–Q07, B13 | Reading simple statements | Onramp only; depth planned |
-| Relationships and modelling | Cardinality, junctions, optional references, deletion, normalization; R, D03, D13 | Keys and row meaning | FK and deletion drafts; modelling depth planned |
-| Query meaning and reporting | Joins, grouping, subqueries, CTEs, windows, sets and pagination; Q | Values and basic SELECT; relationships for joins | Basic examples only; dedicated lessons planned |
+| Values and identity | Select types, distinguish missing values, define keys and row constraints; F, Q05–Q07, B13 | Reading simple statements | Stored values and identity drafts; wider types and modelling depth planned |
+| Relationships and modelling | Cardinality, junctions, optional references, deletion, normalization; R, D03, D13 | Keys and row meaning | FK, deletion and membership drafts; deeper modelling planned |
+| Query meaning and reporting | Joins, grouping, subqueries, CTEs, windows, sets and pagination; Q | Values and basic SELECT; relationships for joins | Filtering and pagination draft; joins, grouping and reporting planned |
 | Rules and automation | Constraints, functions, trigger events, derived values, transitions; B | Writes, constraints; lookups for cross-table rules | Validation and derivation drafts; remaining coverage planned |
 | Transactions and concurrency | Atomic groups, deferral, counters, locking, isolation, retries; T, R11 | Writes and constraints | Rollback and deferral drafts; concurrent and request labs planned |
 | Identity and access | Authentication, privileges, RLS, function execution identity, tenants; A | Filtering, relationships; functions for definer work | Planned |
@@ -85,6 +85,9 @@ For the advanced branches, learn concurrency before implementing concurrent retr
 
 | Start here | Return in a different setting | What to explain |
 |---|---|---|
+| Shop: stock is NULL, zero or omitted | Reservations: contact is missing or empty | Inspect stored values before choosing a fallback or a constraint; available lab 07 transfer |
+| Shop: order filters return extra rows | Subscriptions: renewals include missing dates | State inclusion and ordering rules, then predict exact rows; available lab 08 transfer |
+| Workspace: handles repeat across workspaces | Loyalty: card codes repeat across programmes | Separate pair identity from scoped business uniqueness; available lab 09 transfer |
 | Clinic: an FK accepts an existing receptionist | Shop: a customer exists but is suspended | Why existence does not prove eligibility; available FK transfer prompt |
 | Clinic: a profile changes after validation | Library: a borrower becomes inactive | Which later writes affect the chosen rule; available validation transfer prompt |
 | Clinic: a note keeps an old owner | Shop: an old order keeps a shipping address | Whether the copy is stale or intentionally historical; available derivation transfer prompt |
@@ -102,6 +105,9 @@ Every planned route needs a worked example, a changed-setting task with feedback
 | Available draft | General SQL idea | PostgreSQL focus | Supabase focus |
 |---|---|---|---|
 | Reading the examples | Rows, columns and basic statements | Qualified names and runnable lab syntax | None; optional setup only |
+| Stored values | Missing information, defaults, predicates and row rules | NULL comparisons, casts and constraint behaviour | None |
+| Selecting rows | Filtering, ordering, paging and selected writes | ILIKE, RETURNING and tested pagination behaviour | None |
+| Row identity | Keys, cardinality and scoped uniqueness | Identity, UUID defaults and NULLS NOT DISTINCT | None |
 | Foreign keys | Reference existence, nullability | Exact declarations and error outcomes | None |
 | Business rules | Existence versus eligibility | PL/pgSQL trigger attachment and exceptions | None |
 | Derived values | Input versus stored or copied data | BEFORE trigger assignment | None |
