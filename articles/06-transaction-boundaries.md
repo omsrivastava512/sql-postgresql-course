@@ -81,7 +81,7 @@ Ask "which writes were in this transaction?" A trigger shares its triggering ope
 
 **Lab:** [Failure points and transaction boundaries](../labs/06-transaction-boundaries/README.md).
 **Related:** [Deferred checks](05-deferred-checks.md) shows a failure that arrives at commit.
-**Next, planned:** concurrent counter requests and safe retries in the [course map](../COURSE_MAP.md#the-wider-course).
+**Next:** [competing claims and transaction retries](16-competing-claims.md). Full request idempotency remains planned in the [course map](../COURSE_MAP.md#the-wider-course).
 
 **Reference:** [PostgreSQL transaction tutorial](https://www.postgresql.org/docs/17/tutorial-transactions.html).
 

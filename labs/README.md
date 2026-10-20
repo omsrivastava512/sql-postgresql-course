@@ -28,7 +28,9 @@ docker start clinic-course-postgres
 
 The fixed tag selects PostgreSQL 17.11. The [official image page](https://hub.docker.com/_/postgres) documents image variables. No host directory is mounted; the classroom password is for this loopback-only disposable container.
 
-If the name already exists, use docker start rather than recreating it. If port 55432 is occupied, change only the host port. Future two-connection labs use two psql sessions against the same database.
+If the name already exists, use docker start rather than recreating it. If port 55432 is occupied, change only the host port. Labs 16 and 17 use persistent A/B connections and a third observer connection against the same database; open three psql terminals. Confirm distinct SELECT pg_backend_pid(); results.
+
+An existing native PostgreSQL 17 server also works. Use psql -h 127.0.0.1 -p YOUR_PORT -U YOUR_ROLE -d YOUR_DISPOSABLE_DATABASE. The author verification used a temporary native Windows server; it did not validate Docker startup.
 
 ## Supabase
 
@@ -40,7 +42,7 @@ SELECT version(), current_database(), current_user;
 
 Save the output in your own verification record. Paste one lab's setup.sql and run it. Then run the tasks as directed.
 
-Run each BEGIN-to-COMMIT or BEGIN-to-ROLLBACK block in one execution. Do not assume two separate editor requests share a transaction. For experiments that pause between statements, or later concurrency labs, use psql with a direct or session-mode connection. [Connection-mode documentation](https://supabase.com/docs/guides/database/connecting-to-postgres)
+Run each BEGIN-to-COMMIT or BEGIN-to-ROLLBACK block in one execution. Do not assume two separate editor or MCP requests share a transaction. For experiments that pause between statements, including labs 16 and 17, use psql with a direct or session-mode connection. [Connection-mode documentation](https://supabase.com/docs/guides/database/connecting-to-postgres)
 
 These initial labs don't use the Data API, authentication or RLS. They use custom course schemas and do not require exposing those schemas through the API. Later security labs need separate identities; testing as the SQL Editor's privileged role is not a substitute.
 
@@ -70,7 +72,15 @@ For a real database run, set COURSE_DATABASE_URL in your local environment to th
 npm run test:database
 ```
 
-The runner uses one persistent connection and resets the fifteen named course schemas. It prints server version and results, never the connection string. For Supabase, use a direct or session-mode connection string with the appropriate SSL settings. Do not paste passwords into chats or commit them.
+The runner uses one persistent connection and resets the seventeen named course schemas. It prints server version and results, never the connection string. For Supabase, use a direct or session-mode connection string with the appropriate SSL settings. Do not paste passwords into chats or commit them.
+
+For the two concurrent-session labs, with the same disposable database variable set:
+
+```sh
+node tests/verify-sessions.mjs
+```
+
+This separate checker uses the existing pg driver and three connections. It resets only course_race and course_change, observes blockers through pg_blocking_pids and checks stored results after waits, failures and retries. It uses 10-second statement and 60-second idle-transaction limits; manual exercises allow longer pauses. Use --lab=16 or --lab=17 for one suite, or --reverse to check the opposite order. Do not run reset scripts or another checker against those schemas concurrently. The embedded runner checks their single-session reference examples only.
 
 The runner checks failure categories and stored state, including rejected writes and commit-time failures. See [verification](../VERIFICATION.md).
 

@@ -2,15 +2,15 @@
 
 ## What the files are for
 
-The original package contained 42 files. It now contains 80 after adding the author-only curriculum audit, three foundation article/lab sets and six query/data-handoff sets with a CSV fixture; this is a file count, not a lesson count.
+The original package contained 42 files. It now contains 92 after adding the author-only curriculum audit, three foundation sets, six query/data-handoff sets with a CSV fixture, and two concurrency/migration sets with a separate session checker; this is a file count, not a lesson count.
 
 | Files | Purpose | Intended audience |
 |---|---|---|
-| 16 article files | One SQL onramp, six mechanism-focused lessons, three foundation lessons and six query/data-handoff lessons | Readers |
-| 47 lab files | Shared instructions plus fifteen sets of tasks, setup SQL and solutions, with one CSV fixture | Readers; authors verifying examples |
+| 18 article files | One SQL onramp, six mechanism-focused lessons, three foundation lessons, six query/data-handoff lessons and two concurrency/migration pilots | Readers |
+| 56 lab files | Shared instructions plus seventeen sets of tasks, setup SQL and solutions, with one CSV fixture and three migration phase files | Readers; authors verifying examples |
 | 11 top-level Markdown files | Navigation, review, sources, curriculum, authoring and verification records | Mixed; author records are labelled |
-| 6 tooling files | Git ignore rules, package files and three verification files | Maintainers |
-| 80 total | Current source package, excluding Git metadata and installed dependencies | Not 80 lessons |
+| 7 tooling files | Git ignore rules, package files and four verification files | Maintainers |
+| 92 total | Current source package, excluding Git metadata and installed dependencies | Not 92 lessons |
 
 Readers start at the [README](README.md), [course map](COURSE_MAP.md), articles, labs and [review prompts](REVIEW.md). Authors additionally use the [curriculum audit](CURRICULUM_AUDIT.md), teaching guide, publication queue, provenance and verification records. No reader needs the private source application.
 
@@ -141,3 +141,35 @@ This batch adds 25 files and updates 13 against 7cd5dcc. Locations describe this
 | [labs/15-data-handoff/raw-lines.csv](labs/15-data-handoff/raw-lines.csv) | 1–11 (new file) |
 | [labs/15-data-handoff/setup.sql](labs/15-data-handoff/setup.sql) | 1–18 (new file) |
 | [labs/15-data-handoff/solution.sql](labs/15-data-handoff/solution.sql) | 1–39 (new file) |
+
+## Concurrency and migration delivery on 2026-10-21
+
+This batch adds twelve files and updates thirteen against local commit 564ed9d. The live upstream preflight found main at 7cd5dcc, with the local branch 1 ahead/0 behind and no open/closed PRs or issues. No Git mutation was performed. Locations below describe this delivery; future revisions may move them. The temporary runtime and approval log are outside the course repository.
+
+| File | Added or updated line locations |
+|---|---|
+| [COURSE_MAP.md](COURSE_MAP.md) | 32–33, 44, 48, 100–102, 134–135 |
+| [CURRICULUM_AUDIT.md](CURRICULUM_AUDIT.md) | 45–48, 91–99, 108 |
+| [NEW_FILES.md](NEW_FILES.md) | 5, 9–10, 12–13, 145–175 |
+| [PUBLICATION.md](PUBLICATION.md) | 13, 44–54, 57, 60, 64, 72 |
+| [README.md](README.md) | 37–38, 40, 42 |
+| [REVIEW.md](REVIEW.md) | 26–33, 59, 63 |
+| [SOURCES.md](SOURCES.md) | 16, 68–75 |
+| [TOPIC_INVENTORY.md](TOPIC_INVENTORY.md) | 14, 116–118, 124–125, 174–176, 181, 186 |
+| [VERIFICATION.md](VERIFICATION.md) | 3, 7–9, 11–12, 16, 20–53, 72 |
+| [articles/06-transaction-boundaries.md](articles/06-transaction-boundaries.md) | 84 |
+| [articles/15-data-handoff.md](articles/15-data-handoff.md) | 78 |
+| [labs/README.md](labs/README.md) | 31–33, 45, 75–83 |
+| [tests/cases.json](tests/cases.json) | 3396–3575 |
+| [articles/16-competing-claims.md](articles/16-competing-claims.md) | 1–76 (new file) |
+| [articles/17-compatible-change.md](articles/17-compatible-change.md) | 1–76 (new file) |
+| [labs/16-competing-claims/README.md](labs/16-competing-claims/README.md) | 1–107 (new file) |
+| [labs/16-competing-claims/setup.sql](labs/16-competing-claims/setup.sql) | 1–8 (new file) |
+| [labs/16-competing-claims/solution.sql](labs/16-competing-claims/solution.sql) | 1–20 (new file) |
+| [labs/17-compatible-change/01-expand.sql](labs/17-compatible-change/01-expand.sql) | 1–7 (new file) |
+| [labs/17-compatible-change/02-backfill.sql](labs/17-compatible-change/02-backfill.sql) | 1–10 (new file) |
+| [labs/17-compatible-change/03-require.sql](labs/17-compatible-change/03-require.sql) | 1–9 (new file) |
+| [labs/17-compatible-change/README.md](labs/17-compatible-change/README.md) | 1–92 (new file) |
+| [labs/17-compatible-change/setup.sql](labs/17-compatible-change/setup.sql) | 1–11 (new file) |
+| [labs/17-compatible-change/solution.sql](labs/17-compatible-change/solution.sql) | 1–50 (new file) |
+| [tests/verify-sessions.mjs](tests/verify-sessions.mjs) | 1–295 (new file) |

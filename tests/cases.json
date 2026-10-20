@@ -3393,6 +3393,186 @@
         ]
       }
     ]
+  },
+  {
+    "lab": "16-competing-claims",
+    "steps": [
+      {
+        "sql": "WITH claimed AS (UPDATE course_race.stock SET available = available - 1 WHERE item_id = 1 AND available >= 1 RETURNING item_id) INSERT INTO course_race.reservations SELECT 101, item_id, -1 FROM claimed",
+        "error": "23514"
+      },
+      {
+        "query": "SELECT available FROM course_race.stock WHERE item_id = 1",
+        "rows": [
+          {
+            "available": 1
+          }
+        ]
+      },
+      {
+        "query": "SELECT count(*)::integer AS n FROM course_race.reservations",
+        "rows": [
+          {
+            "n": 0
+          }
+        ]
+      }
+    ],
+    "solution": [
+      {
+        "query": "SELECT available FROM course_race.stock WHERE item_id = 1",
+        "rows": [
+          {
+            "available": 0
+          }
+        ]
+      },
+      {
+        "query": "SELECT id, item_id, quantity FROM course_race.reservations ORDER BY id",
+        "rows": [
+          {
+            "id": 101,
+            "item_id": 1,
+            "quantity": 1
+          }
+        ]
+      },
+      {
+        "query": "SELECT remaining_seats FROM course_race.sessions WHERE id = 1",
+        "rows": [
+          {
+            "remaining_seats": 1
+          }
+        ]
+      },
+      {
+        "query": "SELECT id, session_id, seats FROM course_race.registrations",
+        "rows": [
+          {
+            "id": 201,
+            "session_id": 1,
+            "seats": 2
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "lab": "17-compatible-change",
+    "steps": [
+      {
+        "sql": "ALTER TABLE course_change.bookings ADD COLUMN reminder_minutes integer NOT NULL",
+        "error": "23502"
+      },
+      {
+        "query": "SELECT column_name FROM information_schema.columns WHERE table_schema = 'course_change' AND table_name = 'bookings' AND column_name = 'reminder_minutes'",
+        "rows": []
+      },
+      {
+        "sql": "BEGIN; ALTER TABLE course_change.bookings ADD COLUMN reminder_minutes integer; ALTER TABLE course_change.bookings ALTER COLUMN reminder_minutes SET DEFAULT 30; ALTER TABLE course_change.bookings ADD CONSTRAINT reminder_range CHECK (reminder_minutes BETWEEN 0 AND 1440) NOT VALID; INSERT INTO course_change.migration_history VALUES ('001_expand'); COMMIT"
+      },
+      {
+        "query": "SELECT id, reminder_minutes FROM course_change.bookings ORDER BY id",
+        "rows": [
+          {
+            "id": 1,
+            "reminder_minutes": null
+          },
+          {
+            "id": 2,
+            "reminder_minutes": null
+          },
+          {
+            "id": 3,
+            "reminder_minutes": null
+          },
+          {
+            "id": 4,
+            "reminder_minutes": null
+          }
+        ]
+      },
+      {
+        "sql": "INSERT INTO course_change.bookings VALUES (99, 'Blue', '2026-10-24 09:00+00', -1)",
+        "error": "23514"
+      },
+      {
+        "sql": "BEGIN; ALTER TABLE course_change.bookings ADD CONSTRAINT reminder_present CHECK (reminder_minutes IS NOT NULL) NOT VALID; ALTER TABLE course_change.bookings VALIDATE CONSTRAINT reminder_present",
+        "error": "23514"
+      },
+      {
+        "sql": "ROLLBACK"
+      },
+      {
+        "query": "SELECT conname FROM pg_constraint WHERE conrelid = 'course_change.bookings'::regclass AND conname = 'reminder_present'",
+        "rows": []
+      },
+      {
+        "query": "SELECT version FROM course_change.migration_history",
+        "rows": [
+          {
+            "version": "001_expand"
+          }
+        ]
+      }
+    ],
+    "solution": [
+      {
+        "query": "SELECT id, reminder_minutes FROM course_change.bookings ORDER BY id",
+        "rows": [
+          {
+            "id": 1,
+            "reminder_minutes": 30
+          },
+          {
+            "id": 2,
+            "reminder_minutes": 30
+          },
+          {
+            "id": 3,
+            "reminder_minutes": 30
+          },
+          {
+            "id": 4,
+            "reminder_minutes": 30
+          }
+        ]
+      },
+      {
+        "query": "SELECT attnotnull FROM pg_attribute WHERE attrelid = 'course_change.bookings'::regclass AND attname = 'reminder_minutes'",
+        "rows": [
+          {
+            "attnotnull": true
+          }
+        ]
+      },
+      {
+        "query": "SELECT version FROM course_change.migration_history ORDER BY version",
+        "rows": [
+          {
+            "version": "001_expand"
+          },
+          {
+            "version": "003_require"
+          }
+        ]
+      },
+      {
+        "query": "SELECT * FROM course_change.jobs ORDER BY id",
+        "rows": [
+          {
+            "id": 1,
+            "queue": "email",
+            "attempt_limit": 3
+          },
+          {
+            "id": 2,
+            "queue": "sms",
+            "attempt_limit": 3
+          }
+        ]
+      }
+    ]
   }
 ]
 

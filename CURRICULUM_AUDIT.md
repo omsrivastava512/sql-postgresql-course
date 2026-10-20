@@ -42,10 +42,10 @@ The table below maps every named concept, exercise and domain question in the te
 | 8b | Evaluate whether a visit's existence means completed and paid | B14, D12 | Planned order/reservation lifecycle exercise with draft, fulfilled and paid states. |
 | 8b | Evaluate catalog selection and its day-to-day workflow | R07, D04, D07, D12 | Lab 14 distinguishes current catalog prices from supplied historical amounts. Catalog workflow, snapshot creation and price precedence remain planned. |
 | 8b | Evaluate shared identity across branches versus separate identities | F09, R04, A10, D12 | Planned tenant/member identity comparison; no mandatory clinic policy. |
-| 9 | Create versioned migration files and test locally/staging before production | O07, O21 | Planned; replay from empty and existing-data databases, record CLI/platform-specific steps. |
-| 9 | Keep migration history reviewable and compare intended versus actual schema | O07, O08 | Planned migration-history and drift exercise; a file alone is not proof it ran. |
-| 9 | Evaluate adding columns/tables/indexes/checks, including locks and existing data | O01, O07, O09, O19 | Planned; measure validation and lock effects, avoid blanket safe-change labels. |
-| 9 | Backfill before stricter constraints; handle renames and type changes compatibly | O07–O09 | Planned expand-contract exercise with old and new callers. |
+| 9 | Create versioned migration files and test locally/staging before production | O07, O21 | Lab 17 runs versioned steps on an existing-data fixture locally. Empty-application replay, staging and deployment tooling remain planned. |
+| 9 | Keep migration history reviewable and compare intended versus actual schema | O07, O08 | Lab 17 inspects schema/history after success and rollback. Drift detection and migration-tool integration remain planned. |
+| 9 | Evaluate adding columns/tables/indexes/checks, including locks and existing data | O01, O07, O09, O19 | Lab 17 tests additive column/check validation and a blocked ALTER TABLE. Indexes, other DDL and production-scale measurements remain planned. |
+| 9 | Backfill before stricter constraints; handle renames and type changes compatibly | O07–O09 | Lab 17 preserves old/new SQL callers during an additive change. Renames, type changes and removal bridges remain planned. |
 | 9 | Handle destructive changes and practise restoring data | O08, O15 | Planned disposable restore rehearsal, distinct from transaction rollback. |
 | 9 | Introduce an appointment feature with relationships and safety rules together | D14, O07, O14, O21 | Planned reservation migration case study; both structural changes and validators require migration review. |
 | 10 | Distinguish structured database rejection from a transport failure | B08, O12, T13 | SQLSTATE and lost-response distinction introduced; API comparison planned. |
@@ -88,7 +88,15 @@ Six new article/lab pairs now cover joins, aggregate grain, scalar/existence/set
 
 The [inventory](TOPIC_INVENTORY.md) records narrower outcomes under existing IDs. All 132 IDs remain; no row is promoted to whole-course mastery. Reference examples passed 252 embedded assertions; actual CSV parsing, replay and export/re-import were checked separately. The query pilot is an executed draft, not a measured learner trial.
 
-Concurrent writes/retries, authorization, measured performance, inherited-database repair, migrations, restore and the integrated capstone remain future implementation. The [publication queue](PUBLICATION.md) names the next concurrency and operations pilots. Public release requirements and deferred hosted testing are unchanged.
+At that checkpoint, concurrent writes/retries, authorization, measured performance, inherited-database repair, migrations, restore and the integrated capstone remained future implementation. The next two pilots are recorded below.
+
+## Concurrency and migration pilots — 2026-10-21
+
+Two new article/lab pairs implement the competing-claim and bounded additive-change pilots. Stock claims transfer to limited seats; booking reminders transfer to job attempt limits whose historical value differs from the future default. The migration article includes one short Stripe engineering comparison, with GitLab guidance as supporting context.
+
+Native local PostgreSQL 17.11 passed all 270 single-session assertions and 100 separate live-session assertions, including observed blockers, commit/rollback branches, a complete retry after 40001, interrupted backfill, caller overlap and failed validation/DDL rollback. Reverse suite order also passed. Embedded execution passed the 270 reference assertions. These are execution results, not learner mastery or production deployment evidence.
+
+All 132 topic IDs remain. Only demonstrated sub-outcomes are promoted in the [inventory](TOPIC_INVENTORY.md). Deadlocks, optimistic locking, HTTP idempotency, authorization, measured performance, full migration deployment/removal, backup restoration and the capstone remain planned. Hosted and reader trials are open; connecting Supabase MCP did not constitute a course test run.
 
 ## Coverage acceptance
 
@@ -97,6 +105,6 @@ Concurrent writes/retries, authorization, measured performance, inherited-databa
 - Reader-facing routes require no source repository and distinguish available drafts from intended routes.
 - At least one changed-setting prompt and later retrieval opportunity belongs to each route; planned prompts are labelled planned.
 - SQL, PostgreSQL and Supabase are separated in the map and authoring contract.
-- Execution evidence is tracked by environment, separately from editorial coverage. Hosted testing stays deferred.
+- Execution evidence is tracked by environment, separately from editorial coverage. Hosted testing remains unperformed.
 
 An author's audit is not a new-reader usability test. Public release still requires the trials and supported-environment checks in the [publication agreement](PUBLICATION.md).

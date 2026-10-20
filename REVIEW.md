@@ -23,6 +23,14 @@ Suggested times: next study session, roughly one week later, roughly one month l
 | October has five units across three lines. What denominator gives average unit amount? | [Reusable reports](articles/14-reusable-reports.md): total units, not line count; an empty denominator is handled explicitly. |
 | A CSV repeats the same amount under a new event key. Is it a duplicate? | [Data handoff](articles/15-data-handoff.md): equal amounts do not prove equal events; preserve event identity and compare complete payloads. |
 | A replay reports four accepted source events. Did it insert four more facts? | [Data handoff](articles/15-data-handoff.md): accepted candidates and newly inserted facts differ; reconcile stored fact count and total after replay. |
+| Both callers read one item and commit availability zero. Does CHECK (available >= 0) prove only one reservation exists? | [Competing claims](articles/16-competing-claims.md): inspect the reservation total; a stale replacement can pass that CHECK while overpromising. |
+| A's claim is open and B is blocked. What changes if A rolls back instead of committing? | [Lab 16](labs/16-competing-claims/README.md#repair-and-observe-the-wait): after rollback B can claim; after commit the condition finds no stock. Confirm the blocker and final rows. |
+| A transaction receives 40001. Can its old read be reused for the next attempt? | [Competing claims](articles/16-competing-claims.md#an-old-snapshot-can-require-a-fresh-attempt): restart the complete read/decision/write unit; external effects need separate handling. |
+| A lock timeout is followed by 25P02. What must the caller do before another query? | [Lab 16](labs/16-competing-claims/README.md#bound-a-wait-and-recover): roll back the failed explicit transaction, then inspect/retry under the chosen policy. |
+| A nullable column is added, then its default is set to 30. What happened to existing NULLs? | [Compatible change](articles/17-compatible-change.md): nothing; backfill historical data separately and preserve explicit choices. |
+| A migration failed validation. Is a completed version record enough evidence that the new constraint exists? | [Lab 17](labs/17-compatible-change/README.md#interrupt-and-resume-the-backfill): inspect both schema and history; this lab commits the schema step and version together, so the failed step leaves neither. |
+| A backfill resumes after a caller chose zero. Should it replace that value with 30? | [Lab 17](labs/17-compatible-change/README.md#interrupt-and-resume-the-backfill): no; update only missing preferences and reconcile actual values. |
+| Can DROP COLUMN recover from a faulty new caller? | [Compatible change](articles/17-compatible-change.md#keep-a-usable-fallback): it destroys stored preferences; retain compatible data, and rehearse backup restoration separately. |
 | A note refers to profile 2. Profile 2 exists but is a receptionist. What does a plain FK know? | [Foreign keys](articles/01-foreign-keys.md): it knows the referenced key exists, not whether the role is appropriate. |
 | The patient trigger accepted an admin yesterday. Today that profile is changed to receptionist. Does writing profiles rerun the patient trigger? | [Business rules](articles/02-business-rules.md): no; enforcement must cover the operations that can violate the rule. |
 | A note INSERT supplied owner 2 but stored owner 1. Where could the change have happened? | [Derived values](articles/03-derived-values.md): its BEFORE trigger assigns NEW.owner_id before storage. |
@@ -48,11 +56,11 @@ These become useful after their lessons are written. They are authoring commitme
 | Relationships and modelling | Model a club membership after studying shop customers. Can one membership row describe two members? | State row grain, cardinality and key choices; test counterexamples. |
 | Further query meaning | Traverse a category hierarchy that contains a cycle. | State termination and cycle policy; recursive CTEs remain planned. |
 | Rules and automation | Move an eligibility check from creation to every update in a lending example. | Name all operations that can invalidate the intended rule. |
-| Transactions and concurrency | Two callers reserve the final seat. Where can each observe or change state? | Trace interleaving and retry scope; one-session rollback is insufficient evidence. |
+| Further transactions and concurrency | Two workflows lock the same pair of resources in opposite order. | Reproduce a deadlock, choose ordering and distinguish its retry from request replay. |
 | Identity and access | Switch from workspace members to clinic staff. What changes in the identity-to-visible-row trace? | Separate authentication, grants, row policy and privileged function execution. |
 | Deeper data history | Reconstruct which accounts were active at the end of an old month. | A current active flag is insufficient; historical state needs its own representation. |
 | Performance and recovery | A slow query and an accidental deletion both occur. Which measurement or recovery tool answers each problem? | Use query evidence for performance; prove restoration separately from rollback. |
-| Evolution and integration | Add a required field while an older caller is still running. | Explain compatibility, backfill, validation and the user's failure/recovery path. |
+| Further evolution and integration | Replace and eventually remove an old field while deployed callers overlap. | Extend the additive lab to read/write transitions, removal evidence and an API recovery path. |
 
 ## Transfer problem
 

@@ -10,7 +10,7 @@ The source-study objectives are a minimum baseline, documented in the [author au
 
 ## Current package
 
-Sixteen article drafts, fifteen independent labs, and a curriculum of 132 topic groups with explicit evidence and gaps. The onramp, six mechanism-focused lessons, three foundation lessons and six query/reporting lessons are drafted; further foundations and later routes remain unfinished. All remain drafts.
+Eighteen article drafts, seventeen independent labs, and a curriculum of 132 topic groups with explicit evidence and gaps. The onramp, six mechanism-focused lessons, three foundation lessons, six query/reporting lessons and two concurrency/migration pilots are drafted; further foundations and later routes remain unfinished. All remain drafts.
 
 The [first route](COURSE_MAP.md#the-first-route) remains usable now. The [beginner route](COURSE_MAP.md#the-beginner-route) connects the available foundations and identifies the missing steps. Existing numbers and URLs stay stable.
 
@@ -41,16 +41,27 @@ The second implementation batch is drafted in six connected article/lab pairs:
 
 Embedded checks passed 252 assertions across fifteen labs. Actual CSV import, replay and export/re-import were separately checked with the embedded engine. These are draft-execution results; local PostgreSQL, hosted and reader trials remain open.
 
+## Concurrency and migration pilots — 2026-10-21
+
+| Draft | Concrete outcome and changed setting |
+|---|---|
+| [Competing claims](articles/16-competing-claims.md) | Reproduce a stale decision, repair it with a conditional claim, observe commit/rollback waits, compare a locking read and restart after 40001; transfer to limited seats. |
+| [Compatible change](articles/17-compatible-change.md) | Add a field, interrupt and resume a backfill, preserve old/new SQL callers, roll back failed validation and retry a timed-out schema step; transfer to different historical/new job limits. |
+
+Local PostgreSQL 17.11 passed 270 assertions across seventeen lab suites and 100 additional live-session assertions, also run in reverse suite order. Embedded execution passed the same 270 single-session assertions. The approved temporary native Windows server uses no hosted resources. Hosted execution, Docker setup and reader trials remain unverified. See [verification](VERIFICATION.md).
+
+The migration pilot is one additive change, with a short attributed Stripe comparison. It does not implement a full deployment pipeline, rename/removal bridge or backup restore. The concurrency pilot has no HTTP retry store or external effects. These boundaries keep each learning question concrete.
+
 ## Later branches
 
-Next, prototype the concurrency and operational lessons: two callers claiming the last item, and one bounded database change or recovery exercise. The query pilot now has a draft and execution evidence, but no human learning-time or comprehension evidence. Record actual reader effort and revise confusing steps before committing to a production schedule. Continue broader implementation according to prerequisites:
+The query, concurrency and bounded migration pilots now have drafts and execution evidence, but no human learning-time or comprehension evidence. Next, have the author attempt these pilots and record effort, help and wrong predictions. Use that evidence to choose the next implementation batch; do not equate passing reference SQL with mastery. Continue broader implementation according to prerequisites:
 
 - A correct report is slow: query plans and measured index choices, building on the new joins, views and windows.
-- Two people reserve the same resource: transactions, locks, isolation and retry boundaries.
+- Two workflows acquire several resources: deadlocks, lock ordering and optimistic version checks, building on the claim pilot.
 - A successful request loses its response: idempotency, payload comparison and concurrent duplicate requests.
 - A user logs in but cannot see a row: identity, privileges, RLS, then invoker/definer and full request tracing.
 - Yesterday's invoice changes with today's price: snapshots, exact money and time-dependent rules.
-- An application needs a new field: migration history, backfill, compatibility, locks and restore rehearsal.
+- An application replaces an old representation: extend the additive pilot to staged compatibility, removal and a separate restore rehearsal.
 
 Use the [full inventory](TOPIC_INVENTORY.md) for less visible objectives; this queue is a writing priority, not a replacement syllabus.
 
@@ -58,7 +69,7 @@ Use the [full inventory](TOPIC_INVENTORY.md) for less visible objectives; this q
 
 - Check its stated prerequisites, scope labels, prediction feedback and changed-context answer.
 - Run setup twice, then solution and relevant failure cases from a fresh state. Record exact objectives tested.
-- Execute on local PostgreSQL and hosted Supabase; record engine, role, date and outcomes. Hosted testing remains deferred by request, so affected articles remain drafts. Embedded tests do not satisfy these two gates.
+- Execute on local PostgreSQL and hosted Supabase; record engine, role, date and outcomes. Local native execution is now recorded. Supabase MCP is connected, but no dedicated course project was used; hosted verification remains open. Embedded tests do not satisfy these two gates.
 - Check source attribution, dates, narrow company claims and local links.
 - Have the author do the lab and revise in their own voice; retain assistance/source attribution.
 - Ask a new reader to follow the material without private conversations and explain a changed example. Record confusion and revise the relevant passage.

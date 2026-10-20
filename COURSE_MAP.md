@@ -29,6 +29,8 @@ Branch from foreign keys to [Deletion](articles/04-deleting-related-rows.md). Re
 
 The transaction lab supplies its trigger, so you can observe rollback before learning to write that function. Return to derived values when you want to trace its internals.
 
+After transactions and [CTEs](articles/12-query-shapes.md), continue to [competing claims](articles/16-competing-claims.md), then [a compatible field addition](articles/17-compatible-change.md). These pilots require separate persistent connections.
+
 ## The wider course
 
 Topic IDs refer to the [inventory](TOPIC_INVENTORY.md), which records the narrower objectives actually covered. A route below can contain several short articles and labs.
@@ -39,11 +41,11 @@ Topic IDs refer to the [inventory](TOPIC_INVENTORY.md), which records the narrow
 | Relationships and modelling | Cardinality, junctions, optional references, deletion, normalization; R, D03, D13 | Keys and row meaning | FK, deletion and membership drafts; deeper modelling planned |
 | Query meaning and reporting | Joins, grouping, subqueries, CTEs, windows, sets and pagination; Q | Values and basic SELECT; relationships for joins | Filtering, joins, grouping, subqueries/sets, CTEs, windows and reusable-report drafts; recursion and specialized query depth remain planned |
 | Rules and automation | Constraints, functions, trigger events, derived values, transitions; B | Writes, constraints; lookups for cross-table rules | Validation and derivation drafts; remaining coverage planned |
-| Transactions and concurrency | Atomic groups, deferral, counters, locking, isolation, retries; T, R11 | Writes and constraints | Rollback and deferral drafts; concurrent and request labs planned |
+| Transactions and concurrency | Atomic groups, deferral, counters, locking, isolation, retries; T, R11 | Writes and constraints; CTEs for the claim | Rollback, deferral and competing-claim drafts; deadlocks, optimistic checks and full request retries remain planned |
 | Identity and access | Authentication, privileges, RLS, function execution identity, tenants; A | Filtering, relationships; functions for definer work | Planned |
 | Data over time | Generated values, views, snapshots, exact money, calendars and audits; D | Expressions; joins and grouping for reports | Historical price, exact-cent, period-boundary and view examples in the report draft; broader lifecycle/calendar rules planned |
 | Performance and recovery | Indexes, query plans, statistics, pooling, imports, backup restoration; O01–O06, O15–O19 | Queries; transactions for locks and recovery | Small CSV handoff draft; performance and operational recovery remain planned |
-| Evolution and integration | Versioned migrations, compatibility, APIs, safe parameters, useful errors; O07–O14, O20–O21 | Constraints, transactions and access | Request boundaries introduced; full workflow planned |
+| Evolution and integration | Versioned migrations, compatibility, APIs, safe parameters, useful errors; O07–O14, O20–O21 | Constraints, transactions and locks; access for API work | Additive migration with backfill and old/new SQL callers drafted; renames, removal, restore and full API workflow remain planned |
 
 The scope is application-focused SQL/PostgreSQL, from foundations through maintaining a database-backed service. Full database administration, replication, and sharding are optional future case-study directions, not hidden requirements for finishing this course. The inventory can grow when new learning questions justify it.
 
@@ -95,7 +97,9 @@ For the advanced branches, learn concurrency before implementing concurrent retr
 | Clinic: a note keeps an old owner | Shop: an old order keeps a shipping address | Whether the copy is stale or intentionally historical; available derivation transfer prompt |
 | Clinic: deleting a patient affects visits | Team: deleting a membership | Which direction the relationship runs; available deletion variation |
 | Import: references are temporarily missing | Shop: import orders and items together | When validation runs and what happens if repair never occurs; available deferral prompt |
-| Clinic: invoice failure undoes a table counter | Reservations: seat claim and booking fail together | Locate all writes inside the boundary; review prompt available, reservation SQL lab planned |
+| Clinic: invoice failure undoes a table counter | Stock: a rejected reservation undoes its decrement | Locate all writes inside the boundary; available lab 16 failed-statement probe |
+| Shop: two callers claim the last item | Sessions: two callers each request two seats from three | Observe blocking and preserve the quantity rule; available lab 16 transfer |
+| Bookings: add reminder preferences | Jobs: historical attempt limits differ from the new default | Preserve explicit choices, reconcile and validate; available lab 17 transfer |
 | Shop: totals multiply after a join | Subscriptions: usage and payments share an account | State the grain before aggregating; available lab 11 transfer |
 | Shop: missing orders disappear | Clubs: only inactive memberships exist | Preserve the required population; available lab 10 transfer |
 | Accounts: any paid order versus newest address | Workspaces: no successful events | Choose result shape and correlate absence; available lab 12 transfer |
@@ -127,6 +131,8 @@ Every planned route needs a worked example, a changed-setting task with feedback
 | Deletion | Choosing what happens to related rows | Tested delete actions and constraint interactions | None |
 | Deferred checks | Validation timing inside a transaction | DEFERRABLE and SET CONSTRAINTS | Editor request boundaries only |
 | Transaction boundaries | Atomic groups versus network outcomes | Trigger rollback and ordinary table counters | Connection/request guidance only |
+| Competing claims | Stale decisions, atomic claims and retry boundaries | Read Committed, Repeatable Read, row locks and pg_blocking_pids | Requires persistent connections; MCP/editor calls alone do not prove concurrency |
+| Compatible change | Existing data, future defaults and old/new callers | Transactional DDL, NOT VALID, validation and lock_timeout | No hosted migration deployment is claimed |
 
 These labels do not certify cross-database portability. Future Supabase identity/Data API lessons will name the platform explicitly; PostgreSQL roles and RLS will first get their own explanation.
 

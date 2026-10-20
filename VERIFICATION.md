@@ -1,21 +1,56 @@
 # Verification record
 
-Status: draft. Initial SQL execution dated 2026-10-17 (Asia/Kolkata); documentation audit added 2026-10-19; foundation and query/data-handoff execution added 2026-10-20.
+Status: draft. Initial SQL execution dated 2026-10-17 (Asia/Kolkata); documentation audit added 2026-10-19; foundation and query/data-handoff execution added 2026-10-20; native concurrent-session and migration execution added 2026-10-21.
 
 | Check | Result |
 |---|---|
-| Embedded PostgreSQL execution | PASS: 252 assertions across 15 labs on PostgreSQL 18.6 / PGlite 0.5.10 (2026-10-20) |
+| Embedded PostgreSQL execution | PASS: 270 assertions across 17 labs on PostgreSQL 18.6 / PGlite 0.5.10 (2026-10-21) |
+| Native local PostgreSQL 17.11 | PASS: 270 assertions across 17 labs, Windows x64, role course_author (2026-10-21) |
+| Independent concurrent sessions | PASS: 100 assertions across labs 16/17 using three distinct connections; also passed in reverse suite order on native PostgreSQL 17.11 (2026-10-21) |
 | Local Docker PostgreSQL 17.11 | Not run; Docker is not installed on this host |
-| Hosted Supabase | Deferred at the user's request on 2026-10-17; not tested |
-| Local Markdown links, current package | PASS: 478 local links across 43 Markdown files, including heading targets (2026-10-20) |
+| Hosted Supabase | MCP connected and project inventory read; no SQL run or project changed. No dedicated course project used; hosted verification remains open. |
+| Local Markdown links, current package | PASS: 558 local links across 47 Markdown files, including heading targets (2026-10-21) |
 | Author learning trial and editorial revision | Pending |
 | Public publication | Not performed |
 
-The embedded runtime tests SQL behavior only. It cannot establish Docker setup, hosted permissions, or concurrent-session behavior. A public release requires the two supported environment runs and an editorial learning trial.
+The embedded runtime tests SQL behavior only. It cannot establish Docker setup, hosted permissions, or concurrent-session behavior. Native local execution now establishes the SQL and session results described below, but not Docker startup. A public release still requires hosted verification and an editorial learning trial.
 
 The six initial labs cover foreign-key failures, role validation and its update gap, derived values and stale copies, delete actions, deferred-check timing, and invoice failure rollback. The test cases also run every successful solution after a fresh setup and exercise setup reset twice.
 
-No test in this package claims to verify concurrent requests, API retries, production authorization, or a deployed clinic schema.
+No test in this package claims to verify HTTP requests, API retries, production authorization, or a deployed clinic schema. Live SQL sessions are tested separately from application requests. Earlier sections below preserve dated checkpoints; this opening table and the latest section describe the current package.
+
+## Concurrency and migration pilots — 2026-10-21
+
+Two new article/lab pairs add a competing stock claim and a bounded additive schema change. The package now contains 92 source files, eighteen articles and seventeen labs. All 132 topic IDs remain. No dependency or package file changed; the approved separate session checker uses the existing pg driver.
+
+| Suite | Observed behaviour checked | Not established |
+|---|---|---|
+| 16-competing-claims | Both callers read 1 and overpromise with stale replacements; conditional claims block, then correctly follow commit/rollback; observer sees committed state; locking read returns updated availability; invalid reservation rolls back decrement; 40001 requires a fresh read/decision; 55P03 leaves an explicit transaction failed until rollback; two-seat/one-seat transfer | Deadlocks, optimistic versioning, arbitrary writers, restocking/cancellation, HTTP deduplication or external-effect safety |
+| 17-compatible-change | Immediate NOT NULL addition fails; defaults leave old NULLs; NOT VALID checks new writes; interrupted two-row backfill resumes without replacing 0/120; premature validation rolls back schema/history; original booking facts survive; old/new callers work; overlapping update wins over backfill; blocked ALTER times out without a column/history record; retry succeeds; jobs use historical 3 and future default 5 | Zero downtime, production-scale timings, deployment tooling, rename/removal bridge, hosted migration permissions or backup restoration |
+
+The regular checker passed 270 assertions on both engines: the original 252 plus 18 new single-session reference checks. It resets each setup twice and runs each solution from fresh setup. The separate checker passed 100 assertions on three distinct PostgreSQL backend IDs, then passed in reverse suite order. Each scenario resets its own schema after ending transactions. Wait checks query pg_blocking_pids and require B to be blocked by A; elapsed time alone is not accepted as evidence.
+
+Commands executed with COURSE_DATABASE_URL set only in the test process environment to the temporary loopback database:
+
+```text
+npm run test:embedded
+PASS 270 assertions across 17 labs.
+
+npm run test:database
+PASS 270 assertions across 17 labs.
+
+node tests/verify-sessions.mjs
+PASS 100 live-session assertions on three distinct PostgreSQL connections.
+
+node tests/verify-sessions.mjs --reverse
+PASS 100 live-session assertions on three distinct PostgreSQL connections.
+```
+
+The native runtime was EDB's PostgreSQL 17.11-5 Windows x64 binary bundle, obtained through the official PostgreSQL Windows download route. postgres --version and the server both reported 17.11. Archive size: 381531864 bytes; locally computed SHA-256: 80379B2C04D51C30225532E0AE04509899141E9957ED096FE749D7FD9DF8F82F. This identifies the downloaded artifact; it is not a claimed comparison with a publisher checksum.
+
+The temporary server listened only on 127.0.0.1:55433, used a dedicated disposable course database and role course_author, and installed no Windows service. A sandboxed background launch did not persist and local socket access was denied; the already-approved runtime and test commands therefore ran with elevated tool access. Shutdown completed after testing; pg_ctl confirmed no server running. The task's temporary archive, runtime and data directory were then removed after checking their resolved cleanup path. No Supabase SQL, paid feature or hosted resource was used.
+
+These checks do not run the Docker/psql CSV transport, prove learner comprehension or complete the wider curriculum. The article/lab drafts include independent transfer and retrieval prompts; actual author/new-reader time, errors and assistance remain unrecorded until a person attempts them. Hosted execution, Docker setup and reader trials remain release work.
 
 ## Query and data-handoff implementation — 2026-10-20
 
@@ -34,7 +69,7 @@ The six new suites also passed independently in fresh embedded databases, run in
 
 A separate check loaded the actual CSV through PostgreSQL's parser and matched all ten raw rows to the SQL snapshot, including quoted commas, quotes, NULL and empty text. Processing yielded four facts totalling 5250 cents, replay left those facts unchanged, and an exported CSV re-imported to equal facts. The command below makes that author check repeatable; the normal runner uses the SQL snapshot.
 
-The current package contains 80 source files, sixteen articles and fifteen labs. All 132 topic IDs remain. No dependencies or runner architecture changed. Docker and psql are unavailable on this host; local PostgreSQL 17 and hosted Supabase execution remain unverified. Author/new-reader trials, concurrency and operational pilots remain open. This batch is a verified draft, not a public release or completion of the course.
+At this checkpoint the package contained 80 source files, sixteen articles and fifteen labs. All 132 topic IDs remained. No dependencies or runner architecture changed. Docker and psql were unavailable on this host; local PostgreSQL 17 and hosted Supabase execution had not been performed. The later native concurrency/migration checks are recorded above. This batch was a verified draft, not a public release or completion of the course.
 
 ### Repeat the actual-file check
 

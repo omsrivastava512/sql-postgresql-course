@@ -34,10 +34,12 @@ The examples use fictional applications. The first drafts use a clinic; the wide
 | [Deleting a patient with visits](articles/04-deleting-related-rows.md) | Predict rejection, cascading deletion, and clearing a reference. |
 | [Can the database wait until I am finished?](articles/05-deferred-checks.md) | Compare immediate and deferred checks in a complete transaction. |
 | [The invoice failed. Did its number disappear?](articles/06-transaction-boundaries.md) | Locate rollback boundaries and distinguish them from a lost response. |
+| [Can two callers claim the last item?](articles/16-competing-claims.md) | Repair a stale decision, observe blocking and retry a complete transaction. |
+| [Can old callers survive a required new field?](articles/17-compatible-change.md) | Resume a bounded backfill, preserve old/new callers and inspect migration failures. |
 
-There are **sixteen article drafts and fifteen labs**. The query/reporting batch is drafted; deeper modelling, concurrency, access control, performance, migrations, recovery and the integrated capstone still need substantial work. The [topic inventory](TOPIC_INVENTORY.md) records evidence and gaps; a topic being listed does not mean it has been taught.
+There are **eighteen article drafts and seventeen labs**. The latest pilots add competing claims and a compatible field addition. Deeper modelling, request retries, access control, performance, broader migrations, recovery and the integrated capstone still need substantial work. The [topic inventory](TOPIC_INVENTORY.md) records evidence and gaps; a topic being listed does not mean it has been taught.
 
-These are editorial drafts. Embedded PostgreSQL checks passed on 2026-10-20; local Docker testing remains pending and hosted Supabase testing is deferred. See the [verification record](VERIFICATION.md) for dates and limits.
+These are editorial drafts. Embedded and native local PostgreSQL checks passed on 2026-10-21, including separate concurrent sessions. Docker setup, hosted Supabase and reader trials remain unverified. See the [verification record](VERIFICATION.md) for dates and limits.
 
 ## How the ideas connect
 

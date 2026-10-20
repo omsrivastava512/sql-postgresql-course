@@ -75,6 +75,6 @@ A different payload under an existing source key must be reported as a conflict.
 The [lab](../labs/15-data-handoff/README.md) imports the real CSV, compares it with the supplied SQL snapshot, exports the accepted facts, replays the batch and changes the duplicate policy input. Its independent transfer adds a distinct event with the same economic values; that must increase the accepted total.
 
 **Requires:** [values](07-stored-values.md), [grouping](11-aggregate-grain.md), [CTEs](12-query-shapes.md), [windows](13-window-questions.md) and [views](14-reusable-reports.md).
-**Revisited in:** [planned migrations and operational recovery](../COURSE_MAP.md#the-wider-course).
+**Revisited in:** [a compatible field addition](17-compatible-change.md), then [planned operational recovery](../COURSE_MAP.md#the-wider-course).
 **Return:** explain which count refers to records, unique facts, accepted candidates or newly inserted rows.
 **References:** PostgreSQL [COPY and CSV](https://www.postgresql.org/docs/17/sql-copy.html), [input validation](https://www.postgresql.org/docs/17/functions-info.html#FUNCTIONS-INFO-VALIDITY), [conditional expressions](https://www.postgresql.org/docs/17/functions-conditional.html) and [ON CONFLICT](https://www.postgresql.org/docs/17/sql-insert.html#SQL-ON-CONFLICT).
