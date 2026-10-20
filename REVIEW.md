@@ -13,6 +13,16 @@ Suggested times: next study session, roughly one week later, roughly one month l
 | Two orders share a date. Is ORDER BY date enough for a repeatable page boundary? | [Selecting rows](articles/08-selecting-rows.md): add a unique tie-breaker; changes between requests can still move offset pages. |
 | A membership's handle may repeat in another workspace. Which pair must remain unique? | [Row identity](articles/09-row-identity.md): workspace and handle; the member/workspace pair identifies membership separately. |
 | A rolled-back insert consumed an identity value. Must the next insert reuse it? | [Row identity](articles/09-row-identity.md): no; identity allocation can leave gaps, unlike the ordinary table counter in lab 06. |
+| A LEFT JOIN report loses customers after adding WHERE order.status = 'paid'. What changed? | [Joins](articles/10-joins.md): the filter removes padded rows; preserve customers by restricting qualifying matches in ON when that matches the brief. |
+| Two equal-valued lines meet three payments. Does SUM(DISTINCT amount) fix the inflated total? | [Aggregate grain](articles/11-aggregate-grain.md): it loses a legitimate equal-valued line; summarize each collection at the intended grain first. |
+| One account has two addresses. Should an unordered LIMIT 1 repair its scalar lookup? | [Query shapes](articles/12-query-shapes.md): only an explicit selection policy resolves ambiguity; existence and scalar-value questions differ. |
+| A NOT IN source contains NULL. Can it reliably express accounts with no matching orders? | [Query shapes](articles/12-query-shapes.md): use the correlated absence test and explain the unknown comparison. |
+| Two charges share a date and a running sum jumps over both. Which window choices matter? | [Windows](articles/13-window-questions.md): peer handling, frame and a deterministic processing order; final display sorting does not repair the calculation. |
+| All top ties are required. Should ID be part of RANK's ordering? | [Windows](articles/13-window-questions.md): ID would break the amount tie; use it for final display ordering instead. |
+| An October order is refunded in November. Which month should change? | [Reusable reports](articles/14-reusable-reports.md): under this stated contract, November's refund total; another policy would need a different metric definition. |
+| October has five units across three lines. What denominator gives average unit amount? | [Reusable reports](articles/14-reusable-reports.md): total units, not line count; an empty denominator is handled explicitly. |
+| A CSV repeats the same amount under a new event key. Is it a duplicate? | [Data handoff](articles/15-data-handoff.md): equal amounts do not prove equal events; preserve event identity and compare complete payloads. |
+| A replay reports four accepted source events. Did it insert four more facts? | [Data handoff](articles/15-data-handoff.md): accepted candidates and newly inserted facts differ; reconcile stored fact count and total after replay. |
 | A note refers to profile 2. Profile 2 exists but is a receptionist. What does a plain FK know? | [Foreign keys](articles/01-foreign-keys.md): it knows the referenced key exists, not whether the role is appropriate. |
 | The patient trigger accepted an admin yesterday. Today that profile is changed to receptionist. Does writing profiles rerun the patient trigger? | [Business rules](articles/02-business-rules.md): no; enforcement must cover the operations that can violate the rule. |
 | A note INSERT supplied owner 2 but stored owner 1. Where could the change have happened? | [Derived values](articles/03-derived-values.md): its BEFORE trigger assigns NEW.owner_id before storage. |
@@ -36,11 +46,11 @@ These become useful after their lessons are written. They are authoring commitme
 |---|---|---|
 | Wider values and identity | Choose representations for exact amounts, time zones and business document numbers in a subscriptions variant. | Apply type and lifecycle requirements; the first values/identity labs do not cover all these choices. |
 | Relationships and modelling | Model a club membership after studying shop customers. Can one membership row describe two members? | State row grain, cardinality and key choices; test counterexamples. |
-| Query meaning and reporting | Add a second payment and explain why a joined subscription total changed. | Account for rows before aggregation rather than patching with DISTINCT blindly. |
+| Further query meaning | Traverse a category hierarchy that contains a cycle. | State termination and cycle policy; recursive CTEs remain planned. |
 | Rules and automation | Move an eligibility check from creation to every update in a lending example. | Name all operations that can invalidate the intended rule. |
 | Transactions and concurrency | Two callers reserve the final seat. Where can each observe or change state? | Trace interleaving and retry scope; one-session rollback is insufficient evidence. |
 | Identity and access | Switch from workspace members to clinic staff. What changes in the identity-to-visible-row trace? | Separate authentication, grants, row policy and privileged function execution. |
-| Data over time | Change a current catalog price after an order was paid. | Explain which value is historical and which is recomputed. |
+| Deeper data history | Reconstruct which accounts were active at the end of an old month. | A current active flag is insufficient; historical state needs its own representation. |
 | Performance and recovery | A slow query and an accidental deletion both occur. Which measurement or recovery tool answers each problem? | Use query evidence for performance; prove restoration separately from rollback. |
 | Evolution and integration | Add a required field while an older caller is still running. | Explain compatibility, backfill, validation and the user's failure/recovery path. |
 

@@ -56,6 +56,14 @@ The first foundation batch applies inspection, repair, independent practice and 
 
 Technical references for this batch also include PostgreSQL 17 [defaults](https://www.postgresql.org/docs/17/ddl-default.html), [comparisons](https://www.postgresql.org/docs/17/functions-comparison.html), [identity columns](https://www.postgresql.org/docs/17/ddl-identity-columns.html), [UUID functions](https://www.postgresql.org/docs/17/functions-uuid.html), [ordering](https://www.postgresql.org/docs/17/queries-order.html), [pagination](https://www.postgresql.org/docs/17/queries-limit.html) and [RETURNING](https://www.postgresql.org/docs/17/dml-returning.html). Each article links its more specific authorities. Actual execution versions belong in the verification record.
 
+## Query and data-handoff implementation references
+
+Checked 2026-10-20. The two original business briefs from the accepted plan now have draft labs: a monthly metric with an independent usage report, and a reconciled CSV handoff. They use synthetic data and are not reports of incidents at a named company. Existing engineering case studies remain curated for the later lessons where they are relevant.
+
+Technical checks used PostgreSQL 17 [table expressions](https://www.postgresql.org/docs/17/queries-table-expressions.html), [aggregate expressions](https://www.postgresql.org/docs/17/sql-expressions.html), [subquery predicates](https://www.postgresql.org/docs/17/functions-subquery.html), [set operations](https://www.postgresql.org/docs/17/queries-union.html), [WITH](https://www.postgresql.org/docs/17/queries-with.html), [window functions](https://www.postgresql.org/docs/17/functions-window.html), [views](https://www.postgresql.org/docs/17/sql-createview.html), [materialized views](https://www.postgresql.org/docs/17/rules-materializedviews.html), [numeric types](https://www.postgresql.org/docs/17/datatype-numeric.html), [date/time types](https://www.postgresql.org/docs/17/datatype-datetime.html), [COPY](https://www.postgresql.org/docs/17/sql-copy.html), [input validation](https://www.postgresql.org/docs/17/functions-info.html) and [INSERT/ON CONFLICT](https://www.postgresql.org/docs/17/sql-insert.html).
+
+The separate actual-file check uses [PGlite's documented Blob import/export interface](https://pglite.dev/docs/api). This verifies PostgreSQL CSV parsing in the embedded runtime; it does not verify Docker copying, psql interaction, hosted file permissions or a Supabase upload flow. The [verification record](VERIFICATION.md) preserves the command and limitations.
+
 ## Learning format references
 
 [The Odin Project](https://www.theodinproject.com/lessons/foundations-how-this-course-will-work) connects lessons with projects. [SQLBolt](https://sqlbolt.com/) places exercises beside explanations. [Explorable Explanations](https://explorabl.es/faq/) offers examples of learning through manipulation. [Quantum Country](https://quantum.country/) embeds spaced review into essays.

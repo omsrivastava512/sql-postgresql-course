@@ -18,13 +18,13 @@ The table below maps every named concept, exercise and domain question in the te
 | 1 | Explain NOT NULL, UNIQUE and scoped/composite uniqueness | F07, F09, F10 | Labs 07 and 09 practise required values, duplicate boundaries and NULL uniqueness policies. Tenant authorization remains separate. |
 | 1 | Distinguish defaults, omitted input and explicit NULL | F05, F06 | Lab 07 compares stored values after omitted input, DEFAULT, explicit NULL and empty text. |
 | 1 | Reject a conditional referral row, repair it, then insert successfully | F07, B13 | Negative amount CHECK practised in lab 06; conditional-row rule and repair exercise planned in an order/delivery setting. |
-| 1 | Represent money in integer minor units and examine alternatives | D05, D06 | Planned; compare integer minor units, NUMERIC and floating point with rounding boundaries. |
+| 1 | Represent money in integer minor units and examine alternatives | D05, D06 | Labs 14/15 use exact cents, NUMERIC conversion/division and a declared precision policy. Floating-point comparisons and broader rounding policies remain planned. |
 | 2 | Explain REFERENCES and deletion cascade | R01, R08, R09 | Practised in labs 01 and 04; retain existing lessons. |
 | 2 | Distinguish catalog records from growing transaction records and choose keys | R07, F08, F14 | Planned; avoid teaching text versus UUID as an intrinsic distinction. |
-| 2 | Trace one event's patient, service/course and location relationships | R03, R04, R06, R14 | Lab 09 practises membership grain and an independent loyalty junction. Multi-fact order modelling, join cardinality and report grain remain planned. |
+| 2 | Trace one event's patient, service/course and location relationships | R03, R04, R06, R14 | Lab 09 practises membership grain; labs 10/11 add role-specific joins and report grain. Independent multi-fact schema design remains planned. |
 | 2 | Reject an event without membership/access, create prerequisite membership, then accept | A10, B10, B14 | General role-guard gap practised in lab 02; membership workflow and auto-creation trace still planned. |
 | 3 | Derive a stored generated total and reject a direct write | D01, D05 | Planned; order amounts supply the independent example. |
-| 3 | Explain a view versus a stored table and compare a ledger view with its underlying join | D02, Q02, Q08, Q09 | Planned; compare rows and totals, including unmatched rows and duplicate joins. |
+| 3 | Explain a view versus a stored table and compare a ledger view with its underlying join | D02, Q02, Q08, Q09 | Labs 10/11/14 compare joined facts, repaired totals, live views and materialized refresh. A full ledger model is not claimed. |
 | 4 | Read a PL/pgSQL function and its BEFORE INSERT/UPDATE attachment | B03, B05, B09, B16 | Initial trigger mechanism practised in lab 02; independent function writing and timing variants planned. |
 | 4 | Distinguish NEW and OLD | B04 | NEW explained; OLD and TG_OP lab planned. |
 | 4 | Update a row and inspect an automatic timestamp | B15, D08 | Planned; separate updated_at from an audit history. |
@@ -40,7 +40,7 @@ The table below maps every named concept, exercise and domain question in the te
 | 8a | Verify branch isolation, cross-tenant rejection and admin visibility | A07, A10, A13, O14 | Planned identity matrix with explicit successful and rejected operations. Supabase run deferred. |
 | 8b | Evaluate whether a referring person should be free text or a separate table | R07, R13, D03, D12, D13 | Planned contact/catalog modelling comparison; course does not settle the clinic's product decision. |
 | 8b | Evaluate whether a visit's existence means completed and paid | B14, D12 | Planned order/reservation lifecycle exercise with draft, fulfilled and paid states. |
-| 8b | Evaluate catalog selection and its day-to-day workflow | R07, D04, D07, D12 | Planned product catalog and price-snapshot walkthrough. |
+| 8b | Evaluate catalog selection and its day-to-day workflow | R07, D04, D07, D12 | Lab 14 distinguishes current catalog prices from supplied historical amounts. Catalog workflow, snapshot creation and price precedence remain planned. |
 | 8b | Evaluate shared identity across branches versus separate identities | F09, R04, A10, D12 | Planned tenant/member identity comparison; no mandatory clinic policy. |
 | 9 | Create versioned migration files and test locally/staging before production | O07, O21 | Planned; replay from empty and existing-data databases, record CLI/platform-specific steps. |
 | 9 | Keep migration history reviewable and compare intended versus actual schema | O07, O08 | Planned migration-history and drift exercise; a file alone is not proof it ran. |
@@ -80,7 +80,15 @@ Similarly, do not classify index creation or adding a CHECK as universally safe 
 
 Three article/lab pairs now teach stored values, row selection and row identity. The [inventory](TOPIC_INVENTORY.md) updates only the demonstrated sub-outcomes; all 132 topic IDs are retained. Basic type choices do not complete time/money modelling, a between-page insert is not a concurrent-session test, and a workspace uniqueness constraint is not access control.
 
-The next query batch still needs joins, aggregation, group filters, report definitions and a small reconciled data handoff. The [publication queue](PUBLICATION.md) keeps those priorities separate from completed drafts. Learner trials and supported-environment execution remain pending.
+At that foundation checkpoint, joins, aggregation, group filters, reports and a reconciled data handoff were the next batch. Their implementation is recorded below. Learner trials and supported-environment execution remain pending.
+
+## Query and data-handoff implementation — 2026-10-20
+
+Six new article/lab pairs now cover joins, aggregate grain, scalar/existence/set shapes, nonrecursive CTEs, windows, views, reusable reports and a small reconciled import. The two original business briefs from the practical-course plan are implemented with synthetic datasets: the monthly sales/usage report and the CSV handoff.
+
+The [inventory](TOPIC_INVENTORY.md) records narrower outcomes under existing IDs. All 132 IDs remain; no row is promoted to whole-course mastery. Reference examples passed 252 embedded assertions; actual CSV parsing, replay and export/re-import were checked separately. The query pilot is an executed draft, not a measured learner trial.
+
+Concurrent writes/retries, authorization, measured performance, inherited-database repair, migrations, restore and the integrated capstone remain future implementation. The [publication queue](PUBLICATION.md) names the next concurrency and operations pilots. Public release requirements and deferred hosted testing are unchanged.
 
 ## Coverage acceptance
 

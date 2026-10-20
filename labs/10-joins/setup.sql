@@ -1,0 +1,14 @@
+DROP SCHEMA IF EXISTS course_join CASCADE;
+CREATE SCHEMA course_join;
+CREATE TABLE course_join.customers (id integer PRIMARY KEY, name text NOT NULL);
+CREATE TABLE course_join.orders (id integer PRIMARY KEY, customer_id integer REFERENCES course_join.customers(id), status text NOT NULL);
+CREATE TABLE course_join.staff (id integer PRIMARY KEY, name text NOT NULL);
+CREATE TABLE course_join.tickets (id integer PRIMARY KEY, created_by integer NOT NULL REFERENCES course_join.staff(id), assigned_to integer REFERENCES course_join.staff(id));
+CREATE TABLE course_join.clubs (id integer PRIMARY KEY, name text NOT NULL);
+CREATE TABLE course_join.memberships (id integer PRIMARY KEY, club_id integer NOT NULL REFERENCES course_join.clubs(id), active boolean NOT NULL);
+INSERT INTO course_join.customers VALUES (1, 'Riya'), (2, 'Sam'), (3, 'Dev');
+INSERT INTO course_join.orders VALUES (101, 1, 'paid'), (102, 1, 'pending'), (103, 2, 'paid'), (104, NULL, 'paid');
+INSERT INTO course_join.staff VALUES (1, 'Asha'), (2, 'Bo');
+INSERT INTO course_join.tickets VALUES (1, 1, 2), (2, 1, NULL);
+INSERT INTO course_join.clubs VALUES (10, 'Books'), (20, 'Walking'), (30, 'Chess');
+INSERT INTO course_join.memberships VALUES (1, 10, true), (2, 10, false), (3, 20, false);

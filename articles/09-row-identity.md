@@ -80,6 +80,7 @@ After a gap, explain why (workspace_id, member_id) and (workspace_id, handle) an
 
 **Requires:** [stored values](07-stored-values.md), [selecting rows](08-selecting-rows.md) and the narrow [foreign-key guarantee](01-foreign-keys.md).
 **Related:** [deleting related rows](04-deleting-related-rows.md) asks what happens when one of these facts is removed.
-**Revisited in:** [planned modeling and reporting](../COURSE_MAP.md#the-wider-course), where row meaning determines joins and totals.
+**Next:** [Which rows survive a join?](10-joins.md) uses these relationships to select matching and unmatched facts.
+**Revisited in:** [aggregate grain](11-aggregate-grain.md), where row meaning determines totals. Deeper modelling remains in the [wider course](../COURSE_MAP.md#the-wider-course).
 
 **References:** PostgreSQL [constraints](https://www.postgresql.org/docs/17/ddl-constraints.html), [identity columns](https://www.postgresql.org/docs/17/ddl-identity-columns.html), [sequences](https://www.postgresql.org/docs/17/functions-sequence.html) and [UUID functions](https://www.postgresql.org/docs/17/functions-uuid.html).

@@ -22,6 +22,12 @@ The examples use fictional applications. The first drafts use a clinic; the wide
 | [What value did I actually store?](articles/07-stored-values.md) | Distinguish omitted input, NULL and empty text, then enforce a chosen row rule. |
 | [Which rows did I ask for?](articles/08-selecting-rows.md) | Predict filters, ordering, pages and the rows selected for a write. |
 | [What identifies this row?](articles/09-row-identity.md) | Define scoped uniqueness and relationships, and separate generated keys from business numbering. |
+| [Which rows survive a join?](articles/10-joins.md) | Preserve the intended population and query role-specific relationships. |
+| [Why did the total multiply?](articles/11-aggregate-grain.md) | Repair double counting at the right grain and distinguish row/group filters. |
+| [What shape does this query return?](articles/12-query-shapes.md) | Choose scalar, existence and set results; decompose queries with CTEs. |
+| [Which row is first, and what came before it?](articles/13-window-questions.md) | Specify ranking ties, latest rows, running totals and previous-row comparisons. |
+| [What does this monthly number mean?](articles/14-reusable-reports.md) | Build reusable reports with explicit metrics, periods and denominators. |
+| [Can this imported data be trusted?](articles/15-data-handoff.md) | Validate, reconcile, export and replay a small CSV handoff. |
 | [What a foreign key actually promises](articles/01-foreign-keys.md) | Separate existence from suitability and permission. |
 | [An existing person can still be the wrong owner](articles/02-business-rules.md) | Trace a validation trigger and identify a write it does not cover. |
 | [Who put that owner on the note?](articles/03-derived-values.md) | Trace supplied input through a BEFORE trigger and spot a stale copy. |
@@ -29,7 +35,7 @@ The examples use fictional applications. The first drafts use a clinic; the wide
 | [Can the database wait until I am finished?](articles/05-deferred-checks.md) | Compare immediate and deferred checks in a complete transaction. |
 | [The invoice failed. Did its number disappear?](articles/06-transaction-boundaries.md) | Locate rollback boundaries and distinguish them from a lost response. |
 
-There are **ten article drafts and nine labs**. Joins and reporting, deeper modelling, access control, performance, migrations, and other areas still need substantial lessons. The [topic inventory](TOPIC_INVENTORY.md) records evidence and gaps; a topic being listed does not mean it has been taught.
+There are **sixteen article drafts and fifteen labs**. The query/reporting batch is drafted; deeper modelling, concurrency, access control, performance, migrations, recovery and the integrated capstone still need substantial work. The [topic inventory](TOPIC_INVENTORY.md) records evidence and gaps; a topic being listed does not mean it has been taught.
 
 These are editorial drafts. Embedded PostgreSQL checks passed on 2026-10-20; local Docker testing remains pending and hosted Supabase testing is deferred. See the [verification record](VERIFICATION.md) for dates and limits.
 

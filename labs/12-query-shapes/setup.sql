@@ -1,0 +1,16 @@
+DROP SCHEMA IF EXISTS course_shape CASCADE;
+CREATE SCHEMA course_shape;
+CREATE TABLE course_shape.accounts (id integer PRIMARY KEY, name text NOT NULL);
+CREATE TABLE course_shape.orders (id integer PRIMARY KEY, account_id integer REFERENCES course_shape.accounts(id), status text NOT NULL, cents integer NOT NULL);
+CREATE TABLE course_shape.contacts (id integer PRIMARY KEY, account_id integer NOT NULL REFERENCES course_shape.accounts(id), address text NOT NULL);
+CREATE TABLE course_shape.online (customer_id integer NOT NULL);
+CREATE TABLE course_shape.store (customer_id integer NOT NULL);
+CREATE TABLE course_shape.workspaces (id integer PRIMARY KEY);
+CREATE TABLE course_shape.events (id integer PRIMARY KEY, workspace_id integer REFERENCES course_shape.workspaces(id), status text NOT NULL);
+INSERT INTO course_shape.accounts VALUES (1, 'Asha'), (2, 'Bo'), (3, 'Cy');
+INSERT INTO course_shape.orders VALUES (11, 1, 'paid', 100), (12, 1, 'pending', 200), (13, 2, 'paid', 50), (14, NULL, 'paid', 25);
+INSERT INTO course_shape.contacts VALUES (1, 1, 'alpha'), (2, 1, 'beta'), (3, 2, 'bo');
+INSERT INTO course_shape.online VALUES (1), (1), (2);
+INSERT INTO course_shape.store VALUES (1), (3);
+INSERT INTO course_shape.workspaces VALUES (1), (2), (3);
+INSERT INTO course_shape.events VALUES (1, 1, 'success'), (2, 1, 'success'), (3, 2, 'failed'), (4, NULL, 'success');

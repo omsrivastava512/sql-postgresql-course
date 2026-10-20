@@ -1,0 +1,14 @@
+DROP SCHEMA IF EXISTS course_totals CASCADE;
+CREATE SCHEMA course_totals;
+CREATE TABLE course_totals.orders (id integer PRIMARY KEY, status text NOT NULL);
+CREATE TABLE course_totals.lines (id integer PRIMARY KEY, order_id integer NOT NULL REFERENCES course_totals.orders(id), quantity integer NOT NULL CHECK (quantity > 0), unit_cents integer NOT NULL CHECK (unit_cents >= 0));
+CREATE TABLE course_totals.payments (id integer PRIMARY KEY, order_id integer NOT NULL REFERENCES course_totals.orders(id), kind text NOT NULL CHECK (kind IN ('capture', 'refund')), cents integer NOT NULL CHECK (cents > 0));
+INSERT INTO course_totals.orders VALUES (101, 'paid'), (102, 'pending'), (103, 'paid'), (104, 'cancelled'), (105, 'paid');
+INSERT INTO course_totals.lines VALUES (1, 101, 1, 1000), (2, 101, 1, 1000), (3, 102, 1, 500), (4, 103, 3, 1000), (5, 104, 1, 700);
+INSERT INTO course_totals.payments VALUES (1, 101, 'capture', 1000), (2, 101, 'capture', 1000), (3, 101, 'refund', 500), (4, 103, 'capture', 3000), (5, 104, 'capture', 700);
+CREATE TABLE course_totals.accounts (id integer PRIMARY KEY);
+CREATE TABLE course_totals.usage (id integer PRIMARY KEY, account_id integer NOT NULL REFERENCES course_totals.accounts(id), units integer NOT NULL);
+CREATE TABLE course_totals.receipts (id integer PRIMARY KEY, account_id integer NOT NULL REFERENCES course_totals.accounts(id), cents integer NOT NULL);
+INSERT INTO course_totals.accounts VALUES (1), (2);
+INSERT INTO course_totals.usage VALUES (1, 1, 2), (2, 1, 3), (3, 2, 4);
+INSERT INTO course_totals.receipts VALUES (1, 1, 100), (2, 1, 200);

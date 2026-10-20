@@ -1,0 +1,16 @@
+DROP SCHEMA IF EXISTS course_report CASCADE;
+CREATE SCHEMA course_report;
+CREATE TABLE course_report.products (id integer PRIMARY KEY, current_cents integer NOT NULL);
+CREATE TABLE course_report.orders (id integer PRIMARY KEY, placed_at timestamptz NOT NULL, status text NOT NULL);
+CREATE TABLE course_report.lines (id integer PRIMARY KEY, order_id integer NOT NULL REFERENCES course_report.orders(id), product_id integer NOT NULL REFERENCES course_report.products(id), quantity integer NOT NULL CHECK (quantity > 0), unit_cents integer NOT NULL CHECK (unit_cents >= 0), discount_cents integer NOT NULL CHECK (discount_cents >= 0), CHECK (discount_cents <= quantity::bigint * unit_cents));
+CREATE TABLE course_report.refunds (id integer PRIMARY KEY, order_id integer NOT NULL REFERENCES course_report.orders(id), refunded_at timestamptz NOT NULL, cents integer NOT NULL CHECK (cents > 0));
+CREATE TABLE course_report.periods (label text PRIMARY KEY, start_at timestamptz NOT NULL, end_at timestamptz NOT NULL, CHECK (end_at > start_at));
+INSERT INTO course_report.products VALUES (1, 1200), (2, 600);
+INSERT INTO course_report.orders VALUES (101, '2026-09-30 18:30:00+00', 'paid'), (102, '2026-10-31 18:29:59+00', 'paid'), (103, '2026-10-10 10:00:00+00', 'cancelled'), (104, '2026-10-31 18:30:00+00', 'paid'), (105, '2026-10-15 10:00:00+00', 'pending'), (106, '2026-11-15 10:00:00+00', 'paid');
+INSERT INTO course_report.lines VALUES (1, 101, 1, 1, 1001, 1), (2, 101, 2, 3, 500, 0), (3, 102, 1, 1, 1000, 0), (4, 103, 1, 1, 700, 0), (5, 104, 1, 2, 1000, 0), (6, 105, 1, 1, 400, 0), (7, 106, 1, 2, 1000, 0);
+INSERT INTO course_report.refunds VALUES (1, 101, '2026-11-02 10:00:00+00', 300), (2, 101, '2026-10-20 10:00:00+00', 100);
+INSERT INTO course_report.periods VALUES ('2026-10', '2026-10-01 00:00:00+05:30', '2026-11-01 00:00:00+05:30'), ('2026-11', '2026-11-01 00:00:00+05:30', '2026-12-01 00:00:00+05:30'), ('2026-12', '2026-12-01 00:00:00+05:30', '2027-01-01 00:00:00+05:30');
+CREATE TABLE course_report.accounts (id integer PRIMARY KEY, active boolean NOT NULL);
+CREATE TABLE course_report.usage (id integer PRIMARY KEY, account_id integer NOT NULL REFERENCES course_report.accounts(id), used_at timestamptz NOT NULL, units integer NOT NULL);
+INSERT INTO course_report.accounts VALUES (1, true), (2, true), (3, false);
+INSERT INTO course_report.usage VALUES (1, 1, '2026-10-10 10:00:00+00', 5), (2, 1, '2026-10-20 10:00:00+00', 3), (3, 1, '2026-10-25 10:00:00+00', 4), (4, 2, '2026-11-05 10:00:00+00', 20), (5, 3, '2026-10-15 10:00:00+00', 99);

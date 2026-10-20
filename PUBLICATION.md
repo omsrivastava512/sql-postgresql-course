@@ -10,7 +10,7 @@ The source-study objectives are a minimum baseline, documented in the [author au
 
 ## Current package
 
-Ten article drafts, nine independent labs, and a curriculum of 132 topic groups with explicit evidence and gaps. The onramp, six mechanism-focused lessons and three foundation lessons are useful opening material; further foundations and later routes remain unfinished. All remain drafts.
+Sixteen article drafts, fifteen independent labs, and a curriculum of 132 topic groups with explicit evidence and gaps. The onramp, six mechanism-focused lessons, three foundation lessons and six query/reporting lessons are drafted; further foundations and later routes remain unfinished. All remain drafts.
 
 The [first route](COURSE_MAP.md#the-first-route) remains usable now. The [beginner route](COURSE_MAP.md#the-beginner-route) connects the available foundations and identifies the missing steps. Existing numbers and URLs stay stable.
 
@@ -26,11 +26,26 @@ Drafted 2026-10-20 using the existing article/lab structure. Embedded execution 
 
 For each: provide a worked example before the task, resettable synthetic setup, prediction feedback, accessible hints/solution, a return prompt and evidence-backed inventory updates. Use exact outcomes to keep the lesson short; split a draft if its single main question becomes unmanageable.
 
+## Query and data-handoff batch — 2026-10-20
+
+The second implementation batch is drafted in six connected article/lab pairs:
+
+| Draft | Concrete outcome and changed setting |
+|---|---|
+| [Joins](articles/10-joins.md) | Preserve unmatched customers, distinguish creator/assignee roles; transfer to active club memberships. |
+| [Aggregate grain](articles/11-aggregate-grain.md) | Repair multiplied order totals; transfer to usage and receipts. |
+| [Query shapes](articles/12-query-shapes.md) | Exercise scalar cardinality, existence, sets and CTEs; transfer to workspace events. |
+| [Windows](articles/13-window-questions.md) | Test ties, frames, latest rows and previous values; transfer to meter readings. |
+| [Reusable reports](articles/14-reusable-reports.md) | Define a monthly metric, rerun periods, test refunds and denominators; independently report account usage. |
+| [Data handoff](articles/15-data-handoff.md) | Parse a retained CSV, record rejections, reconcile facts, replay safely under a single-session policy and test conflicting keys. |
+
+Embedded checks passed 252 assertions across fifteen labs. Actual CSV import, replay and export/re-import were separately checked with the embedded engine. These are draft-execution results; local PostgreSQL, hosted and reader trials remain open.
+
 ## Later branches
 
-Next, build joins and grouping around a doubled report total, then introduce a small data handoff and reusable report. Pilot query correctness, concurrency and an operational change before committing to the full production schedule. Record actual reader effort and revise confusing steps; embedded SQL success alone does not validate the teaching. Build ledger views and performance work after their query prerequisites. Then choose from the reader's actual question while respecting prerequisites:
+Next, prototype the concurrency and operational lessons: two callers claiming the last item, and one bounded database change or recovery exercise. The query pilot now has a draft and execution evidence, but no human learning-time or comprehension evidence. Record actual reader effort and revise confusing steps before committing to a production schedule. Continue broader implementation according to prerequisites:
 
-- A dashboard total doubles: joins and grain, then views, windows and query plans.
+- A correct report is slow: query plans and measured index choices, building on the new joins, views and windows.
 - Two people reserve the same resource: transactions, locks, isolation and retry boundaries.
 - A successful request loses its response: idempotency, payload comparison and concurrent duplicate requests.
 - A user logs in but cannot see a row: identity, privileges, RLS, then invoker/definer and full request tracing.

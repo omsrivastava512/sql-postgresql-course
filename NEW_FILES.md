@@ -2,15 +2,15 @@
 
 ## What the files are for
 
-The original package contained 42 files. It now contains 55 after adding the author-only curriculum audit and three article/lab sets; this is a file count, not a lesson count.
+The original package contained 42 files. It now contains 80 after adding the author-only curriculum audit, three foundation article/lab sets and six query/data-handoff sets with a CSV fixture; this is a file count, not a lesson count.
 
 | Files | Purpose | Intended audience |
 |---|---|---|
-| 10 article files | One SQL onramp, six mechanism-focused lessons and three foundation lessons | Readers |
-| 28 lab files | Shared instructions plus nine sets of tasks, setup SQL and solutions | Readers; authors verifying examples |
+| 16 article files | One SQL onramp, six mechanism-focused lessons, three foundation lessons and six query/data-handoff lessons | Readers |
+| 47 lab files | Shared instructions plus fifteen sets of tasks, setup SQL and solutions, with one CSV fixture | Readers; authors verifying examples |
 | 11 top-level Markdown files | Navigation, review, sources, curriculum, authoring and verification records | Mixed; author records are labelled |
 | 6 tooling files | Git ignore rules, package files and three verification files | Maintainers |
-| 55 total | Current source package, excluding Git metadata and installed dependencies | Not 55 lessons |
+| 80 total | Current source package, excluding Git metadata and installed dependencies | Not 80 lessons |
 
 Readers start at the [README](README.md), [course map](COURSE_MAP.md), articles, labs and [review prompts](REVIEW.md). Authors additionally use the [curriculum audit](CURRICULUM_AUDIT.md), teaching guide, publication queue, provenance and verification records. No reader needs the private source application.
 
@@ -96,3 +96,48 @@ This dated record lists the first implementation batch against e652e31. Line loc
 | [labs/README.md](labs/README.md) | 73 |
 | [tests/cases.json](tests/cases.json) | 607–1538 |
 | [NEW_FILES.md](NEW_FILES.md) | 5, 9–10, 13, 69–98 |
+
+## Query and data-handoff delivery on 2026-10-20
+
+This batch adds 25 files and updates 13 against 7cd5dcc. Locations describe this delivery. It adds six article/lab pairs, a CSV fixture, reference checks and connected course records. No commit, push or public release was performed.
+
+| File | Added or updated line locations |
+|---|---|
+| [COURSE_MAP.md](COURSE_MAP.md) | 7, 13, 16–18, 40, 44–45, 99–104, 118–123 |
+| [CURRICULUM_AUDIT.md](CURRICULUM_AUDIT.md) | 21, 24, 27, 43, 83–91 |
+| [NEW_FILES.md](NEW_FILES.md) | 5, 9–10, 13, 99–143 |
+| [PUBLICATION.md](PUBLICATION.md) | 13, 29–43, 46, 48 |
+| [README.md](README.md) | 25–30, 38 |
+| [REVIEW.md](REVIEW.md) | 16–25, 49, 53 |
+| [SOURCES.md](SOURCES.md) | 59–66 |
+| [TOPIC_INVENTORY.md](TOPIC_INVENTORY.md) | 14, 26, 48, 56, 65–67, 71–73, 77–81, 83, 121, 150, 152–154, 156, 160, 183 |
+| [VERIFICATION.md](VERIFICATION.md) | 3, 7, 10, 20–77 |
+| [articles/08-selecting-rows.md](articles/08-selecting-rows.md) | 111 |
+| [articles/09-row-identity.md](articles/09-row-identity.md) | 83–84 |
+| [labs/README.md](labs/README.md) | 73 |
+| [tests/cases.json](tests/cases.json) | 1539–3395 |
+| [articles/10-joins.md](articles/10-joins.md) | 1–62 (new file) |
+| [articles/11-aggregate-grain.md](articles/11-aggregate-grain.md) | 1–102 (new file) |
+| [articles/12-query-shapes.md](articles/12-query-shapes.md) | 1–89 (new file) |
+| [articles/13-window-questions.md](articles/13-window-questions.md) | 1–67 (new file) |
+| [articles/14-reusable-reports.md](articles/14-reusable-reports.md) | 1–79 (new file) |
+| [articles/15-data-handoff.md](articles/15-data-handoff.md) | 1–80 (new file) |
+| [labs/10-joins/README.md](labs/10-joins/README.md) | 1–49 (new file) |
+| [labs/10-joins/setup.sql](labs/10-joins/setup.sql) | 1–14 (new file) |
+| [labs/10-joins/solution.sql](labs/10-joins/solution.sql) | 1–6 (new file) |
+| [labs/11-aggregate-grain/README.md](labs/11-aggregate-grain/README.md) | 1–48 (new file) |
+| [labs/11-aggregate-grain/setup.sql](labs/11-aggregate-grain/setup.sql) | 1–14 (new file) |
+| [labs/11-aggregate-grain/solution.sql](labs/11-aggregate-grain/solution.sql) | 1–12 (new file) |
+| [labs/12-query-shapes/README.md](labs/12-query-shapes/README.md) | 1–41 (new file) |
+| [labs/12-query-shapes/setup.sql](labs/12-query-shapes/setup.sql) | 1–16 (new file) |
+| [labs/12-query-shapes/solution.sql](labs/12-query-shapes/solution.sql) | 1–10 (new file) |
+| [labs/13-window-questions/README.md](labs/13-window-questions/README.md) | 1–46 (new file) |
+| [labs/13-window-questions/setup.sql](labs/13-window-questions/setup.sql) | 1–6 (new file) |
+| [labs/13-window-questions/solution.sql](labs/13-window-questions/solution.sql) | 1–9 (new file) |
+| [labs/14-reusable-reports/README.md](labs/14-reusable-reports/README.md) | 1–62 (new file) |
+| [labs/14-reusable-reports/setup.sql](labs/14-reusable-reports/setup.sql) | 1–16 (new file) |
+| [labs/14-reusable-reports/solution.sql](labs/14-reusable-reports/solution.sql) | 1–35 (new file) |
+| [labs/15-data-handoff/README.md](labs/15-data-handoff/README.md) | 1–70 (new file) |
+| [labs/15-data-handoff/raw-lines.csv](labs/15-data-handoff/raw-lines.csv) | 1–11 (new file) |
+| [labs/15-data-handoff/setup.sql](labs/15-data-handoff/setup.sql) | 1–18 (new file) |
+| [labs/15-data-handoff/solution.sql](labs/15-data-handoff/solution.sql) | 1–39 (new file) |

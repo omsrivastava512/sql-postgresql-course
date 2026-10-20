@@ -1,13 +1,13 @@
 # Verification record
 
-Status: draft. Initial SQL execution dated 2026-10-17 (Asia/Kolkata); documentation audit added 2026-10-19; foundation execution added 2026-10-20.
+Status: draft. Initial SQL execution dated 2026-10-17 (Asia/Kolkata); documentation audit added 2026-10-19; foundation and query/data-handoff execution added 2026-10-20.
 
 | Check | Result |
 |---|---|
-| Embedded PostgreSQL execution | PASS: 149 assertions across 9 labs on PostgreSQL 18.6 / PGlite 0.5.10 (2026-10-20) |
+| Embedded PostgreSQL execution | PASS: 252 assertions across 15 labs on PostgreSQL 18.6 / PGlite 0.5.10 (2026-10-20) |
 | Local Docker PostgreSQL 17.11 | Not run; Docker is not installed on this host |
 | Hosted Supabase | Deferred at the user's request on 2026-10-17; not tested |
-| Local Markdown links, original package | Historical PASS: 161 local links across 24 Markdown files; current revision checked below |
+| Local Markdown links, current package | PASS: 478 local links across 43 Markdown files, including heading targets (2026-10-20) |
 | Author learning trial and editorial revision | Pending |
 | Public publication | Not performed |
 
@@ -16,6 +16,64 @@ The embedded runtime tests SQL behavior only. It cannot establish Docker setup, 
 The six initial labs cover foreign-key failures, role validation and its update gap, derived values and stale copies, delete actions, deferred-check timing, and invoice failure rollback. The test cases also run every successful solution after a fresh setup and exercise setup reset twice.
 
 No test in this package claims to verify concurrent requests, API retries, production authorization, or a deployed clinic schema.
+
+## Query and data-handoff implementation — 2026-10-20
+
+Six new article/lab pairs add joins, aggregate grain, query shapes, windows, reusable reports and a reconciled CSV import. All 252 assertions across fifteen labs passed, including 103 new assertions. The original nine suites are unchanged. Each suite resets setup twice and runs its solution from a fresh setup.
+
+| New suite | Observed behaviour checked | Not established |
+|---|---|---|
+| 10-joins | Inner/outer/cross joins, ON versus WHERE, unmatched rows, creator/assignee roles and active-club transfer | Authorization or join performance |
+| 11-aggregate-grain | Fan-out errors, failed DISTINCT repair, independent summaries, WHERE/HAVING, FILTER, empty aggregates and usage/receipt transfer | Arbitrary reporting correctness |
+| 12-query-shapes | Scalar zero/one/many results, EXISTS/NOT EXISTS, nullable NOT IN, set duplicates, CTE equivalence and workspace transfer | Recursive CTEs or optimizer behaviour |
+| 13-window-questions | Deterministic latest rows, ranking ties, explicit/default frames, LAG and changed meter readings | Concurrent histories or complete window-function coverage |
+| 14-reusable-reports | Explicit month boundaries, weighted averages, historical prices, dated refunds, empty periods, current-account denominators and materialized-view refresh | Accounting policy, historical eligibility, daylight-saving calendars or production financial controls |
+| 15-data-handoff | Guarded conversions, row decisions, accepted totals, replay, distinct event identity and conflicting payload rejection | Concurrent ingestion, append-only audit history or multi-batch recovery |
+
+The six new suites also passed independently in fresh embedded databases, run in reverse order: 103 assertions. This checks their independence from earlier labs. Editorial review corrected a refund that preceded its order; a fixture assertion now checks that relationship.
+
+A separate check loaded the actual CSV through PostgreSQL's parser and matched all ten raw rows to the SQL snapshot, including quoted commas, quotes, NULL and empty text. Processing yielded four facts totalling 5250 cents, replay left those facts unchanged, and an exported CSV re-imported to equal facts. The command below makes that author check repeatable; the normal runner uses the SQL snapshot.
+
+The current package contains 80 source files, sixteen articles and fifteen labs. All 132 topic IDs remain. No dependencies or runner architecture changed. Docker and psql are unavailable on this host; local PostgreSQL 17 and hosted Supabase execution remain unverified. Author/new-reader trials, concurrency and operational pilots remain open. This batch is a verified draft, not a public release or completion of the course.
+
+### Repeat the actual-file check
+
+From the repository root, with the existing pinned dependencies available, run in PowerShell:
+
+```powershell
+$csvCheck = @'
+import assert from 'node:assert/strict';
+import { readFile } from 'node:fs/promises';
+import { PGlite } from '@electric-sql/pglite';
+const db = new PGlite();
+try {
+  const base = 'labs/15-data-handoff/';
+  await db.exec(await readFile(base + 'setup.sql', 'utf8'));
+  const expected = (await db.query('SELECT * FROM course_import.raw_lines ORDER BY line_no')).rows;
+  await db.exec('TRUNCATE course_import.decisions, course_import.raw_lines');
+  await db.query("COPY course_import.raw_lines FROM '/dev/blob' WITH (FORMAT csv, HEADER true)", [], { blob: new Blob([await readFile(base + 'raw-lines.csv')]) });
+  assert.deepEqual((await db.query('SELECT * FROM course_import.raw_lines ORDER BY line_no')).rows, expected);
+  const solution = await readFile(base + 'solution.sql', 'utf8');
+  await db.exec(solution);
+  const facts = (await db.query('SELECT * FROM course_import.facts ORDER BY source_key')).rows;
+  assert.equal(facts.length, 4);
+  assert.deepEqual((await db.query('SELECT SUM(quantity::bigint * unit_cents)::integer AS cents FROM course_import.facts')).rows, [{ cents: 5250 }]);
+  await db.exec(solution);
+  assert.deepEqual((await db.query('SELECT * FROM course_import.facts ORDER BY source_key')).rows, facts);
+  const exported = await db.query("COPY (SELECT * FROM course_import.facts ORDER BY source_key) TO '/dev/blob' WITH (FORMAT csv, HEADER true)");
+  assert.ok(exported.blob);
+  await db.exec('CREATE TABLE course_import.roundtrip (LIKE course_import.facts INCLUDING ALL)');
+  await db.query("COPY course_import.roundtrip FROM '/dev/blob' WITH (FORMAT csv, HEADER true)", [], { blob: exported.blob });
+  assert.deepEqual((await db.query('SELECT * FROM course_import.roundtrip ORDER BY source_key')).rows, facts);
+  console.log('PASS actual CSV import equals 10-row SQL snapshot; accepted 4 facts / 5250 cents; replay unchanged; CSV export/import round trip equal.');
+} finally {
+  await db.close();
+}
+'@
+$csvCheck | node --input-type=module
+```
+
+The /dev/blob route belongs to the embedded runtime. It verifies CSV parsing and SQL processing, not the lab's Docker/psql transport instructions.
 
 ## Foundation implementation — 2026-10-20
 

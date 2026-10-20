@@ -108,6 +108,6 @@ After a gap, explain why a successful query can still be wrong. Name one exclude
 
 **Requires:** [Reading the examples](00-reading-the-examples.md) and [stored values](07-stored-values.md).
 **Next:** read [the foreign-key guarantee](01-foreign-keys.md), then [What identifies this row?](09-row-identity.md), which connects keys with membership relationships.
-**Revisited in:** [planned joins and reporting](../COURSE_MAP.md#the-wider-course), where filtering cannot repair an accidentally multiplied total.
+**Revisited in:** [joins and aggregate grain](11-aggregate-grain.md), where filtering cannot repair an accidentally multiplied total.
 
 **References:** PostgreSQL [table expressions](https://www.postgresql.org/docs/17/queries-table-expressions.html), [sorting](https://www.postgresql.org/docs/17/queries-order.html), [LIMIT/OFFSET](https://www.postgresql.org/docs/17/queries-limit.html), [pattern matching](https://www.postgresql.org/docs/17/functions-matching.html) and [RETURNING](https://www.postgresql.org/docs/17/dml-returning.html).

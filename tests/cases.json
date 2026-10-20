@@ -1536,6 +1536,1863 @@
         ]
       }
     ]
+  },
+  {
+    "lab": "10-joins",
+    "steps": [
+      {
+        "query": "SELECT c.id AS customer_id,o.id AS order_id FROM course_join.customers c JOIN course_join.orders o ON o.customer_id=c.id ORDER BY c.id,o.id",
+        "rows": [
+          {
+            "customer_id": 1,
+            "order_id": 101
+          },
+          {
+            "customer_id": 1,
+            "order_id": 102
+          },
+          {
+            "customer_id": 2,
+            "order_id": 103
+          }
+        ]
+      },
+      {
+        "query": "SELECT c.id AS customer_id,o.id AS order_id FROM course_join.customers c LEFT JOIN course_join.orders o ON o.customer_id=c.id ORDER BY c.id,o.id",
+        "rows": [
+          {
+            "customer_id": 1,
+            "order_id": 101
+          },
+          {
+            "customer_id": 1,
+            "order_id": 102
+          },
+          {
+            "customer_id": 2,
+            "order_id": 103
+          },
+          {
+            "customer_id": 3,
+            "order_id": null
+          }
+        ]
+      },
+      {
+        "query": "SELECT c.id AS customer_id,o.id AS order_id FROM course_join.orders o RIGHT JOIN course_join.customers c ON o.customer_id=c.id ORDER BY c.id,o.id",
+        "rows": [
+          {
+            "customer_id": 1,
+            "order_id": 101
+          },
+          {
+            "customer_id": 1,
+            "order_id": 102
+          },
+          {
+            "customer_id": 2,
+            "order_id": 103
+          },
+          {
+            "customer_id": 3,
+            "order_id": null
+          }
+        ]
+      },
+      {
+        "query": "SELECT c.id AS customer_id,o.id AS order_id FROM course_join.customers c FULL JOIN course_join.orders o ON o.customer_id=c.id ORDER BY c.id NULLS LAST,o.id",
+        "rows": [
+          {
+            "customer_id": 1,
+            "order_id": 101
+          },
+          {
+            "customer_id": 1,
+            "order_id": 102
+          },
+          {
+            "customer_id": 2,
+            "order_id": 103
+          },
+          {
+            "customer_id": 3,
+            "order_id": null
+          },
+          {
+            "customer_id": null,
+            "order_id": 104
+          }
+        ]
+      },
+      {
+        "query": "SELECT COUNT(*)::integer AS count FROM course_join.customers CROSS JOIN course_join.orders",
+        "rows": [
+          {
+            "count": 12
+          }
+        ]
+      },
+      {
+        "query": "SELECT c.id AS customer_id,o.id AS order_id FROM course_join.customers c LEFT JOIN course_join.orders o ON o.customer_id=c.id WHERE o.status='paid' ORDER BY c.id,o.id",
+        "rows": [
+          {
+            "customer_id": 1,
+            "order_id": 101
+          },
+          {
+            "customer_id": 2,
+            "order_id": 103
+          }
+        ]
+      },
+      {
+        "query": "SELECT c.id AS customer_id,o.id AS order_id FROM course_join.customers c LEFT JOIN course_join.orders o ON o.customer_id=c.id AND o.status='paid' ORDER BY c.id,o.id",
+        "rows": [
+          {
+            "customer_id": 1,
+            "order_id": 101
+          },
+          {
+            "customer_id": 2,
+            "order_id": 103
+          },
+          {
+            "customer_id": 3,
+            "order_id": null
+          }
+        ]
+      },
+      {
+        "sql": "INSERT INTO course_join.orders VALUES (105,3,'pending')"
+      },
+      {
+        "query": "SELECT c.id AS customer_id,o.id AS order_id FROM course_join.customers c LEFT JOIN course_join.orders o ON o.customer_id=c.id AND o.status='paid' ORDER BY c.id,o.id",
+        "rows": [
+          {
+            "customer_id": 1,
+            "order_id": 101
+          },
+          {
+            "customer_id": 2,
+            "order_id": 103
+          },
+          {
+            "customer_id": 3,
+            "order_id": null
+          }
+        ]
+      },
+      {
+        "query": "SELECT t.id,c.name AS creator,a.name AS assignee FROM course_join.tickets t JOIN course_join.staff c ON c.id=t.created_by LEFT JOIN course_join.staff a ON a.id=t.assigned_to ORDER BY t.id",
+        "rows": [
+          {
+            "id": 1,
+            "creator": "Asha",
+            "assignee": "Bo"
+          },
+          {
+            "id": 2,
+            "creator": "Asha",
+            "assignee": null
+          }
+        ]
+      },
+      {
+        "query": "SELECT c.id AS club_id,m.id AS membership_id FROM course_join.clubs c LEFT JOIN course_join.memberships m ON m.club_id=c.id AND m.active ORDER BY c.id,m.id",
+        "rows": [
+          {
+            "club_id": 10,
+            "membership_id": 1
+          },
+          {
+            "club_id": 20,
+            "membership_id": null
+          },
+          {
+            "club_id": 30,
+            "membership_id": null
+          }
+        ]
+      },
+      {
+        "query": "SELECT c.id FROM course_join.clubs c LEFT JOIN course_join.memberships m ON m.club_id=c.id AND m.active WHERE m.id IS NULL ORDER BY c.id",
+        "rows": [
+          {
+            "id": 20
+          },
+          {
+            "id": 30
+          }
+        ]
+      },
+      {
+        "sql": "INSERT INTO course_join.memberships VALUES (4,10,true)"
+      },
+      {
+        "query": "SELECT c.id AS club_id,m.id AS membership_id FROM course_join.clubs c LEFT JOIN course_join.memberships m ON m.club_id=c.id AND m.active ORDER BY c.id,m.id",
+        "rows": [
+          {
+            "club_id": 10,
+            "membership_id": 1
+          },
+          {
+            "club_id": 10,
+            "membership_id": 4
+          },
+          {
+            "club_id": 20,
+            "membership_id": null
+          },
+          {
+            "club_id": 30,
+            "membership_id": null
+          }
+        ]
+      },
+      {
+        "query": "SELECT c.id FROM course_join.clubs c LEFT JOIN course_join.memberships m ON m.club_id=c.id AND m.active WHERE m.id IS NULL ORDER BY c.id",
+        "rows": [
+          {
+            "id": 20
+          },
+          {
+            "id": 30
+          }
+        ]
+      }
+    ],
+    "solution": [
+      {
+        "query": "SELECT c.id AS customer_id,o.id AS order_id FROM course_join.customers c LEFT JOIN course_join.orders o ON o.customer_id=c.id AND o.status='paid' ORDER BY c.id,o.id",
+        "rows": [
+          {
+            "customer_id": 1,
+            "order_id": 101
+          },
+          {
+            "customer_id": 2,
+            "order_id": 103
+          },
+          {
+            "customer_id": 3,
+            "order_id": null
+          }
+        ]
+      },
+      {
+        "query": "SELECT c.id AS club_id,m.id AS membership_id FROM course_join.clubs c LEFT JOIN course_join.memberships m ON m.club_id=c.id AND m.active ORDER BY c.id,m.id",
+        "rows": [
+          {
+            "club_id": 10,
+            "membership_id": 1
+          },
+          {
+            "club_id": 20,
+            "membership_id": null
+          },
+          {
+            "club_id": 30,
+            "membership_id": null
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "lab": "11-aggregate-grain",
+    "steps": [
+      {
+        "query": "SELECT l.id AS line,p.id AS payment FROM course_totals.lines l JOIN course_totals.payments p ON p.order_id=l.order_id WHERE l.order_id=101 ORDER BY l.id,p.id",
+        "rows": [
+          {
+            "line": 1,
+            "payment": 1
+          },
+          {
+            "line": 1,
+            "payment": 2
+          },
+          {
+            "line": 1,
+            "payment": 3
+          },
+          {
+            "line": 2,
+            "payment": 1
+          },
+          {
+            "line": 2,
+            "payment": 2
+          },
+          {
+            "line": 2,
+            "payment": 3
+          }
+        ]
+      },
+      {
+        "query": "SELECT COUNT(*)::integer AS rows,SUM(l.quantity*l.unit_cents)::integer AS lines,SUM(CASE WHEN p.kind='refund' THEN -p.cents ELSE p.cents END)::integer AS payments FROM course_totals.lines l JOIN course_totals.payments p ON p.order_id=l.order_id WHERE l.order_id=101",
+        "rows": [
+          {
+            "rows": 6,
+            "lines": 6000,
+            "payments": 3000
+          }
+        ]
+      },
+      {
+        "query": "SELECT SUM(DISTINCT quantity*unit_cents)::integer AS cents FROM course_totals.lines WHERE order_id=101",
+        "rows": [
+          {
+            "cents": 1000
+          }
+        ]
+      },
+      {
+        "query": "SELECT o.id,COALESCE(l.cents,0)::integer AS lines,COALESCE(p.cents,0)::integer AS payments FROM course_totals.orders o LEFT JOIN (SELECT order_id,SUM(quantity*unit_cents) AS cents FROM course_totals.lines GROUP BY order_id) l ON l.order_id=o.id LEFT JOIN (SELECT order_id,SUM(CASE WHEN kind='refund' THEN -cents ELSE cents END) AS cents FROM course_totals.payments GROUP BY order_id) p ON p.order_id=o.id ORDER BY o.id",
+        "rows": [
+          {
+            "id": 101,
+            "lines": 2000,
+            "payments": 1500
+          },
+          {
+            "id": 102,
+            "lines": 500,
+            "payments": 0
+          },
+          {
+            "id": 103,
+            "lines": 3000,
+            "payments": 3000
+          },
+          {
+            "id": 104,
+            "lines": 700,
+            "payments": 700
+          },
+          {
+            "id": 105,
+            "lines": 0,
+            "payments": 0
+          }
+        ]
+      },
+      {
+        "sql": "SELECT order_id,SUM(quantity*unit_cents) FROM course_totals.lines WHERE SUM(quantity*unit_cents)>=2000 GROUP BY order_id",
+        "error": "42803"
+      },
+      {
+        "query": "SELECT order_id,SUM(quantity*unit_cents)::integer AS cents FROM course_totals.lines GROUP BY order_id HAVING SUM(quantity*unit_cents)>=2000 ORDER BY order_id",
+        "rows": [
+          {
+            "order_id": 101,
+            "cents": 2000
+          },
+          {
+            "order_id": 103,
+            "cents": 3000
+          }
+        ]
+      },
+      {
+        "query": "SELECT order_id,(SUM(cents) FILTER (WHERE kind='capture'))::integer AS captured,(SUM(cents) FILTER (WHERE kind='refund'))::integer AS refunded FROM course_totals.payments GROUP BY order_id ORDER BY order_id",
+        "rows": [
+          {
+            "order_id": 101,
+            "captured": 2000,
+            "refunded": 500
+          },
+          {
+            "order_id": 103,
+            "captured": 3000,
+            "refunded": null
+          },
+          {
+            "order_id": 104,
+            "captured": 700,
+            "refunded": null
+          }
+        ]
+      },
+      {
+        "query": "SELECT COUNT(*)::integer AS rows,COUNT(l.id)::integer AS lines,SUM(l.quantity*l.unit_cents)::integer AS cents FROM course_totals.orders o LEFT JOIN course_totals.lines l ON l.order_id=o.id WHERE o.id=105",
+        "rows": [
+          {
+            "rows": 1,
+            "lines": 0,
+            "cents": null
+          }
+        ]
+      },
+      {
+        "query": "SELECT COUNT(*)::integer AS rows,SUM(quantity*unit_cents)::integer AS cents FROM course_totals.lines WHERE order_id=999",
+        "rows": [
+          {
+            "rows": 0,
+            "cents": null
+          }
+        ]
+      },
+      {
+        "sql": "INSERT INTO course_totals.payments VALUES (6,101,'capture',100)"
+      },
+      {
+        "query": "SELECT o.id,COALESCE(l.cents,0)::integer AS lines,COALESCE(p.cents,0)::integer AS payments FROM course_totals.orders o LEFT JOIN (SELECT order_id,SUM(quantity*unit_cents) AS cents FROM course_totals.lines GROUP BY order_id) l ON l.order_id=o.id LEFT JOIN (SELECT order_id,SUM(CASE WHEN kind='refund' THEN -cents ELSE cents END) AS cents FROM course_totals.payments GROUP BY order_id) p ON p.order_id=o.id ORDER BY o.id",
+        "rows": [
+          {
+            "id": 101,
+            "lines": 2000,
+            "payments": 1600
+          },
+          {
+            "id": 102,
+            "lines": 500,
+            "payments": 0
+          },
+          {
+            "id": 103,
+            "lines": 3000,
+            "payments": 3000
+          },
+          {
+            "id": 104,
+            "lines": 700,
+            "payments": 700
+          },
+          {
+            "id": 105,
+            "lines": 0,
+            "payments": 0
+          }
+        ]
+      },
+      {
+        "query": "SELECT a.id,COALESCE(u.units,0)::integer AS units,COALESCE(r.cents,0)::integer AS cents FROM course_totals.accounts a LEFT JOIN (SELECT account_id,SUM(units) AS units FROM course_totals.usage GROUP BY account_id) u ON u.account_id=a.id LEFT JOIN (SELECT account_id,SUM(cents) AS cents FROM course_totals.receipts GROUP BY account_id) r ON r.account_id=a.id ORDER BY a.id",
+        "rows": [
+          {
+            "id": 1,
+            "units": 5,
+            "cents": 300
+          },
+          {
+            "id": 2,
+            "units": 4,
+            "cents": 0
+          }
+        ]
+      },
+      {
+        "sql": "INSERT INTO course_totals.accounts VALUES (3)"
+      },
+      {
+        "query": "SELECT a.id,COALESCE(u.units,0)::integer AS units,COALESCE(r.cents,0)::integer AS cents FROM course_totals.accounts a LEFT JOIN (SELECT account_id,SUM(units) AS units FROM course_totals.usage GROUP BY account_id) u ON u.account_id=a.id LEFT JOIN (SELECT account_id,SUM(cents) AS cents FROM course_totals.receipts GROUP BY account_id) r ON r.account_id=a.id ORDER BY a.id",
+        "rows": [
+          {
+            "id": 1,
+            "units": 5,
+            "cents": 300
+          },
+          {
+            "id": 2,
+            "units": 4,
+            "cents": 0
+          },
+          {
+            "id": 3,
+            "units": 0,
+            "cents": 0
+          }
+        ]
+      }
+    ],
+    "solution": [
+      {
+        "query": "SELECT o.id,COALESCE(l.cents,0)::integer AS lines,COALESCE(p.cents,0)::integer AS payments FROM course_totals.orders o LEFT JOIN (SELECT order_id,SUM(quantity*unit_cents) AS cents FROM course_totals.lines GROUP BY order_id) l ON l.order_id=o.id LEFT JOIN (SELECT order_id,SUM(CASE WHEN kind='refund' THEN -cents ELSE cents END) AS cents FROM course_totals.payments GROUP BY order_id) p ON p.order_id=o.id ORDER BY o.id",
+        "rows": [
+          {
+            "id": 101,
+            "lines": 2000,
+            "payments": 1500
+          },
+          {
+            "id": 102,
+            "lines": 500,
+            "payments": 0
+          },
+          {
+            "id": 103,
+            "lines": 3000,
+            "payments": 3000
+          },
+          {
+            "id": 104,
+            "lines": 700,
+            "payments": 700
+          },
+          {
+            "id": 105,
+            "lines": 0,
+            "payments": 0
+          }
+        ]
+      },
+      {
+        "query": "SELECT a.id,COALESCE(u.units,0)::integer AS units,COALESCE(r.cents,0)::integer AS cents FROM course_totals.accounts a LEFT JOIN (SELECT account_id,SUM(units) AS units FROM course_totals.usage GROUP BY account_id) u ON u.account_id=a.id LEFT JOIN (SELECT account_id,SUM(cents) AS cents FROM course_totals.receipts GROUP BY account_id) r ON r.account_id=a.id ORDER BY a.id",
+        "rows": [
+          {
+            "id": 1,
+            "units": 5,
+            "cents": 300
+          },
+          {
+            "id": 2,
+            "units": 4,
+            "cents": 0
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "lab": "12-query-shapes",
+    "steps": [
+      {
+        "query": "SELECT (SELECT address FROM course_shape.contacts WHERE account_id=3) AS address",
+        "rows": [
+          {
+            "address": null
+          }
+        ]
+      },
+      {
+        "query": "SELECT (SELECT address FROM course_shape.contacts WHERE account_id=2) AS address",
+        "rows": [
+          {
+            "address": "bo"
+          }
+        ]
+      },
+      {
+        "sql": "SELECT (SELECT address FROM course_shape.contacts WHERE account_id=1)",
+        "error": "21000"
+      },
+      {
+        "sql": "SELECT (SELECT id,address FROM course_shape.contacts WHERE account_id=2)",
+        "error": "42601"
+      },
+      {
+        "query": "SELECT a.id,(SELECT address FROM course_shape.contacts c WHERE c.account_id=a.id ORDER BY c.id DESC LIMIT 1) AS address FROM course_shape.accounts a ORDER BY a.id",
+        "rows": [
+          {
+            "id": 1,
+            "address": "beta"
+          },
+          {
+            "id": 2,
+            "address": "bo"
+          },
+          {
+            "id": 3,
+            "address": null
+          }
+        ]
+      },
+      {
+        "sql": "INSERT INTO course_shape.contacts VALUES (4,1,'gamma')"
+      },
+      {
+        "query": "SELECT (SELECT address FROM course_shape.contacts WHERE account_id=1 ORDER BY id DESC LIMIT 1) AS address",
+        "rows": [
+          {
+            "address": "gamma"
+          }
+        ]
+      },
+      {
+        "query": "SELECT a.id FROM course_shape.accounts a WHERE EXISTS (SELECT 1 FROM course_shape.orders o WHERE o.account_id=a.id AND o.status='paid') ORDER BY a.id",
+        "rows": [
+          {
+            "id": 1
+          },
+          {
+            "id": 2
+          }
+        ]
+      },
+      {
+        "query": "SELECT a.id FROM course_shape.accounts a WHERE NOT EXISTS (SELECT 1 FROM course_shape.orders o WHERE o.account_id=a.id) ORDER BY a.id",
+        "rows": [
+          {
+            "id": 3
+          }
+        ]
+      },
+      {
+        "query": "SELECT id FROM course_shape.accounts WHERE id NOT IN (SELECT account_id FROM course_shape.orders)",
+        "rows": []
+      },
+      {
+        "sql": "INSERT INTO course_shape.orders VALUES (15,1,'paid',80)"
+      },
+      {
+        "query": "SELECT a.id FROM course_shape.accounts a WHERE EXISTS (SELECT 1 FROM course_shape.orders o WHERE o.account_id=a.id AND o.status='paid') ORDER BY a.id",
+        "rows": [
+          {
+            "id": 1
+          },
+          {
+            "id": 2
+          }
+        ]
+      },
+      {
+        "reset": true
+      },
+      {
+        "query": "SELECT customer_id FROM course_shape.online UNION SELECT customer_id FROM course_shape.store ORDER BY customer_id",
+        "rows": [
+          {
+            "customer_id": 1
+          },
+          {
+            "customer_id": 2
+          },
+          {
+            "customer_id": 3
+          }
+        ]
+      },
+      {
+        "query": "SELECT customer_id FROM course_shape.online UNION ALL SELECT customer_id FROM course_shape.store ORDER BY customer_id",
+        "rows": [
+          {
+            "customer_id": 1
+          },
+          {
+            "customer_id": 1
+          },
+          {
+            "customer_id": 1
+          },
+          {
+            "customer_id": 2
+          },
+          {
+            "customer_id": 3
+          }
+        ]
+      },
+      {
+        "query": "SELECT customer_id FROM course_shape.online INTERSECT SELECT customer_id FROM course_shape.store ORDER BY customer_id",
+        "rows": [
+          {
+            "customer_id": 1
+          }
+        ]
+      },
+      {
+        "query": "SELECT customer_id FROM course_shape.online EXCEPT SELECT customer_id FROM course_shape.store ORDER BY customer_id",
+        "rows": [
+          {
+            "customer_id": 2
+          }
+        ]
+      },
+      {
+        "query": "SELECT DISTINCT customer_id FROM course_shape.online ORDER BY customer_id",
+        "rows": [
+          {
+            "customer_id": 1
+          },
+          {
+            "customer_id": 2
+          }
+        ]
+      },
+      {
+        "sql": "SELECT customer_id FROM course_shape.online UNION SELECT customer_id,customer_id FROM course_shape.store",
+        "error": "42601"
+      },
+      {
+        "query": "WITH totals AS (SELECT account_id,SUM(cents) AS cents FROM course_shape.orders GROUP BY account_id) SELECT a.id,COALESCE(t.cents,0)::integer AS cents FROM course_shape.accounts a LEFT JOIN totals t ON t.account_id=a.id ORDER BY a.id",
+        "rows": [
+          {
+            "id": 1,
+            "cents": 300
+          },
+          {
+            "id": 2,
+            "cents": 50
+          },
+          {
+            "id": 3,
+            "cents": 0
+          }
+        ]
+      },
+      {
+        "query": "SELECT a.id,COALESCE(t.cents,0)::integer AS cents FROM course_shape.accounts a LEFT JOIN (SELECT account_id,SUM(cents) AS cents FROM course_shape.orders GROUP BY account_id) t ON t.account_id=a.id ORDER BY a.id",
+        "rows": [
+          {
+            "id": 1,
+            "cents": 300
+          },
+          {
+            "id": 2,
+            "cents": 50
+          },
+          {
+            "id": 3,
+            "cents": 0
+          }
+        ]
+      },
+      {
+        "query": "SELECT w.id FROM course_shape.workspaces w WHERE NOT EXISTS (SELECT 1 FROM course_shape.events e WHERE e.workspace_id=w.id AND e.status='success') ORDER BY w.id",
+        "rows": [
+          {
+            "id": 2
+          },
+          {
+            "id": 3
+          }
+        ]
+      },
+      {
+        "query": "SELECT w.id FROM course_shape.workspaces w WHERE NOT EXISTS (SELECT 1 FROM course_shape.events e WHERE e.workspace_id=w.id) ORDER BY w.id",
+        "rows": [
+          {
+            "id": 3
+          }
+        ]
+      },
+      {
+        "sql": "INSERT INTO course_shape.events VALUES (5,2,'success')"
+      },
+      {
+        "query": "SELECT w.id FROM course_shape.workspaces w WHERE NOT EXISTS (SELECT 1 FROM course_shape.events e WHERE e.workspace_id=w.id AND e.status='success') ORDER BY w.id",
+        "rows": [
+          {
+            "id": 3
+          }
+        ]
+      }
+    ],
+    "solution": [
+      {
+        "query": "SELECT a.id FROM course_shape.accounts a WHERE EXISTS (SELECT 1 FROM course_shape.orders o WHERE o.account_id=a.id AND o.status='paid') ORDER BY a.id",
+        "rows": [
+          {
+            "id": 1
+          },
+          {
+            "id": 2
+          }
+        ]
+      },
+      {
+        "query": "SELECT w.id FROM course_shape.workspaces w WHERE NOT EXISTS (SELECT 1 FROM course_shape.events e WHERE e.workspace_id=w.id AND e.status='success') ORDER BY w.id",
+        "rows": [
+          {
+            "id": 2
+          },
+          {
+            "id": 3
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "lab": "13-window-questions",
+    "steps": [
+      {
+        "query": "SELECT id,(SUM(cents) OVER (PARTITION BY account_id ORDER BY charged_on,id ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW))::integer AS total FROM course_window.charges ORDER BY id",
+        "rows": [
+          {
+            "id": 1,
+            "total": 100
+          },
+          {
+            "id": 2,
+            "total": 300
+          },
+          {
+            "id": 3,
+            "total": 500
+          },
+          {
+            "id": 4,
+            "total": 450
+          },
+          {
+            "id": 5,
+            "total": 300
+          }
+        ]
+      },
+      {
+        "query": "SELECT id,(SUM(cents) OVER (PARTITION BY account_id ORDER BY charged_on))::integer AS total FROM course_window.charges ORDER BY id",
+        "rows": [
+          {
+            "id": 1,
+            "total": 100
+          },
+          {
+            "id": 2,
+            "total": 500
+          },
+          {
+            "id": 3,
+            "total": 500
+          },
+          {
+            "id": 4,
+            "total": 450
+          },
+          {
+            "id": 5,
+            "total": 300
+          }
+        ]
+      },
+      {
+        "query": "WITH n AS (SELECT *,ROW_NUMBER() OVER (PARTITION BY account_id ORDER BY charged_on DESC,id DESC) AS position FROM course_window.charges) SELECT account_id,id,cents FROM n WHERE position=1 ORDER BY account_id",
+        "rows": [
+          {
+            "account_id": 1,
+            "id": 4,
+            "cents": -50
+          },
+          {
+            "account_id": 2,
+            "id": 5,
+            "cents": 300
+          }
+        ]
+      },
+      {
+        "query": "SELECT DISTINCT ON (account_id) account_id,id,cents FROM course_window.charges ORDER BY account_id,charged_on DESC,id DESC",
+        "rows": [
+          {
+            "account_id": 1,
+            "id": 4,
+            "cents": -50
+          },
+          {
+            "account_id": 2,
+            "id": 5,
+            "cents": 300
+          }
+        ]
+      },
+      {
+        "sql": "SELECT id FROM course_window.charges WHERE ROW_NUMBER() OVER (PARTITION BY account_id ORDER BY id)=1",
+        "error": "42P20"
+      },
+      {
+        "query": "SELECT id,(RANK() OVER (PARTITION BY account_id ORDER BY cents DESC))::integer AS rank,(DENSE_RANK() OVER (PARTITION BY account_id ORDER BY cents DESC))::integer AS dense FROM course_window.charges ORDER BY id",
+        "rows": [
+          {
+            "id": 1,
+            "rank": 3,
+            "dense": 2
+          },
+          {
+            "id": 2,
+            "rank": 1,
+            "dense": 1
+          },
+          {
+            "id": 3,
+            "rank": 1,
+            "dense": 1
+          },
+          {
+            "id": 4,
+            "rank": 4,
+            "dense": 3
+          },
+          {
+            "id": 5,
+            "rank": 1,
+            "dense": 1
+          }
+        ]
+      },
+      {
+        "query": "WITH r AS (SELECT *,RANK() OVER (PARTITION BY account_id ORDER BY cents DESC) AS position FROM course_window.charges) SELECT id FROM r WHERE position=1 ORDER BY id",
+        "rows": [
+          {
+            "id": 2
+          },
+          {
+            "id": 3
+          },
+          {
+            "id": 5
+          }
+        ]
+      },
+      {
+        "query": "SELECT id,cents-LAG(cents) OVER (PARTITION BY account_id ORDER BY charged_on,id) AS change FROM course_window.charges ORDER BY id",
+        "rows": [
+          {
+            "id": 1,
+            "change": null
+          },
+          {
+            "id": 2,
+            "change": 100
+          },
+          {
+            "id": 3,
+            "change": 0
+          },
+          {
+            "id": 4,
+            "change": -250
+          },
+          {
+            "id": 5,
+            "change": null
+          }
+        ]
+      },
+      {
+        "sql": "INSERT INTO course_window.charges VALUES (6,1,'2026-10-03',75)"
+      },
+      {
+        "query": "WITH n AS (SELECT *,ROW_NUMBER() OVER (PARTITION BY account_id ORDER BY charged_on DESC,id DESC) AS position FROM course_window.charges) SELECT account_id,id,cents FROM n WHERE position=1 ORDER BY account_id",
+        "rows": [
+          {
+            "account_id": 1,
+            "id": 6,
+            "cents": 75
+          },
+          {
+            "account_id": 2,
+            "id": 5,
+            "cents": 300
+          }
+        ]
+      },
+      {
+        "query": "SELECT id,(SUM(cents) OVER (PARTITION BY account_id ORDER BY charged_on,id ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW))::integer AS total FROM course_window.charges ORDER BY id",
+        "rows": [
+          {
+            "id": 1,
+            "total": 100
+          },
+          {
+            "id": 2,
+            "total": 300
+          },
+          {
+            "id": 3,
+            "total": 500
+          },
+          {
+            "id": 4,
+            "total": 450
+          },
+          {
+            "id": 5,
+            "total": 300
+          },
+          {
+            "id": 6,
+            "total": 525
+          }
+        ]
+      },
+      {
+        "query": "SELECT id,reading-LAG(reading) OVER (PARTITION BY meter ORDER BY read_on,id) AS used FROM course_window.readings ORDER BY id",
+        "rows": [
+          {
+            "id": 1,
+            "used": null
+          },
+          {
+            "id": 2,
+            "used": 3
+          },
+          {
+            "id": 3,
+            "used": 0
+          },
+          {
+            "id": 4,
+            "used": 4
+          },
+          {
+            "id": 5,
+            "used": null
+          }
+        ]
+      },
+      {
+        "query": "WITH n AS (SELECT *,ROW_NUMBER() OVER (PARTITION BY meter ORDER BY read_on DESC,id DESC) AS position FROM course_window.readings) SELECT meter,reading FROM n WHERE position=1 ORDER BY meter",
+        "rows": [
+          {
+            "meter": "A",
+            "reading": 17
+          },
+          {
+            "meter": "B",
+            "reading": 5
+          }
+        ]
+      },
+      {
+        "sql": "INSERT INTO course_window.readings VALUES (6,'A','2026-10-04',2)"
+      },
+      {
+        "query": "WITH n AS (SELECT *,ROW_NUMBER() OVER (PARTITION BY meter ORDER BY read_on DESC,id DESC) AS position FROM course_window.readings) SELECT meter,reading FROM n WHERE position=1 ORDER BY meter",
+        "rows": [
+          {
+            "meter": "A",
+            "reading": 2
+          },
+          {
+            "meter": "B",
+            "reading": 5
+          }
+        ]
+      },
+      {
+        "query": "WITH d AS (SELECT id,reading-LAG(reading) OVER (PARTITION BY meter ORDER BY read_on,id) AS used FROM course_window.readings) SELECT used FROM d WHERE id=6",
+        "rows": [
+          {
+            "used": -15
+          }
+        ]
+      }
+    ],
+    "solution": [
+      {
+        "query": "WITH n AS (SELECT *,ROW_NUMBER() OVER (PARTITION BY account_id ORDER BY charged_on DESC,id DESC) AS position FROM course_window.charges) SELECT account_id,id,cents FROM n WHERE position=1 ORDER BY account_id",
+        "rows": [
+          {
+            "account_id": 1,
+            "id": 4,
+            "cents": -50
+          },
+          {
+            "account_id": 2,
+            "id": 5,
+            "cents": 300
+          }
+        ]
+      },
+      {
+        "query": "WITH n AS (SELECT *,ROW_NUMBER() OVER (PARTITION BY meter ORDER BY read_on DESC,id DESC) AS position FROM course_window.readings) SELECT meter,reading FROM n WHERE position=1 ORDER BY meter",
+        "rows": [
+          {
+            "meter": "A",
+            "reading": 17
+          },
+          {
+            "meter": "B",
+            "reading": 5
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "lab": "14-reusable-reports",
+    "steps": [
+      {
+        "query": "SELECT r.id FROM course_report.refunds r JOIN course_report.orders o ON o.id = r.order_id WHERE r.refunded_at < o.placed_at ORDER BY r.id",
+        "rows": []
+      },
+      {
+        "sql": "CREATE VIEW course_report.order_amounts AS\nSELECT o.id, o.placed_at, o.status, SUM(l.quantity) AS units, SUM(l.quantity::bigint * l.unit_cents - l.discount_cents) AS sale_cents\nFROM course_report.orders o JOIN course_report.lines l ON l.order_id = o.id\nGROUP BY o.id, o.placed_at, o.status;\nCREATE VIEW course_report.monthly_sales AS\nWITH sales AS (\n  SELECT p.label, COUNT(o.id) AS order_count, COALESCE(SUM(o.units), 0) AS units, COALESCE(SUM(o.sale_cents), 0) AS sale_cents\n  FROM course_report.periods p LEFT JOIN course_report.order_amounts o ON o.status = 'paid' AND o.placed_at >= p.start_at AND o.placed_at < p.end_at\n  GROUP BY p.label\n), refunds AS (\n  SELECT p.label, COALESCE(SUM(r.cents), 0) AS refund_cents\n  FROM course_report.periods p LEFT JOIN (\n    SELECT r.refunded_at, r.cents FROM course_report.refunds r JOIN course_report.orders o ON o.id = r.order_id WHERE o.status = 'paid'\n  ) r ON r.refunded_at >= p.start_at AND r.refunded_at < p.end_at\n  GROUP BY p.label\n)\nSELECT s.label, s.order_count, s.units, s.sale_cents, r.refund_cents, s.sale_cents - r.refund_cents AS net_cents,\n       ROUND(s.sale_cents::numeric / NULLIF(s.units, 0), 2) AS average_unit_cents\nFROM sales s JOIN refunds r ON r.label = s.label;\nCREATE VIEW course_report.monthly_usage AS\nWITH per_account AS (\n  SELECT p.label, a.id, COALESCE(SUM(u.units), 0) AS units\n  FROM course_report.periods p CROSS JOIN course_report.accounts a\n  LEFT JOIN course_report.usage u ON u.account_id = a.id AND u.used_at >= p.start_at AND u.used_at < p.end_at\n  WHERE a.active\n  GROUP BY p.label, a.id\n)\nSELECT label, COUNT(*) AS active_accounts, SUM(units) AS units, ROUND(AVG(units), 2) AS average_units FROM per_account GROUP BY label;\nSELECT * FROM course_report.monthly_sales ORDER BY label;\nSELECT * FROM course_report.monthly_usage ORDER BY label;\nWITH ranked AS (\n  SELECT p.label, o.id, o.sale_cents, RANK() OVER (PARTITION BY p.label ORDER BY o.sale_cents DESC) AS position\n  FROM course_report.periods p JOIN course_report.order_amounts o ON o.status = 'paid' AND o.placed_at >= p.start_at AND o.placed_at < p.end_at\n)\nSELECT label, id, sale_cents FROM ranked WHERE position = 1 ORDER BY label, id;\n"
+      },
+      {
+        "query": "SELECT label,order_count::integer AS orders,units::integer AS units,sale_cents::integer AS sales,refund_cents::integer AS refunds,net_cents::integer AS net,average_unit_cents::text AS average FROM course_report.monthly_sales ORDER BY label",
+        "rows": [
+          {
+            "label": "2026-10",
+            "orders": 2,
+            "units": 5,
+            "sales": 3500,
+            "refunds": 100,
+            "net": 3400,
+            "average": "700.00"
+          },
+          {
+            "label": "2026-11",
+            "orders": 2,
+            "units": 4,
+            "sales": 4000,
+            "refunds": 300,
+            "net": 3700,
+            "average": "1000.00"
+          },
+          {
+            "label": "2026-12",
+            "orders": 0,
+            "units": 0,
+            "sales": 0,
+            "refunds": 0,
+            "net": 0,
+            "average": null
+          }
+        ]
+      },
+      {
+        "query": "SELECT label,active_accounts::integer AS accounts,units::integer AS units,average_units::text AS average FROM course_report.monthly_usage ORDER BY label",
+        "rows": [
+          {
+            "label": "2026-10",
+            "accounts": 2,
+            "units": 12,
+            "average": "6.00"
+          },
+          {
+            "label": "2026-11",
+            "accounts": 2,
+            "units": 20,
+            "average": "10.00"
+          },
+          {
+            "label": "2026-12",
+            "accounts": 2,
+            "units": 0,
+            "average": "0.00"
+          }
+        ]
+      },
+      {
+        "query": "SELECT p.label,o.id FROM course_report.periods p JOIN course_report.orders o ON o.placed_at>=p.start_at AND o.placed_at<p.end_at WHERE o.id IN (101,102,104) ORDER BY o.id",
+        "rows": [
+          {
+            "label": "2026-10",
+            "id": 101
+          },
+          {
+            "label": "2026-10",
+            "id": 102
+          },
+          {
+            "label": "2026-11",
+            "id": 104
+          }
+        ]
+      },
+      {
+        "query": "SELECT p.label FROM course_report.periods p JOIN course_report.orders o ON o.placed_at BETWEEN p.start_at AND p.end_at WHERE o.id=104 ORDER BY p.label",
+        "rows": [
+          {
+            "label": "2026-10"
+          },
+          {
+            "label": "2026-11"
+          }
+        ]
+      },
+      {
+        "query": "SELECT id,units::integer AS units,sale_cents::integer AS cents FROM course_report.order_amounts WHERE id=101",
+        "rows": [
+          {
+            "id": 101,
+            "units": 4,
+            "cents": 2500
+          }
+        ]
+      },
+      {
+        "query": "SELECT ROUND(AVG((l.quantity::bigint*l.unit_cents-l.discount_cents)::numeric/l.quantity),2)::text AS wrong_average FROM course_report.lines l JOIN course_report.orders o ON o.id=l.order_id JOIN course_report.periods p ON o.placed_at>=p.start_at AND o.placed_at<p.end_at WHERE o.status='paid' AND p.label='2026-10'",
+        "rows": [
+          {
+            "wrong_average": "833.33"
+          }
+        ]
+      },
+      {
+        "query": "WITH ranked AS (SELECT p.label,o.id,o.sale_cents,RANK() OVER (PARTITION BY p.label ORDER BY o.sale_cents DESC) AS position FROM course_report.periods p JOIN course_report.order_amounts o ON o.status='paid' AND o.placed_at>=p.start_at AND o.placed_at<p.end_at) SELECT label,id,sale_cents::integer AS cents FROM ranked WHERE position=1 ORDER BY label,id",
+        "rows": [
+          {
+            "label": "2026-10",
+            "id": 101,
+            "cents": 2500
+          },
+          {
+            "label": "2026-11",
+            "id": 104,
+            "cents": 2000
+          },
+          {
+            "label": "2026-11",
+            "id": 106,
+            "cents": 2000
+          }
+        ]
+      },
+      {
+        "sql": "SET TIME ZONE 'UTC'"
+      },
+      {
+        "query": "SELECT label,order_count::integer AS orders,units::integer AS units,sale_cents::integer AS sales,refund_cents::integer AS refunds,net_cents::integer AS net,average_unit_cents::text AS average FROM course_report.monthly_sales ORDER BY label",
+        "rows": [
+          {
+            "label": "2026-10",
+            "orders": 2,
+            "units": 5,
+            "sales": 3500,
+            "refunds": 100,
+            "net": 3400,
+            "average": "700.00"
+          },
+          {
+            "label": "2026-11",
+            "orders": 2,
+            "units": 4,
+            "sales": 4000,
+            "refunds": 300,
+            "net": 3700,
+            "average": "1000.00"
+          },
+          {
+            "label": "2026-12",
+            "orders": 0,
+            "units": 0,
+            "sales": 0,
+            "refunds": 0,
+            "net": 0,
+            "average": null
+          }
+        ]
+      },
+      {
+        "sql": "SET TIME ZONE 'Asia/Kolkata'"
+      },
+      {
+        "query": "SELECT label,order_count::integer AS orders,units::integer AS units,sale_cents::integer AS sales,refund_cents::integer AS refunds,net_cents::integer AS net,average_unit_cents::text AS average FROM course_report.monthly_sales ORDER BY label",
+        "rows": [
+          {
+            "label": "2026-10",
+            "orders": 2,
+            "units": 5,
+            "sales": 3500,
+            "refunds": 100,
+            "net": 3400,
+            "average": "700.00"
+          },
+          {
+            "label": "2026-11",
+            "orders": 2,
+            "units": 4,
+            "sales": 4000,
+            "refunds": 300,
+            "net": 3700,
+            "average": "1000.00"
+          },
+          {
+            "label": "2026-12",
+            "orders": 0,
+            "units": 0,
+            "sales": 0,
+            "refunds": 0,
+            "net": 0,
+            "average": null
+          }
+        ]
+      },
+      {
+        "sql": "RESET TIME ZONE"
+      },
+      {
+        "sql": "UPDATE course_report.products SET current_cents=99999 WHERE id=1"
+      },
+      {
+        "query": "SELECT label,order_count::integer AS orders,units::integer AS units,sale_cents::integer AS sales,refund_cents::integer AS refunds,net_cents::integer AS net,average_unit_cents::text AS average FROM course_report.monthly_sales ORDER BY label",
+        "rows": [
+          {
+            "label": "2026-10",
+            "orders": 2,
+            "units": 5,
+            "sales": 3500,
+            "refunds": 100,
+            "net": 3400,
+            "average": "700.00"
+          },
+          {
+            "label": "2026-11",
+            "orders": 2,
+            "units": 4,
+            "sales": 4000,
+            "refunds": 300,
+            "net": 3700,
+            "average": "1000.00"
+          },
+          {
+            "label": "2026-12",
+            "orders": 0,
+            "units": 0,
+            "sales": 0,
+            "refunds": 0,
+            "net": 0,
+            "average": null
+          }
+        ]
+      },
+      {
+        "sql": "INSERT INTO course_report.lines VALUES (99,101,1,1,100,101)",
+        "error": "23514"
+      },
+      {
+        "sql": "INSERT INTO course_report.periods VALUES ('2027-01','2027-01-01 00:00:00+05:30','2027-02-01 00:00:00+05:30'); INSERT INTO course_report.refunds VALUES (3,101,'2027-01-10 00:00:00+05:30',150)"
+      },
+      {
+        "query": "SELECT label,order_count::integer AS orders,units::integer AS units,sale_cents::integer AS sales,refund_cents::integer AS refunds,net_cents::integer AS net,average_unit_cents::text AS average FROM course_report.monthly_sales ORDER BY label",
+        "rows": [
+          {
+            "label": "2026-10",
+            "orders": 2,
+            "units": 5,
+            "sales": 3500,
+            "refunds": 100,
+            "net": 3400,
+            "average": "700.00"
+          },
+          {
+            "label": "2026-11",
+            "orders": 2,
+            "units": 4,
+            "sales": 4000,
+            "refunds": 300,
+            "net": 3700,
+            "average": "1000.00"
+          },
+          {
+            "label": "2026-12",
+            "orders": 0,
+            "units": 0,
+            "sales": 0,
+            "refunds": 0,
+            "net": 0,
+            "average": null
+          },
+          {
+            "label": "2027-01",
+            "orders": 0,
+            "units": 0,
+            "sales": 0,
+            "refunds": 150,
+            "net": -150,
+            "average": null
+          }
+        ]
+      },
+      {
+        "reset": true
+      },
+      {
+        "sql": "CREATE VIEW course_report.order_amounts AS\nSELECT o.id, o.placed_at, o.status, SUM(l.quantity) AS units, SUM(l.quantity::bigint * l.unit_cents - l.discount_cents) AS sale_cents\nFROM course_report.orders o JOIN course_report.lines l ON l.order_id = o.id\nGROUP BY o.id, o.placed_at, o.status;\nCREATE VIEW course_report.monthly_sales AS\nWITH sales AS (\n  SELECT p.label, COUNT(o.id) AS order_count, COALESCE(SUM(o.units), 0) AS units, COALESCE(SUM(o.sale_cents), 0) AS sale_cents\n  FROM course_report.periods p LEFT JOIN course_report.order_amounts o ON o.status = 'paid' AND o.placed_at >= p.start_at AND o.placed_at < p.end_at\n  GROUP BY p.label\n), refunds AS (\n  SELECT p.label, COALESCE(SUM(r.cents), 0) AS refund_cents\n  FROM course_report.periods p LEFT JOIN (\n    SELECT r.refunded_at, r.cents FROM course_report.refunds r JOIN course_report.orders o ON o.id = r.order_id WHERE o.status = 'paid'\n  ) r ON r.refunded_at >= p.start_at AND r.refunded_at < p.end_at\n  GROUP BY p.label\n)\nSELECT s.label, s.order_count, s.units, s.sale_cents, r.refund_cents, s.sale_cents - r.refund_cents AS net_cents,\n       ROUND(s.sale_cents::numeric / NULLIF(s.units, 0), 2) AS average_unit_cents\nFROM sales s JOIN refunds r ON r.label = s.label;\nCREATE VIEW course_report.monthly_usage AS\nWITH per_account AS (\n  SELECT p.label, a.id, COALESCE(SUM(u.units), 0) AS units\n  FROM course_report.periods p CROSS JOIN course_report.accounts a\n  LEFT JOIN course_report.usage u ON u.account_id = a.id AND u.used_at >= p.start_at AND u.used_at < p.end_at\n  WHERE a.active\n  GROUP BY p.label, a.id\n)\nSELECT label, COUNT(*) AS active_accounts, SUM(units) AS units, ROUND(AVG(units), 2) AS average_units FROM per_account GROUP BY label;\nSELECT * FROM course_report.monthly_sales ORDER BY label;\nSELECT * FROM course_report.monthly_usage ORDER BY label;\nWITH ranked AS (\n  SELECT p.label, o.id, o.sale_cents, RANK() OVER (PARTITION BY p.label ORDER BY o.sale_cents DESC) AS position\n  FROM course_report.periods p JOIN course_report.order_amounts o ON o.status = 'paid' AND o.placed_at >= p.start_at AND o.placed_at < p.end_at\n)\nSELECT label, id, sale_cents FROM ranked WHERE position = 1 ORDER BY label, id;\n"
+      },
+      {
+        "sql": "CREATE MATERIALIZED VIEW course_report.sales_snapshot AS SELECT * FROM course_report.monthly_sales; UPDATE course_report.refunds SET cents=cents+50 WHERE id=2"
+      },
+      {
+        "query": "SELECT net_cents::integer AS cents FROM course_report.monthly_sales WHERE label='2026-10'",
+        "rows": [
+          {
+            "cents": 3350
+          }
+        ]
+      },
+      {
+        "query": "SELECT net_cents::integer AS cents FROM course_report.sales_snapshot WHERE label='2026-10'",
+        "rows": [
+          {
+            "cents": 3400
+          }
+        ]
+      },
+      {
+        "sql": "REFRESH MATERIALIZED VIEW course_report.sales_snapshot"
+      },
+      {
+        "query": "SELECT net_cents::integer AS cents FROM course_report.sales_snapshot WHERE label='2026-10'",
+        "rows": [
+          {
+            "cents": 3350
+          }
+        ]
+      },
+      {
+        "sql": "UPDATE course_report.accounts SET active=false WHERE id=2"
+      },
+      {
+        "query": "SELECT label,active_accounts::integer AS accounts,units::integer AS units,average_units::text AS average FROM course_report.monthly_usage ORDER BY label",
+        "rows": [
+          {
+            "label": "2026-10",
+            "accounts": 1,
+            "units": 12,
+            "average": "12.00"
+          },
+          {
+            "label": "2026-11",
+            "accounts": 1,
+            "units": 0,
+            "average": "0.00"
+          },
+          {
+            "label": "2026-12",
+            "accounts": 1,
+            "units": 0,
+            "average": "0.00"
+          }
+        ]
+      }
+    ],
+    "solution": [
+      {
+        "query": "SELECT label,order_count::integer AS orders,units::integer AS units,sale_cents::integer AS sales,refund_cents::integer AS refunds,net_cents::integer AS net,average_unit_cents::text AS average FROM course_report.monthly_sales ORDER BY label",
+        "rows": [
+          {
+            "label": "2026-10",
+            "orders": 2,
+            "units": 5,
+            "sales": 3500,
+            "refunds": 100,
+            "net": 3400,
+            "average": "700.00"
+          },
+          {
+            "label": "2026-11",
+            "orders": 2,
+            "units": 4,
+            "sales": 4000,
+            "refunds": 300,
+            "net": 3700,
+            "average": "1000.00"
+          },
+          {
+            "label": "2026-12",
+            "orders": 0,
+            "units": 0,
+            "sales": 0,
+            "refunds": 0,
+            "net": 0,
+            "average": null
+          }
+        ]
+      },
+      {
+        "query": "SELECT label,active_accounts::integer AS accounts,units::integer AS units,average_units::text AS average FROM course_report.monthly_usage ORDER BY label",
+        "rows": [
+          {
+            "label": "2026-10",
+            "accounts": 2,
+            "units": 12,
+            "average": "6.00"
+          },
+          {
+            "label": "2026-11",
+            "accounts": 2,
+            "units": 20,
+            "average": "10.00"
+          },
+          {
+            "label": "2026-12",
+            "accounts": 2,
+            "units": 0,
+            "average": "0.00"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "lab": "15-data-handoff",
+    "steps": [
+      {
+        "query": "SELECT pg_input_is_valid('2026-02-30','date') AS bad,pg_input_is_valid('2026-02-28','date') AS good",
+        "rows": [
+          {
+            "bad": false,
+            "good": true
+          }
+        ]
+      },
+      {
+        "query": "SELECT line_no,CASE WHEN btrim(unit_price) ~ '^[0-9]{1,4}[.][0-9]{2}$' THEN (btrim(unit_price)::numeric*100)::integer END AS cents FROM course_import.raw_lines ORDER BY line_no",
+        "rows": [
+          {
+            "line_no": 1,
+            "cents": 1000
+          },
+          {
+            "line_no": 2,
+            "cents": 1000
+          },
+          {
+            "line_no": 3,
+            "cents": 1000
+          },
+          {
+            "line_no": 4,
+            "cents": 700
+          },
+          {
+            "line_no": 5,
+            "cents": 700
+          },
+          {
+            "line_no": 6,
+            "cents": null
+          },
+          {
+            "line_no": 7,
+            "cents": 700
+          },
+          {
+            "line_no": 8,
+            "cents": 700
+          },
+          {
+            "line_no": 9,
+            "cents": 550
+          },
+          {
+            "line_no": 10,
+            "cents": 700
+          }
+        ]
+      },
+      {
+        "sql": "BEGIN;\nCREATE OR REPLACE VIEW course_import.normalized AS\nSELECT line_no, btrim(source_key) AS source_key, btrim(product) AS product, note,\n       CASE WHEN btrim(order_id) ~ '^[1-9][0-9]{0,5}$' THEN btrim(order_id)::integer END AS order_id,\n       CASE WHEN btrim(quantity) ~ '^[1-9][0-9]{0,2}$' THEN btrim(quantity)::integer END AS quantity,\n       CASE WHEN btrim(unit_price) ~ '^[0-9]{1,4}[.][0-9]{2}$' THEN (btrim(unit_price)::numeric * 100)::integer END AS unit_cents,\n       CASE WHEN btrim(sold_on) ~ '^[0-9]{4}-[0-9]{2}-[0-9]{2}$' AND pg_input_is_valid(btrim(sold_on), 'date') THEN btrim(sold_on)::date END AS sold_on\nFROM course_import.raw_lines;\nCREATE OR REPLACE VIEW course_import.assessed AS\nWITH key_versions AS (\n  SELECT source_key, COUNT(DISTINCT (order_id, product, quantity, unit_cents, sold_on, note)) AS versions FROM course_import.normalized GROUP BY source_key\n), numbered AS (\n  SELECT n.*, ROW_NUMBER() OVER (PARTITION BY source_key ORDER BY line_no) AS occurrence FROM course_import.normalized n\n)\nSELECT n.line_no,\n       CASE WHEN n.source_key IS NULL OR n.source_key = '' THEN 'reject_key'\n            WHEN n.order_id IS NULL THEN 'reject_order_format'\n            WHEN n.product IS NULL OR n.product = '' THEN 'reject_product'\n            WHEN n.quantity IS NULL THEN 'reject_quantity'\n            WHEN n.unit_cents IS NULL THEN 'reject_price'\n            WHEN n.sold_on IS NULL THEN 'reject_date'\n            WHEN o.id IS NULL THEN 'reject_unknown_order'\n            WHEN k.versions > 1 THEN 'reject_conflicting_source'\n            WHEN f.source_key IS NOT NULL AND (f.order_id, f.product, f.quantity, f.unit_cents, f.sold_on, f.note) IS DISTINCT FROM (n.order_id, n.product, n.quantity, n.unit_cents, n.sold_on, n.note) THEN 'reject_existing_conflict'\n            WHEN n.occurrence > 1 THEN 'duplicate'\n            ELSE 'accept' END AS decision\nFROM numbered n JOIN key_versions k ON k.source_key IS NOT DISTINCT FROM n.source_key\nLEFT JOIN course_import.orders o ON o.id = n.order_id\nLEFT JOIN course_import.facts f ON f.source_key = n.source_key;\nINSERT INTO course_import.decisions SELECT line_no, decision FROM course_import.assessed\nON CONFLICT (line_no) DO UPDATE SET decision = EXCLUDED.decision;\nINSERT INTO course_import.facts (source_key, order_id, product, quantity, unit_cents, sold_on, note)\nSELECT n.source_key, n.order_id, n.product, n.quantity, n.unit_cents, n.sold_on, n.note\nFROM course_import.normalized n JOIN course_import.decisions d ON d.line_no = n.line_no\nWHERE d.decision = 'accept'\nON CONFLICT (source_key) DO NOTHING;\nCOMMIT;\nSELECT decision, COUNT(*) AS rows FROM course_import.decisions GROUP BY decision ORDER BY decision;\nSELECT COUNT(*) AS facts, SUM(quantity::bigint * unit_cents) AS cents FROM course_import.facts;\n"
+      },
+      {
+        "query": "SELECT line_no,decision FROM course_import.decisions ORDER BY line_no",
+        "rows": [
+          {
+            "line_no": 1,
+            "decision": "accept"
+          },
+          {
+            "line_no": 2,
+            "decision": "accept"
+          },
+          {
+            "line_no": 3,
+            "decision": "duplicate"
+          },
+          {
+            "line_no": 4,
+            "decision": "reject_date"
+          },
+          {
+            "line_no": 5,
+            "decision": "reject_quantity"
+          },
+          {
+            "line_no": 6,
+            "decision": "reject_price"
+          },
+          {
+            "line_no": 7,
+            "decision": "reject_unknown_order"
+          },
+          {
+            "line_no": 8,
+            "decision": "reject_product"
+          },
+          {
+            "line_no": 9,
+            "decision": "accept"
+          },
+          {
+            "line_no": 10,
+            "decision": "accept"
+          }
+        ]
+      },
+      {
+        "query": "SELECT COUNT(*)::integer AS facts,SUM(quantity::bigint*unit_cents)::integer AS cents FROM course_import.facts",
+        "rows": [
+          {
+            "facts": 4,
+            "cents": 5250
+          }
+        ]
+      },
+      {
+        "query": "SELECT source_key,quantity,unit_cents,note FROM course_import.facts ORDER BY source_key",
+        "rows": [
+          {
+            "source_key": "L1",
+            "quantity": 2,
+            "unit_cents": 1000,
+            "note": null
+          },
+          {
+            "source_key": "L2",
+            "quantity": 2,
+            "unit_cents": 1000,
+            "note": null
+          },
+          {
+            "source_key": "L8",
+            "quantity": 1,
+            "unit_cents": 550,
+            "note": "check, shelf"
+          },
+          {
+            "source_key": "L9",
+            "quantity": 1,
+            "unit_cents": 700,
+            "note": ""
+          }
+        ]
+      },
+      {
+        "query": "SELECT COUNT(*)::integer AS raw,(SELECT COUNT(*)::integer FROM course_import.decisions) AS decisions FROM course_import.raw_lines",
+        "rows": [
+          {
+            "raw": 10,
+            "decisions": 10
+          }
+        ]
+      },
+      {
+        "sql": "BEGIN;\nCREATE OR REPLACE VIEW course_import.normalized AS\nSELECT line_no, btrim(source_key) AS source_key, btrim(product) AS product, note,\n       CASE WHEN btrim(order_id) ~ '^[1-9][0-9]{0,5}$' THEN btrim(order_id)::integer END AS order_id,\n       CASE WHEN btrim(quantity) ~ '^[1-9][0-9]{0,2}$' THEN btrim(quantity)::integer END AS quantity,\n       CASE WHEN btrim(unit_price) ~ '^[0-9]{1,4}[.][0-9]{2}$' THEN (btrim(unit_price)::numeric * 100)::integer END AS unit_cents,\n       CASE WHEN btrim(sold_on) ~ '^[0-9]{4}-[0-9]{2}-[0-9]{2}$' AND pg_input_is_valid(btrim(sold_on), 'date') THEN btrim(sold_on)::date END AS sold_on\nFROM course_import.raw_lines;\nCREATE OR REPLACE VIEW course_import.assessed AS\nWITH key_versions AS (\n  SELECT source_key, COUNT(DISTINCT (order_id, product, quantity, unit_cents, sold_on, note)) AS versions FROM course_import.normalized GROUP BY source_key\n), numbered AS (\n  SELECT n.*, ROW_NUMBER() OVER (PARTITION BY source_key ORDER BY line_no) AS occurrence FROM course_import.normalized n\n)\nSELECT n.line_no,\n       CASE WHEN n.source_key IS NULL OR n.source_key = '' THEN 'reject_key'\n            WHEN n.order_id IS NULL THEN 'reject_order_format'\n            WHEN n.product IS NULL OR n.product = '' THEN 'reject_product'\n            WHEN n.quantity IS NULL THEN 'reject_quantity'\n            WHEN n.unit_cents IS NULL THEN 'reject_price'\n            WHEN n.sold_on IS NULL THEN 'reject_date'\n            WHEN o.id IS NULL THEN 'reject_unknown_order'\n            WHEN k.versions > 1 THEN 'reject_conflicting_source'\n            WHEN f.source_key IS NOT NULL AND (f.order_id, f.product, f.quantity, f.unit_cents, f.sold_on, f.note) IS DISTINCT FROM (n.order_id, n.product, n.quantity, n.unit_cents, n.sold_on, n.note) THEN 'reject_existing_conflict'\n            WHEN n.occurrence > 1 THEN 'duplicate'\n            ELSE 'accept' END AS decision\nFROM numbered n JOIN key_versions k ON k.source_key IS NOT DISTINCT FROM n.source_key\nLEFT JOIN course_import.orders o ON o.id = n.order_id\nLEFT JOIN course_import.facts f ON f.source_key = n.source_key;\nINSERT INTO course_import.decisions SELECT line_no, decision FROM course_import.assessed\nON CONFLICT (line_no) DO UPDATE SET decision = EXCLUDED.decision;\nINSERT INTO course_import.facts (source_key, order_id, product, quantity, unit_cents, sold_on, note)\nSELECT n.source_key, n.order_id, n.product, n.quantity, n.unit_cents, n.sold_on, n.note\nFROM course_import.normalized n JOIN course_import.decisions d ON d.line_no = n.line_no\nWHERE d.decision = 'accept'\nON CONFLICT (source_key) DO NOTHING;\nCOMMIT;\nSELECT decision, COUNT(*) AS rows FROM course_import.decisions GROUP BY decision ORDER BY decision;\nSELECT COUNT(*) AS facts, SUM(quantity::bigint * unit_cents) AS cents FROM course_import.facts;\n"
+      },
+      {
+        "query": "SELECT line_no,decision FROM course_import.decisions ORDER BY line_no",
+        "rows": [
+          {
+            "line_no": 1,
+            "decision": "accept"
+          },
+          {
+            "line_no": 2,
+            "decision": "accept"
+          },
+          {
+            "line_no": 3,
+            "decision": "duplicate"
+          },
+          {
+            "line_no": 4,
+            "decision": "reject_date"
+          },
+          {
+            "line_no": 5,
+            "decision": "reject_quantity"
+          },
+          {
+            "line_no": 6,
+            "decision": "reject_price"
+          },
+          {
+            "line_no": 7,
+            "decision": "reject_unknown_order"
+          },
+          {
+            "line_no": 8,
+            "decision": "reject_product"
+          },
+          {
+            "line_no": 9,
+            "decision": "accept"
+          },
+          {
+            "line_no": 10,
+            "decision": "accept"
+          }
+        ]
+      },
+      {
+        "query": "SELECT COUNT(*)::integer AS facts,SUM(quantity::bigint*unit_cents)::integer AS cents FROM course_import.facts",
+        "rows": [
+          {
+            "facts": 4,
+            "cents": 5250
+          }
+        ]
+      },
+      {
+        "sql": "INSERT INTO course_import.raw_lines SELECT 11,'L10',order_id,product,quantity,unit_price,sold_on,note FROM course_import.raw_lines WHERE line_no=1"
+      },
+      {
+        "sql": "BEGIN;\nCREATE OR REPLACE VIEW course_import.normalized AS\nSELECT line_no, btrim(source_key) AS source_key, btrim(product) AS product, note,\n       CASE WHEN btrim(order_id) ~ '^[1-9][0-9]{0,5}$' THEN btrim(order_id)::integer END AS order_id,\n       CASE WHEN btrim(quantity) ~ '^[1-9][0-9]{0,2}$' THEN btrim(quantity)::integer END AS quantity,\n       CASE WHEN btrim(unit_price) ~ '^[0-9]{1,4}[.][0-9]{2}$' THEN (btrim(unit_price)::numeric * 100)::integer END AS unit_cents,\n       CASE WHEN btrim(sold_on) ~ '^[0-9]{4}-[0-9]{2}-[0-9]{2}$' AND pg_input_is_valid(btrim(sold_on), 'date') THEN btrim(sold_on)::date END AS sold_on\nFROM course_import.raw_lines;\nCREATE OR REPLACE VIEW course_import.assessed AS\nWITH key_versions AS (\n  SELECT source_key, COUNT(DISTINCT (order_id, product, quantity, unit_cents, sold_on, note)) AS versions FROM course_import.normalized GROUP BY source_key\n), numbered AS (\n  SELECT n.*, ROW_NUMBER() OVER (PARTITION BY source_key ORDER BY line_no) AS occurrence FROM course_import.normalized n\n)\nSELECT n.line_no,\n       CASE WHEN n.source_key IS NULL OR n.source_key = '' THEN 'reject_key'\n            WHEN n.order_id IS NULL THEN 'reject_order_format'\n            WHEN n.product IS NULL OR n.product = '' THEN 'reject_product'\n            WHEN n.quantity IS NULL THEN 'reject_quantity'\n            WHEN n.unit_cents IS NULL THEN 'reject_price'\n            WHEN n.sold_on IS NULL THEN 'reject_date'\n            WHEN o.id IS NULL THEN 'reject_unknown_order'\n            WHEN k.versions > 1 THEN 'reject_conflicting_source'\n            WHEN f.source_key IS NOT NULL AND (f.order_id, f.product, f.quantity, f.unit_cents, f.sold_on, f.note) IS DISTINCT FROM (n.order_id, n.product, n.quantity, n.unit_cents, n.sold_on, n.note) THEN 'reject_existing_conflict'\n            WHEN n.occurrence > 1 THEN 'duplicate'\n            ELSE 'accept' END AS decision\nFROM numbered n JOIN key_versions k ON k.source_key IS NOT DISTINCT FROM n.source_key\nLEFT JOIN course_import.orders o ON o.id = n.order_id\nLEFT JOIN course_import.facts f ON f.source_key = n.source_key;\nINSERT INTO course_import.decisions SELECT line_no, decision FROM course_import.assessed\nON CONFLICT (line_no) DO UPDATE SET decision = EXCLUDED.decision;\nINSERT INTO course_import.facts (source_key, order_id, product, quantity, unit_cents, sold_on, note)\nSELECT n.source_key, n.order_id, n.product, n.quantity, n.unit_cents, n.sold_on, n.note\nFROM course_import.normalized n JOIN course_import.decisions d ON d.line_no = n.line_no\nWHERE d.decision = 'accept'\nON CONFLICT (source_key) DO NOTHING;\nCOMMIT;\nSELECT decision, COUNT(*) AS rows FROM course_import.decisions GROUP BY decision ORDER BY decision;\nSELECT COUNT(*) AS facts, SUM(quantity::bigint * unit_cents) AS cents FROM course_import.facts;\n"
+      },
+      {
+        "query": "SELECT COUNT(*)::integer AS facts,SUM(quantity::bigint*unit_cents)::integer AS cents FROM course_import.facts",
+        "rows": [
+          {
+            "facts": 5,
+            "cents": 7250
+          }
+        ]
+      },
+      {
+        "query": "SELECT decision,COUNT(*)::integer AS count FROM course_import.decisions GROUP BY decision ORDER BY decision",
+        "rows": [
+          {
+            "decision": "accept",
+            "count": 5
+          },
+          {
+            "decision": "duplicate",
+            "count": 1
+          },
+          {
+            "decision": "reject_date",
+            "count": 1
+          },
+          {
+            "decision": "reject_price",
+            "count": 1
+          },
+          {
+            "decision": "reject_product",
+            "count": 1
+          },
+          {
+            "decision": "reject_quantity",
+            "count": 1
+          },
+          {
+            "decision": "reject_unknown_order",
+            "count": 1
+          }
+        ]
+      },
+      {
+        "reset": true
+      },
+      {
+        "sql": "INSERT INTO course_import.facts VALUES ('L1',101,'Coffee, ground',9,1000,'2026-10-01',NULL)"
+      },
+      {
+        "sql": "BEGIN;\nCREATE OR REPLACE VIEW course_import.normalized AS\nSELECT line_no, btrim(source_key) AS source_key, btrim(product) AS product, note,\n       CASE WHEN btrim(order_id) ~ '^[1-9][0-9]{0,5}$' THEN btrim(order_id)::integer END AS order_id,\n       CASE WHEN btrim(quantity) ~ '^[1-9][0-9]{0,2}$' THEN btrim(quantity)::integer END AS quantity,\n       CASE WHEN btrim(unit_price) ~ '^[0-9]{1,4}[.][0-9]{2}$' THEN (btrim(unit_price)::numeric * 100)::integer END AS unit_cents,\n       CASE WHEN btrim(sold_on) ~ '^[0-9]{4}-[0-9]{2}-[0-9]{2}$' AND pg_input_is_valid(btrim(sold_on), 'date') THEN btrim(sold_on)::date END AS sold_on\nFROM course_import.raw_lines;\nCREATE OR REPLACE VIEW course_import.assessed AS\nWITH key_versions AS (\n  SELECT source_key, COUNT(DISTINCT (order_id, product, quantity, unit_cents, sold_on, note)) AS versions FROM course_import.normalized GROUP BY source_key\n), numbered AS (\n  SELECT n.*, ROW_NUMBER() OVER (PARTITION BY source_key ORDER BY line_no) AS occurrence FROM course_import.normalized n\n)\nSELECT n.line_no,\n       CASE WHEN n.source_key IS NULL OR n.source_key = '' THEN 'reject_key'\n            WHEN n.order_id IS NULL THEN 'reject_order_format'\n            WHEN n.product IS NULL OR n.product = '' THEN 'reject_product'\n            WHEN n.quantity IS NULL THEN 'reject_quantity'\n            WHEN n.unit_cents IS NULL THEN 'reject_price'\n            WHEN n.sold_on IS NULL THEN 'reject_date'\n            WHEN o.id IS NULL THEN 'reject_unknown_order'\n            WHEN k.versions > 1 THEN 'reject_conflicting_source'\n            WHEN f.source_key IS NOT NULL AND (f.order_id, f.product, f.quantity, f.unit_cents, f.sold_on, f.note) IS DISTINCT FROM (n.order_id, n.product, n.quantity, n.unit_cents, n.sold_on, n.note) THEN 'reject_existing_conflict'\n            WHEN n.occurrence > 1 THEN 'duplicate'\n            ELSE 'accept' END AS decision\nFROM numbered n JOIN key_versions k ON k.source_key IS NOT DISTINCT FROM n.source_key\nLEFT JOIN course_import.orders o ON o.id = n.order_id\nLEFT JOIN course_import.facts f ON f.source_key = n.source_key;\nINSERT INTO course_import.decisions SELECT line_no, decision FROM course_import.assessed\nON CONFLICT (line_no) DO UPDATE SET decision = EXCLUDED.decision;\nINSERT INTO course_import.facts (source_key, order_id, product, quantity, unit_cents, sold_on, note)\nSELECT n.source_key, n.order_id, n.product, n.quantity, n.unit_cents, n.sold_on, n.note\nFROM course_import.normalized n JOIN course_import.decisions d ON d.line_no = n.line_no\nWHERE d.decision = 'accept'\nON CONFLICT (source_key) DO NOTHING;\nCOMMIT;\nSELECT decision, COUNT(*) AS rows FROM course_import.decisions GROUP BY decision ORDER BY decision;\nSELECT COUNT(*) AS facts, SUM(quantity::bigint * unit_cents) AS cents FROM course_import.facts;\n"
+      },
+      {
+        "query": "SELECT line_no,decision FROM course_import.decisions WHERE line_no IN (1,3) ORDER BY line_no",
+        "rows": [
+          {
+            "line_no": 1,
+            "decision": "reject_existing_conflict"
+          },
+          {
+            "line_no": 3,
+            "decision": "reject_existing_conflict"
+          }
+        ]
+      },
+      {
+        "query": "SELECT quantity FROM course_import.facts WHERE source_key='L1'",
+        "rows": [
+          {
+            "quantity": 9
+          }
+        ]
+      },
+      {
+        "reset": true
+      },
+      {
+        "sql": "INSERT INTO course_import.raw_lines SELECT 11,source_key,order_id,product,'3',unit_price,sold_on,note FROM course_import.raw_lines WHERE line_no=1"
+      },
+      {
+        "sql": "BEGIN;\nCREATE OR REPLACE VIEW course_import.normalized AS\nSELECT line_no, btrim(source_key) AS source_key, btrim(product) AS product, note,\n       CASE WHEN btrim(order_id) ~ '^[1-9][0-9]{0,5}$' THEN btrim(order_id)::integer END AS order_id,\n       CASE WHEN btrim(quantity) ~ '^[1-9][0-9]{0,2}$' THEN btrim(quantity)::integer END AS quantity,\n       CASE WHEN btrim(unit_price) ~ '^[0-9]{1,4}[.][0-9]{2}$' THEN (btrim(unit_price)::numeric * 100)::integer END AS unit_cents,\n       CASE WHEN btrim(sold_on) ~ '^[0-9]{4}-[0-9]{2}-[0-9]{2}$' AND pg_input_is_valid(btrim(sold_on), 'date') THEN btrim(sold_on)::date END AS sold_on\nFROM course_import.raw_lines;\nCREATE OR REPLACE VIEW course_import.assessed AS\nWITH key_versions AS (\n  SELECT source_key, COUNT(DISTINCT (order_id, product, quantity, unit_cents, sold_on, note)) AS versions FROM course_import.normalized GROUP BY source_key\n), numbered AS (\n  SELECT n.*, ROW_NUMBER() OVER (PARTITION BY source_key ORDER BY line_no) AS occurrence FROM course_import.normalized n\n)\nSELECT n.line_no,\n       CASE WHEN n.source_key IS NULL OR n.source_key = '' THEN 'reject_key'\n            WHEN n.order_id IS NULL THEN 'reject_order_format'\n            WHEN n.product IS NULL OR n.product = '' THEN 'reject_product'\n            WHEN n.quantity IS NULL THEN 'reject_quantity'\n            WHEN n.unit_cents IS NULL THEN 'reject_price'\n            WHEN n.sold_on IS NULL THEN 'reject_date'\n            WHEN o.id IS NULL THEN 'reject_unknown_order'\n            WHEN k.versions > 1 THEN 'reject_conflicting_source'\n            WHEN f.source_key IS NOT NULL AND (f.order_id, f.product, f.quantity, f.unit_cents, f.sold_on, f.note) IS DISTINCT FROM (n.order_id, n.product, n.quantity, n.unit_cents, n.sold_on, n.note) THEN 'reject_existing_conflict'\n            WHEN n.occurrence > 1 THEN 'duplicate'\n            ELSE 'accept' END AS decision\nFROM numbered n JOIN key_versions k ON k.source_key IS NOT DISTINCT FROM n.source_key\nLEFT JOIN course_import.orders o ON o.id = n.order_id\nLEFT JOIN course_import.facts f ON f.source_key = n.source_key;\nINSERT INTO course_import.decisions SELECT line_no, decision FROM course_import.assessed\nON CONFLICT (line_no) DO UPDATE SET decision = EXCLUDED.decision;\nINSERT INTO course_import.facts (source_key, order_id, product, quantity, unit_cents, sold_on, note)\nSELECT n.source_key, n.order_id, n.product, n.quantity, n.unit_cents, n.sold_on, n.note\nFROM course_import.normalized n JOIN course_import.decisions d ON d.line_no = n.line_no\nWHERE d.decision = 'accept'\nON CONFLICT (source_key) DO NOTHING;\nCOMMIT;\nSELECT decision, COUNT(*) AS rows FROM course_import.decisions GROUP BY decision ORDER BY decision;\nSELECT COUNT(*) AS facts, SUM(quantity::bigint * unit_cents) AS cents FROM course_import.facts;\n"
+      },
+      {
+        "query": "SELECT line_no,decision FROM course_import.decisions WHERE line_no IN (1,3,11) ORDER BY line_no",
+        "rows": [
+          {
+            "line_no": 1,
+            "decision": "reject_conflicting_source"
+          },
+          {
+            "line_no": 3,
+            "decision": "reject_conflicting_source"
+          },
+          {
+            "line_no": 11,
+            "decision": "reject_conflicting_source"
+          }
+        ]
+      },
+      {
+        "query": "SELECT source_key FROM course_import.facts ORDER BY source_key",
+        "rows": [
+          {
+            "source_key": "L2"
+          },
+          {
+            "source_key": "L8"
+          },
+          {
+            "source_key": "L9"
+          }
+        ]
+      }
+    ],
+    "solution": [
+      {
+        "query": "SELECT line_no,decision FROM course_import.decisions ORDER BY line_no",
+        "rows": [
+          {
+            "line_no": 1,
+            "decision": "accept"
+          },
+          {
+            "line_no": 2,
+            "decision": "accept"
+          },
+          {
+            "line_no": 3,
+            "decision": "duplicate"
+          },
+          {
+            "line_no": 4,
+            "decision": "reject_date"
+          },
+          {
+            "line_no": 5,
+            "decision": "reject_quantity"
+          },
+          {
+            "line_no": 6,
+            "decision": "reject_price"
+          },
+          {
+            "line_no": 7,
+            "decision": "reject_unknown_order"
+          },
+          {
+            "line_no": 8,
+            "decision": "reject_product"
+          },
+          {
+            "line_no": 9,
+            "decision": "accept"
+          },
+          {
+            "line_no": 10,
+            "decision": "accept"
+          }
+        ]
+      },
+      {
+        "query": "SELECT COUNT(*)::integer AS facts,SUM(quantity::bigint*unit_cents)::integer AS cents FROM course_import.facts",
+        "rows": [
+          {
+            "facts": 4,
+            "cents": 5250
+          }
+        ]
+      }
+    ]
   }
 ]
 
