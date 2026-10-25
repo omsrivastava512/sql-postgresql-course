@@ -2,9 +2,11 @@
 
 Oct 21, 2026 · @Om Srivastava
 
+Conceptual completion: 25 Oct 2026. The company observations retain their original dates; the connected model and its new evidence are dated separately below.
+
 ## Summary
 
-The same few designs repeat across the platforms I could read: a shared platform under separate app shells, a typed core product record, variants as SKU-level children of a parent, combos as a priced record plus a recipe expanded at pick time, one base unit with conversion factors, and invoice lines that copy what was sold. Most of Swiggy, Zomato, Blinkit, Amazon and Flipkart is not public, so for those I say so and name the closest documented analogue.
+Several designs recur in the sources: shared capabilities behind app shells, typed product records, independently identified sellable variants, component recipes for virtual bundles, explicit units, and historical amounts on order or invoice lines. These are alternatives with boundaries, rather than one universal schema. Most of Swiggy, Zomato, Blinkit, Amazon and Flipkart is not public, so for those I say so and name the closest documented analogue. For the complete purchase flow, read [Connecting the pieces](#connecting-the-pieces) after the task sections.
 
 **How to read the tags.** \[Confirmed\] means stated in a primary source I opened (a company statement, official docs, or code at a pinned commit) and linked. \[Inferred\] means my reasoning from confirmed facts, with the reasoning stated; it also covers anything that rests only on press coverage. \[Unknown\] means I found no public evidence.
 
@@ -12,12 +14,12 @@ The same few designs repeat across the platforms I could read: a shared platform
 
 **Key takeaways**
 
-- **Task 1a, shared or separate:** Swiggy ships several apps over shared capabilities. Toing is a separate app that reuses Swiggy's tech and its restaurant and delivery infrastructure, and Bolt orders are indistinguishable from Food orders to delivery partners. Whether any of it shares a database or login is \[Unknown\]. Grab, Uber and DoorDash document one shared order or fulfillment platform that new verticals extend.
-- **Task 1b, one table or many:** none of the platforms I could read uses one flat table or a table per kind. The common shape is a core product with a type column, attributes in EAV or JSON, and side tables for bundles, downloads and gift cards. Amazon's public API shows one generic item plus a per-type JSON schema. Restaurant menus add modifier groups and time-based availability; grocery catalogs add store-level price and stock.
-- **Task 2a, variants:** the sellable SKU is always its own record tied to a parent. Shopify, Saleor, Medusa, Spree and Odoo use a child table; Magento, Amazon, eBay and Walmart keep each variant as a full item grouped by a link or key.
-- **Task 2b, combos:** a combo is its own priced sellable plus a recipe of components that is multiplied out (order quantity × component quantity) into stock moves and picks. Odoo's kit explosion and Medusa's inventory kit are the clearest documented mechanics.
-- **Task 2c, units:** one base unit per item with a factor to every other unit (Odoo has a real table; Magento and Medusa keep a flag or free text). Weighted items keep ordered, fulfilled and charged quantities apart, and Instacart documents three modes. Standards: UN/CEFACT Recommendation 20 codes and GS1 `netContent`.
-- **Task 3, billing:** the invoice or order line is its own row that copies quantity, price and tax at the time of sale, and the per-type rule (quantity × rate, or plan × duration) runs once. Subscriptions sit in a separate billing layer (Stripe, Shopify selling plans, Medusa's subscription module). A worked example with numbers is in Task 3.
+- **Task 1a, shared or separate:** Swiggy describes shared commerce primitives in a 2021 engineering article. Toing later reuses existing capabilities, and Bolt orders are indistinguishable to couriers. The App Store listings share a publisher. None of this establishes shared databases or login \[Unknown\]. Grab and Uber describe shared platforms; DoorDash documents retail fulfillment without establishing sharing with restaurants.
+- **Task 1b, one table or many:** the inspected code combines core records, types, attributes and specialized models. The mix differs by platform. Amazon's generic public API does not establish its storage design. Restaurant menus add customization and timed availability; grocery catalogs separate product content from store-level commercial facts.
+- **Task 2a, variants:** a sellable variant has its own identity; grouping and independent existence depend on the platform. Shopify, Saleor, Medusa, Spree and Odoo use product/variant models; Magento and the marketplace APIs expose item relationships or groups. API nesting alone does not prove a database table layout.
+- **Task 2b, combos:** virtual kits map a sellable to component requirements. Commercial grouping, pricing and inventory expansion are separate decisions: expansion can happen at cart creation or during fulfillment. A prepacked physical bundle can instead have its own stock identity.
+- **Task 2c, units:** distinguish stock conversion, pack content, displayed price per unit, and actual charged quantity. Odoo implements conversions; a decimal flag or text unit alone does not. Weighted items can have different ordered, fulfilled and charged quantities.
+- **Task 3, billing:** preserve the amounts and descriptions required to explain a past transaction. An order, invoice, payment and subscription agreement have different lifecycles. A recurring price identifies the charge for an interval; its amount is not necessarily monthly price multiplied by months. The inline example demonstrates snapshots, not a complete recurring billing implementation.
 
 ## Product facts check
 
@@ -38,7 +40,7 @@ One more hint on the app question: Swiggy's engineering blog says the company ru
 
 ## Task 1a: Shared versus separate backends
 
-Swiggy's own statements show several consumer apps sitting on shared capabilities, but nothing public says whether Food, Instamart, Bolt and Toing share databases \[Unknown\]. The documented analogues (Grab, Uber, DoorDash) all describe one shared order or fulfillment platform that each new vertical extends, with the vertical-specific parts at the edges.
+Swiggy's own statements show several consumer apps sitting on shared capabilities, but the sources here do not establish whether Food, Instamart, Bolt and Toing share databases \[Unknown\]. Grab and Uber document shared order or fulfillment platforms; DoorDash documents a retail fulfillment service without establishing whether restaurants share it. Shared capability, shared service and shared database are different claims.
 
 ### Swiggy: what the sources say
 
@@ -48,6 +50,7 @@ Swiggy's own statements show several consumer apps sitting on shared capabilitie
 | Instamart | A standalone Instamart app exists, published by Swiggy Instamart Private Limited. Business Today reported its Jan 2025 launch and quoted Swiggy's CEO saying the standalone app “will be an add-on” and that Instamart “will remain a key offering within the Swiggy app”. | \[Confirmed\] that the app exists ([App Store listing](https://apps.apple.com/in/app/instamart-10-mins-grocery-app/id6738619733)); \[Inferred\] for the launch date and the CEO's remarks (press only: [Business Today](https://www.businesstoday.in/amp/technology/news/story/swiggy-launches-instamart-as-a-standalone-app-available-on-android-and-ios-460547-2025-01-13)) |
 | Toing | A standalone app that “runs on a separate app”, called a “separate platform” in another answer, housed in “Platform Innovations”, which the letter calls a “deliberate sandbox”. Launched “without any significant incremental fixed costs” by “leveraging our existing tech and execution capabilities”, with the “restaurant/delivery infrastructure” already built. | \[Confirmed\] [Jul 2026 letter](https://nsearchives.nseindia.com/corporate/SWIGGY_30072026154100_Covering_Letter_Letter_to_Shareholders_-_signed.pdf) |
 | Other apps | Business Today calls Snacc a separate Swiggy app that delivers food in 15 minutes. Swiggy Bytes says the “Swiggy Apps” ecosystem spans multiple business lines and shell apps on Android and iOS, with tooling shared across them. | \[Inferred\] for Snacc (press only); \[Confirmed\] for the Swiggy Bytes statement ([post](https://medium.com/swiggy-bytes/how-we-made-all-swiggy-apps-operations-ai-native-1343612ec228)) |
+| Shared backend capabilities, historical | Vijay Seshadri's 15 Mar 2021 article describes shared hyperlocal commerce primitives and the need for multi-tenant order management, promotions, pricing and logistics, with different workflows for food, inventory-backed goods and Genie tasks. It does not name database boundaries or describe Bolt and Toing. | \[Confirmed\] [Engineering challenges at Swiggy](https://medium.com/swiggy-bytes/engineering-challenges-at-swiggy-430dea6c86a3), read 25 Oct 2026 |
 
 What that suggests about the backend:
 
@@ -57,10 +60,11 @@ What that suggests about the backend:
 
 ### How one app can present several verticals
 
-No Swiggy source describes this. The patterns in the brief, and what is documented elsewhere:
+Swiggy does document part of the presentation layer: Sarthak Mishra's 22 Mar 2024 Dynamic Widget article describes a JSON-driven UI engine, then used experimentally for some Track and Search widgets. It does not establish how Food, Instamart or Bolt appear together on the home page. The historical evidence below describes mechanisms, rather than the app's current layout.
 
 | Pattern | Public evidence | Tag and source |
 | --- | --- | --- |
+| Server-driven UI | Swiggy's Dynamic Widget lets clients render widgets from a generic JSON schema; the documented rollout was limited to some Track and Search widgets | \[Confirmed\] [Swiggy, Dynamic Widget](https://medium.com/swiggy-bytes/a-deep-dive-into-dynamic-widget-swiggys-server-driven-ui-system-92cdc3b16ec6); original reading recorded in the log, indexed article text checked 25 Oct 2026 |
 | API gateway or edge layer | Uber groups services into domains and domains into five layers (infrastructure, business, product, presentation, edge); layers depend only on the layers below, and a gateway is “a single entry-point into a collection of underlying services” | \[Confirmed\] [Uber, domain-oriented architecture](https://www.uber.com/us/en/blog/microservice-architecture/) |
 | Modular client in one app | Grab's app has feature modules that do not depend on each other, kit modules for communication between them, core modules (networking, analytics, experimentation, storage, config), shared library modules, and an app module that wires them together with dependency injection; how Food or Mart plug in is not described | \[Confirmed\] [Grab, app modularisation](https://engineering.grab.com/app-modularisation-at-scale) |
 | Backend-for-frontend, micro-frontends | no public description found at any company I checked | \[Unknown\] |
@@ -97,13 +101,19 @@ WHERE i.is_bolt_eligible AND i.prep_time_sec <= :max_prep AND distance_km(r, :cu
 | Does it reuse restaurant, menu and order systems? | Swiggy says it reuses existing tech and its restaurant and delivery infrastructure; menu and order systems are not named | \[Confirmed\] for the statement; \[Unknown\] for the specifics |
 | One account and identity across both? | Not stated; the new-user metrics suggest identities are matched to the Swiggy platform | \[Unknown\]; \[Inferred\] for the matching |
 
+The [Toing](https://apps.apple.com/in/app/toing-food-delivery/id6748918399) and [main Swiggy](https://apps.apple.com/in/app/swiggy-food-instamart-dineout/id989540920) App Store listings both identify BUNDL TECHNOLOGIES PRIVATE LIMITED as developer \[Confirmed, read 25 Oct 2026\]. The earlier reading recorded the same seller and Toing's “© 2025, Swiggy”; that copyright text was not exposed in this continuation's readable page. These are publisher facts, not evidence of a common login, account store, code repository or database. Those remain \[Unknown\].
+
 ### Zomato and Blinkit
 
-Eternal's Q4 FY25 letter says about a third of going-out GOV went through the District app and that the going-out offering will be accessible only on the District app, so the group moves product lines into separate apps \[Confirmed: [Eternal letter](https://b.zmtcdn.com/investor-relations/d9c290cd23764a09789769c39682276a_1746094084.pdf)\]. Business Today refers to the Blinkit app \[Inferred: press only\], and Wikipedia says the Zomato app kept its name after the Eternal rename \[Inferred: secondary source\]. I found no primary engineering source on Zomato's or Blinkit's databases, catalogs or service boundaries \[Unknown\]. The only items I found were third-party (a MongoDB case study, vendor blog posts, a job listing) and I did not rely on them. For the same question about a quick-commerce vertical beside a restaurant business, the closest documented analogues are Grab's GrabMart built on GrabFood and DoorDash's retail path above.
+Eternal's Q4 FY25 letter describes moving the going-out offering to the District app \[Confirmed: [Eternal letter](https://b.zmtcdn.com/investor-relations/d9c290cd23764a09789769c39682276a_1746094084.pdf)\]. That establishes an app boundary, rather than a database boundary.
+
+Blinkit has primary engineering material: its [Debezium article](https://lambda.blinkit.com/how-integer-and-int-produced-different-schemas-in-debezium-9c98e8a80aa2) describes MySQL change capture into Hudi; its [Trino/Hudi deadlock article](https://lambda.blinkit.com/how-a-deadlock-froze-blinkits-supply-chain-4b7c4d6d4a3f) concerns analytical jobs for replenishment; its [OpenSearchCon account](https://lambda.blinkit.com/blinkit-at-opensearchcon-india-2026-37fd0046c318) describes moving to multiple search clusters \[Confirmed; the first reading is preserved in the log, the latter two were read again on 25 Oct\]. None establishes how transactional catalog, order and service boundaries fit together \[Unknown\].
+
+An older company post, [Grofers v3.2.1, 24 Apr 2017](https://blinkit.com/blog/grofers-v321-revolutionising-your-shopping-experience-technology/), describes moving from a marketplace to an inventory-led model and building warehousing tools \[Confirmed, read 25 Oct 2026\]. This helps explain why stock ownership matters, but does not establish Blinkit's current schema. UrbanPiper adds menu-integration evidence for Zomato below; it does not publish Zomato's internal tables. Grab's GrabMart and DoorDash's retail path remain documented architecture analogues.
 
 ## Task 1b: One table or many for things you can buy
 
-No platform I could read uses one flat table for everything, and none splits the core catalog into a table per kind; the common shape is a core product record with a type, type-specific attributes held in EAV or JSON, and separate tables only for behavior that really differs (bundles, downloads, gift cards, subscriptions).
+The inspected code uses combinations of core product records, types, attribute models and specialized tables. The rows below show which mechanism is evidenced in each platform; they do not establish that every platform implements every mechanism. Public API shapes, including Amazon's, establish contracts rather than physical storage.
 
 ### The patterns and who is documented using them
 
@@ -180,7 +190,7 @@ My reading \[Inferred\], not a documented rule: a core `product` table with a ty
 
 ## Task 2a: Variants
 
-Every platform I could read keeps the sellable unit (own barcode, price and stock) as its own record and ties several of them to a parent that holds the shared content. The difference is storage: Shopify, Saleor, Medusa, Spree and Odoo put parent and variant in different tables, while Magento's configurable products, Amazon's parent and child ASINs, eBay and Walmart keep every variant as a full item and group them with a key or a relationship. The shopper sees one page either way; the storage choice decides whether a variant can also exist on its own.
+The sources identify sellable variants separately and group them through a product, key or relationship. A barcode, price or tracked stock is not mandatory for every kind of sellable. The inspected code shows distinct product and variant models in Saleor, Medusa, Spree and Odoo, and ordinary product rows joined by links in Magento. Shopify and the marketplace docs establish their public object relationships; they do not prove an internal table layout. Whether an item can exist independently depends on the platform's rules, rather than how a response happens to be nested.
 
 | Platform | Parent → variant | How they are tied | Tag and source |
 | --- | --- | --- | --- |
@@ -199,9 +209,15 @@ Every platform I could read keeps the sellable unit (own barcode, price and stoc
 
 Both exist.
 
-- **Child rows in another table** (Shopify, Saleor, Medusa, Spree, Odoo): a variant cannot exist without its parent, and shared content such as title, description and brand is stored once. \[Confirmed: table above\]
-- **Full items joined by a link** (Magento, Amazon, eBay, Walmart): each child already has its own identity, so it can be created and sold before or without a parent. Amazon's changelog says children left unchanged when a parent is deleted become standalone listings that stay buyable \[Confirmed\]. I read that as the parent being a grouping layer and the child a complete listing \[Inferred\].
-- **Marketplaces lean to the second shape.** Three of the four marketplaces I read (Amazon, eBay, Walmart) use it, and Etsy stores variants inside the listing \[Confirmed\]. My reading is that outside sellers already identify each variant by its own SKU or barcode, so grouping afterwards is easier than forcing a parent first \[Inferred\].
+- **Product/variant ownership** (Shopify's public model; inspected Saleor, Medusa, Spree and Odoo models): variants belong to a product/template, with shared content on the parent \[Confirmed: table above\]. Shopify's API ownership does not prove a separate physical child table.
+- **Independently identified items with grouping** (Magento code; Amazon, eBay and Walmart APIs): group membership connects item identities. Amazon's changelog specifically says unchanged children of a deleted parent become standalone buyable listings \[Confirmed\]. Independent sale for every item in every platform does not follow from the existence of a grouping key \[Inferred\].
+- **Marketplace contracts differ.** Amazon, eBay and Walmart expose item groups or relationships, while Etsy exposes products inside listing inventory \[Confirmed\]. Seller-managed SKU identity is a useful reason to distinguish an item from its grouping, but is my interpretation rather than evidence of the marketplaces' internal storage \[Inferred\].
+
+### Zomato: integration rules for variants and modifiers
+
+UrbanPiper's undated [Zomato constraints](https://api-docs.urbanpiper.com/downstream/aggregator-constraints/zomato) describe two levels of nested option groups. Its [menu publishing guide](https://help.urbanpiper.com/ordering-channels/zomato/manage-and-publish-your-menu) says that an item with zero base price needs a priced variant, and documents modifier-group selection errors. The guide describes publishing a POS menu through UrbanPiper to Zomato. \[Confirmed as UrbanPiper's own integration documentation, read 25 Oct 2026; Zomato's internal representation is Unknown.\]
+
+The useful distinction is semantic: selecting a large portion can choose a priced variant, while adding cheese can be a modifier selection with its own constraints. Both can use option-group mechanisms in an API. Therefore an API field named “option” does not by itself identify a stock-keeping variant \[Inferred\].
 
 ### A simplified schema
 
@@ -224,7 +240,7 @@ Flipkart's own variant documentation: I found only third-party integration guide
 
 ## Task 2b: Combos versus plain quantity
 
-Every platform I could read that supports bundles stores the combo as its own sellable, with its own price and identity, and keeps a recipe of components that is multiplied out into component quantities when stock moves; none of them treats a combo as just “quantity × component” on the shelf. I found no public description of how Swiggy, Blinkit or Instamart do this in their dark stores \[Unknown\]; the closest documented analogues are Odoo, Medusa and Shopify.
+The documented bundle mechanisms separate commercial identity and pricing from component requirements. Their expansion points differ: Medusa's custom bundle recipe creates component cart lines, Odoo kits create component stock moves, and a physical prepacked bundle is a stock item of its own. I found no public description of how Swiggy, Blinkit or Instamart expand virtual bundles in their dark stores \[Unknown\]; Odoo, Medusa and Shopify supply documented alternatives.
 
 ### Separate SKU or recipe?
 
@@ -278,7 +294,7 @@ For identical items there is a quantity-only alternative, a pack unit. Odoo's pr
 
 ## Task 2c: Units of measure
 
-Platforms store one base unit per item and every other unit as a factor to it; what varies is how much of that is a real table (Odoo has one, Magento and Medusa keep only a flag or free text) and how they handle items whose billed quantity is only known at pick time (Instacart documents this most clearly). I found no public description of how Swiggy, Blinkit or Instamart store units \[Unknown\].
+The sources expose different unit capabilities. Odoo implements conversion relationships; Magento's decimal-quantity flag and Medusa's free-text unit do not establish equivalent conversion engines. Shopify's pack measurement describes unit-price display. Instacart distinguishes ways of ordering and charging weighted items. I found no public description of how Swiggy, Blinkit or Instamart store units \[Unknown\].
 
 ### Base-unit conversion
 
@@ -336,7 +352,7 @@ Simplified from Odoo's unit table and the ordered, delivered and invoiced counte
 
 ## Task 3: Billing across physical items and subscriptions
 
-In every system I could read, the invoice or order line is its own row that stores quantity, unit price and tax as they were at the time of sale, and the type-specific pricing rule (quantity × rate for goods, plan × duration for subscriptions) runs once to produce those numbers instead of being recomputed from the live catalog later. \[Confirmed\] for Saleor, Medusa, Magento, Odoo, Spree, Shopify and Stripe; \[Unknown\] for Amazon, whose billing internals are not public.
+The inspected systems preserve commercial amounts on order or invoice lines, but they differ in copied fields and tax representation. Spree's inspected line model, for example, still reads name and SKU through its retained variant. A cart or draft invoice can be recalculated; preservation matters at the relevant order commitment or invoice finalization boundary. Pricing is applied again for a later subscription period, without rewriting a finalized earlier invoice. The evidence below concerns code or public objects, not Amazon's billing internals \[Unknown\].
 
 ### 3.1 How lines point at different kinds of items
 
@@ -380,7 +396,7 @@ A subscription does not have to share the product line table. The three systems 
 
 Mixed baskets work by accepting both kinds of price in one request. Stripe Checkout in subscription mode takes recurring and one-time prices together; the one-time items “will be on the initial invoice only”, with limits of 20 recurring and 20 one-time lines \[Confirmed: [Checkout Sessions](https://docs.stripe.com/api/checkout/sessions/create)\]. I found no public description of how Amazon combines a Prime plan and a physical item in one charge \[Unknown\].
 
-Reconciliation is plain arithmetic over lines: header net is the sum of line net, header tax is the sum of line tax, and gross is net plus tax. The example below derives the header from the lines and asserts it. Real systems add rounding rules (round each line, or round the invoice) that differ by jurisdiction, and I did not research them \[Unknown\].
+In the example, header net and tax sum the stored line amounts, and gross is net plus tax. That is a chosen reconciliation policy, rather than a universal tax algorithm. Invoice-level rounding can differ from summing independently rounded line taxes; see [Rounding has three separate questions](#rounding-has-three-separate-questions).
 
 None of the open-source cores I read model subscriptions. Searching Saleor's product, order and warehouse models for “subscription” and “bundle” found nothing, Spree's core app, lib and db folders have no files named for subscriptions or bundles, and the Odoo 19 community checkout has no subscription addon \[Confirmed for the folders searched\]. That fits subscriptions living in a separate billing system, as in Stripe \[Inferred\].
 
@@ -393,7 +409,7 @@ None of the open-source cores I read model subscriptions. Searching Saleor's pro
 
 ### 3.4 Worked example: 3 packets of chips plus a 3-month video plan
 
-This is an illustration I built and ran in SQLite on 22 Oct 2026, not a description of any company's system. Money is stored in paise and tax in basis points; the prices, plans and tax rates are invented.
+This illustration was reported as run in SQLite on 22 Oct 2026; the original `worked_example.py` is absent from this checkout. The inline arithmetic is checked separately in the continuation. It is not a description of any company's system or a complete subscription engine. Money is stored in paise and tax in basis points; the prices, plans and tax rates are invented and tax-exclusive.
 
 ```sql
 CREATE TABLE product    (product_id INTEGER PRIMARY KEY, sku TEXT UNIQUE, name TEXT, unit_price INTEGER, tax_bp INTEGER);
@@ -409,6 +425,8 @@ CREATE TABLE invoice_line (
   period_months INTEGER, period_start TEXT, period_end TEXT,   -- NULL for goods
   tax_bp INTEGER, net INTEGER, tax INTEGER, gross INTEGER);
 ```
+
+The generic `item_type`/`item_id` pair deliberately cannot enforce a foreign key to either source table. A missing product or plan could therefore be referenced. That is a limitation of this billing illustration, not a recommendation: typed references or a common sellable identity are alternatives with different integrity guarantees. The schema also omits agreement, renewal and payment records; the connected model below supplies those concepts without pretending they exist in this example.
 
 The two pricing rules run when the cart is turned into lines:
 
@@ -434,7 +452,172 @@ The assertion gross = net + tax = sum of line gross passes. Then the catalog cha
 
 - How Amazon bills a subscription next to a physical item, and what its invoice lines look like internally. \[Unknown\]
 - How Swiggy, Zomato or Blinkit bill mixed carts. \[Unknown\]
-- Tax rounding rules per jurisdiction (line-level or invoice-level). \[Unknown\]
+- A jurisdiction-by-jurisdiction rounding policy. The continuation establishes documented calculation alternatives and the text of India's CGST Section 170; it does not establish a complete compliance policy for every invoice.
+
+## Connecting the pieces
+
+Added 25 Oct 2026. This section is a teaching model \[Inferred\], assembled from the evidence above and the additional primary sources linked here. Its names, relationships and policies are explicit choices for understanding a purchase; they are not a reconstruction of any one company's system. Completion means being able to reason through this model and its alternatives, even where private company details remain \[Unknown\].
+
+### Start with the meaning of each record
+
+Instacart's 11 Jan 2022 [catalog localization article](https://company.instacart.com/tech-innovation/catalog-localization-more-than-just-a-translation) supplies the missing bridge between product identity and place: parent product, retailer-level product, and store-level product, with price, availability and promotion at the store level \[Confirmed\]. Its [minimum catalog requirements](https://docs.instacart.com/catalog/catalog_inventory_file/specifications/minimum-catalog-requirements/) identify `location_code`, `lookup_code`, `cost_price_per_unit` and `cost_unit` \[Confirmed, read 25 Oct 2026\]. This is evidence for separating meanings, not a requirement to copy those exact entities.
+
+| Record in this model | One record means | Owner and relationships | What can change, and what must be retained |
+| --- | --- | --- | --- |
+| Product and variant | A product family; one identifiable sellable configuration within it | Catalog owns products; a product has one or more variants in this model, including a default variant for an item with no choices | Descriptive content can change. A barcode or merchant SKU identifies something within its defined namespace; neither is automatically a global database key |
+| Listing or offer | A seller offers a variant in a location/channel context | Seller owns the commercial offer; one variant can have many offers | Publication, availability rules and commercial terms vary independently of product identity |
+| Price | An amount in a currency for an offer or plan under stated conditions | Pricing owns prices; an offer/plan can have multiple prices by interval, time or context | Retain the selected price identity and agreed amount on the transaction; changing a future price must not rewrite a finalized invoice |
+| Inventory item and balance | A physical resource; its stock at one location | Inventory owns resources and balances; variants map to resources through quantity requirements | A simple item requires one resource; a kit may require several; variants can share a resource. Services may require none. On-hand, reserved and available are different quantities |
+| Cart and order line | A proposed selection; an accepted commercial commitment | Checkout owns the cart; order management owns the accepted order and its lines | Cart quotes may expire. Accepted quantity, selected options, agreed unit rate and later adjustments must remain explainable |
+| Fulfillment line | A quantity picked, dispatched or delivered against a commitment | Fulfillment owns operational records; an order line can have zero or several fulfillment allocations | Physical quantity and status change. Preserve the link to the originating order line, including when a bundle becomes component picks |
+| Invoice and invoice line | A bill and one part of the billed amount | Billing owns documents; a bill has lines; an order line may be billed in multiple allocations, and recurring lines may originate from an agreement | Drafts may change. Finalized commercial values are retained; subsequent credits are linked adjustments |
+| Payment and refund | A collection lifecycle; a return of collected money | Payments owns collection records and their allocation to bills; a collection may involve several attempts | Attempted, authorized, collected and refunded are different facts. A refund is not proof that goods were physically returned |
+| Subscription agreement and entitlement | A customer's continuing terms; permission to use a feature | Subscription management owns the agreement and billed periods; access control owns grants derived from current policy | Plan, interval, period and status are separate facts. One agreement can produce many invoices; access can end without deleting those invoices |
+
+The stock mapping is documented directly in [Medusa's inventory kits](https://docs.medusajs.com/resources/commerce-modules/inventory/inventory-kit): a variant may link to multiple inventory items, and inventory items may be shared across variants \[Confirmed, checked 25 Oct 2026\]. Thus “SKU = stock row” fails for kits and shared stock \[Inferred\]. The compact schemas earlier intentionally omit these additional boundaries.
+
+```mermaid
+flowchart LR
+    Product[Product family] -->|one to many| Variant[Sellable variant]
+    Variant -->|one to many| Offer[Seller and location offer]
+    Offer -->|one to many| Price[Price and conditions]
+    Variant -->|zero to many stock requirements| Resource[Inventory item]
+    Resource -->|one balance per location| Stock[Stock balance]
+    Offer -->|selected in| OrderLine[Accepted order line]
+    OrderLine -->|zero to many allocations| Fulfillment[Fulfillment lines]
+    OrderLine -->|zero to many billing allocations| InvoiceLine[Invoice line]
+    Agreement[Subscription agreement] -->|billed periods| InvoiceLine
+    Agreement -->|access policy| Access[Entitlement]
+    InvoiceLine -->|many to one| Invoice[Invoice]
+    Invoice -->|settlement allocations| Payment[Payment lifecycle]
+    Invoice -->|zero to many| Credit[Credit note]
+    Payment -->|zero to many| Refund[Refund]
+```
+
+Edges describe logical references or allocations, not mandatory direct foreign keys. A requirement linking a variant to a resource carries quantity and unit; an allocation linking a fulfillment or invoice line to an order line carries the attributable quantity or amount. The diagram's offer is scoped to one location for simplicity; a warehouse network can separate selling location from fulfillment location. It also omits customer links: each cart/order/agreement belongs to a customer in this example. Different sellers, currencies or legal issuers can require separate documents even when the UI shows one basket. One basket therefore does not prove one order, invoice, payment or database \[Inferred\].
+
+### Choose a boundary by the behavior it must preserve
+
+These are design trade-offs derived from the documented mechanisms \[Inferred\], not claims that a named company uses the preferred column.
+
+| Question | Choose this when | Alternative and consequence |
+| --- | --- | --- |
+| Is this a variant or a modifier? | A separately identified sellable configuration needs its own commercial or stock treatment | A selection such as extra cheese can be a modifier with selection limits and a price effect; it may still consume inventory. “Modifier” does not mean “untracked” |
+| Is three packets a quantity, pack unit or bundle? | Quantity buys three singles; a pack unit converts three pieces of the same resource; a bundle carries commercial identity and component requirements | A quantity discount can price three singles without creating a bundle SKU. A physical sealed multipack may instead be its own stocked item. Price alone does not determine the stock model |
+| Is the combo fixed or configurable? | Fixed components can use a recipe | A configurable combo needs allowed choices and selected components on the order. Retain the selection or recipe version so a later recipe change cannot alter an earlier pick requirement |
+| Where do extra attributes belong? | Stable fields that need strong relational checks fit columns or typed extension records | JSON suits variable attributes but needs validation; EAV makes attributes independently managed but adds joins and type-validation work. A type column does not replace validation of each type's behavior |
+| Common sellable or typed references? | A common identity lets lines reference goods and services uniformly | Separate nullable foreign keys can preserve type-specific integrity with an exactly-one rule. A generic type/id pair loses ordinary FK enforcement; see the inline billing example |
+| How much infrastructure should verticals share? | Share capabilities with common semantics, such as identity or payment collection | Separate behavior where lifecycles differ, such as a restaurant preparation versus an ambulance booking. A shared capability can be in one application or behind an API; it does not imply one database |
+
+The earlier Odoo service and Uber layering examples establish alternatives for the ambulance case; neither establishes Blinkit's implementation. Whether a company chooses one table or several is a later physical-design decision. First establish the entity's identity, ownership, constraints and lifecycle.
+
+Unit conversion also needs a boundary: kilograms and grams measure compatible dimensions; kilograms and litres need additional information such as density. A packet's declared 52 g content is not a promise that every packet's actual weight is exactly 52 g. Preserve the unit attached to each quantity and the conversion used; a bare number or free-text label cannot enforce those distinctions \[Inferred\].
+
+### Trace one purchase from offer to settlement
+
+This synthetic merchant sells goods and a digital plan in INR under one issuer. The purpose is to connect the existing examples, not to assert that a real delivery app accepts such a basket. All amounts are tax-exclusive, rates are invented, there are no delivery fees or extra discounts, and tax rounds half up per line to paise. The merchant collects only after weighing, locks the accepted unit rates, and permits the explicitly approved weight change below. A different payment or repricing policy needs a different trace.
+
+**1. Catalog and offer.** `CHIPS-52G` is the identified salted packet; 52 g is package content, while the stock unit is one packet. Store A offers it at Rs 20 with 20 packets on hand and none reserved. Store B offers the same variant at Rs 22 but has zero available. Changing store changes the offer, not the packet's identity. A catalog page alone does not guarantee available stock.
+
+Store A also offers `CHIPS-X3` at Rs 55, requiring three `CHIPS-52G` packets per combo. Tomatoes cost Rs 40/kg. The Video-only plan has a distinct three-month price of Rs 399; its agreement preserves that selected price until an explicit terms change. Its 18% tax and the chips' 12% tax are the same invented rates used above; tomatoes use an invented 0% rate here.
+
+**2. Cart and accepted order.** Order `O101`, dated 2026-10-21, accepts three single packets, two combos, an estimated 1.000 kg of tomatoes, and one three-month plan. Its estimated gross is Rs 701.22. The order records the selected combo and subscription price, agreed rates, ordered quantity and the weight-adjustment permission; the cart remains the proposal from which it was accepted. A stale quote or a changed selection would require revalidation rather than silent use of the old total.
+
+**3. Reserve and prepare fulfillment.** The chip requirement is `3 + (2 × 3) = 9` packets. In this model, reserving changes Store A from `(on_hand=20, reserved=0)` to `(20, 9)`; available becomes 11. After successful collection in step 5, dispatch changes it to `(11, 0)`, still 11 available. Do not subtract the same nine once for singles, again for combos, and again for the reservation. The reservation decision must protect the combined component demand against competing orders; a displayed bundle count alone cannot guarantee it.
+
+The picker weighs 1.070 kg of tomatoes. Preserve `ordered=1.000`, `fulfilled=1.070`, `charged=1.070` kg; the final net is `1.070 × 40 = Rs 42.80`. Given 10.000 kg initially and no other claims, the reservation increases from 1.000 to 1.070 kg before dispatch; afterward on-hand is 8.930 kg and reserved is zero. This assumes stock and customer permission cover the extra 0.070 kg. Otherwise it needs a quantity or approval decision before billing.
+
+A sealed `CHIPS-X3` multipack would be a different inventory policy: dispatch two pack resources, unless an explicit assembly/repacking operation had first consumed six singles to create them. It would not silently share both balances. The video plan produces access for an agreed period, not a warehouse pick.
+
+**4. Finalize the bill.** After weighing, invoice `I101` copies the commercial descriptions, quantities, rates, taxes and subscription period. The bundle remains one priced line here; component picks still reference its order line. A component-line invoicing design would need to allocate the bundle amount without billing the parent amount again.
+
+| Invoice line | Quantity and rate | Net | Tax | Gross |
+| --- | --- | --- | --- | --- |
+| Chips 52 g, salted | 3 × Rs 20 | Rs 60.00 | Rs 7.20 | Rs 67.20 |
+| CHIPS-X3 virtual combo | 2 × Rs 55 | Rs 110.00 | Rs 13.20 | Rs 123.20 |
+| Tomatoes, actual weight | 1.070 kg × Rs 40/kg | Rs 42.80 | Rs 0.00 | Rs 42.80 |
+| Video-only, three months | 1 × Rs 399; 2026-10-21 to 2027-01-21 | Rs 399.00 | Rs 71.82 | Rs 470.82 |
+| **I101** | | **Rs 611.80** | **Rs 92.22** | **Rs 704.02** |
+
+`611.80 + 92.22 = 704.02`; the change from the estimate is Rs 2.80 for actual weight. Changing tomorrow's chips offer to Rs 22 and the plan's new-customer price to Rs 449 leaves `I101` unchanged. The earlier two-line invoice remains a separate example totaling Rs 538.02.
+
+**5. Collect, dispatch and activate.** Payment lifecycle `P101` collects Rs 704.02, is allocated to `I101`, and permits its paid state. The prepared goods are then dispatched using the stock movements calculated in step 3. Agreement `S1` records the customer, selected three-month price, billing interval, period boundaries and renewal choice. An entitlement grants Video-only access for the paid period; shipment state remains independent. A bill can be issued before it is paid, and a payment can succeed before physical delivery.
+
+If initial collection fails, the example leaves the bill open and holds dispatch/access; abandoning the order releases its reservations and requires a recorded billing disposition. If collection succeeds but dispatch fails, retain the successful payment and resolve fulfillment or issue an appropriate credit/refund. Neither failure can be repaired by relabeling the whole purchase with a single ambiguous status \[Inferred: example policies\].
+
+Stripe documents a [PaymentIntent](https://docs.stripe.com/payments/payment-intents) as a payment lifecycle that can include multiple charge attempts \[Confirmed\]. Its [invoice workflow](https://docs.stripe.com/invoicing/integration/workflow-transitions) distinguishes finalizing a draft from paying the resulting open invoice \[Confirmed\]. These support retaining independent identities and states; they do not prescribe the synthetic merchant's order of collection and fulfillment \[Inferred\].
+
+### Renewal, failure, cancellation and correction
+
+A plan is a definition of what is offered; an interval price is how much one period costs; an agreement is the customer's continuing arrangement. A three-month access pass can instead be a one-time sale with an expiry, with no automatic renewal. The original invoice schema cannot tell these apart without additional agreement behavior \[Inferred\].
+
+Stripe's [subscription overview](https://docs.stripe.com/billing/subscriptions/overview) documents invoices for recurring periods and distinct subscription, invoice and payment states. Failure handling is configurable, and `active` does not establish that every invoice has been paid \[Confirmed\]. Its [Entitlements API guide](https://docs.stripe.com/billing/entitlements?dashboard-or-api=api) separately models feature access and notifies an application when grants change \[Confirmed\]. In our illustration the access policy is stricter: only paid periods grant access, with no grace period. This is a teaching choice, not a statement of Stripe's default behavior.
+
+| Event or branch from S1 | Agreement and bill | Payment and access | Preserved facts |
+| --- | --- | --- | --- |
+| Initial purchase succeeds | S1 active; I101 paid | P101 collected; access until 2027-01-21, exclusive | Goods, combo and initial subscription charge stay on I101 |
+| Automatic renewal on 2027-01-21 | S1 continues on its agreed Rs 399 interval price; new I102 is Rs 470.82 for 2027-01-21 to 2027-04-21 | A new collection is needed; no physical items recur | I101 is not reused; later new-customer catalog prices do not silently change these agreed terms |
+| Renewal payment fails | I102 remains open; the example agreement is past due | Failed attempt does not collect money; access expires under the example's no-grace policy | Previously paid access and I101 are not erased |
+| Retry succeeds on 2027-01-22 | I102 paid; S1 returns to active | Successful collection settles I102; access resumes through 2027-04-21 | The billed period remains anchored to 2027-01-21; a retry does not create a second renewal invoice |
+| Alternative: cancellation requested on 2026-11-21 for period end | S1 scheduled to end on 2027-01-21 | Already paid access continues until then; no I102 for the next cycle in this fixed-price example | Cancellation request time and effective end time differ; I101 stays in history |
+| One paid single packet is credited | Link C101 to the relevant I101 line: Rs 20 net + Rs 2.40 tax = Rs 22.40 credit | A separate successful R101 refund returns Rs 22.40; collected less refunded is Rs 681.62 | Original invoice gross stays Rs 704.02. Restock only after the physical return is received and accepted as sellable under the example policy |
+
+Stripe's [cancellation guide](https://docs.stripe.com/billing/subscriptions/cancel) supports immediate or period-end cancellation, with refund/proration choices rather than an automatic refund \[Confirmed\]. Its [credit-note guide](https://docs.stripe.com/invoicing/dashboard/credit-notes) distinguishes reducing a finalized bill from recording payment: a credit can reduce an unpaid invoice, become customer credit, or be associated with a refund. A fully credited open invoice can even become `paid` without money being collected \[Confirmed\]. Thus credit note, refund, cancellation and return cannot be synonyms \[Inferred\].
+
+```mermaid
+sequenceDiagram
+    participant Customer
+    participant Commerce
+    participant Stock
+    participant Billing
+    participant Payments
+    participant Access
+    Customer->>Commerce: Select offers and three-month plan
+    Commerce->>Stock: Reserve combined component demand
+    Stock-->>Commerce: Weighed quantity and reserved picks
+    Commerce->>Billing: Final amounts and agreed period
+    Billing->>Payments: Collect I101
+    Payments-->>Billing: Collection succeeded
+    Billing-->>Commerce: I101 settled, goods can dispatch
+    Commerce->>Stock: Dispatch reserved goods
+    Billing-->>Access: Paid-period eligibility for S1
+    Access-->>Customer: Grant Video-only access
+    Billing->>Payments: Collect renewal I102 at next period
+    alt Renewal fails
+        Payments-->>Billing: Failed attempt, bill still open
+        Billing-->>Access: No paid renewal under example policy
+        Access-->>Customer: Access expires, retry can restore it
+    else Renewal succeeds
+        Payments-->>Billing: New period paid
+        Billing-->>Access: Extend eligibility for that period
+    end
+```
+
+This diagram is the synthetic policy's sequence. It does not imply that billing directly controls every production entitlement service, that collection always precedes dispatch in other systems, or that the steps are one atomic transaction. Payment, stock and access systems can complete at different times; retain their identities and reconcile their outcomes. For example, payment success with a failed access update requires restoring the grant from paid-period facts, rather than collecting again. Stripe's entitlement guide provides a retrieval API for reconciliation after missed updates \[Confirmed\].
+
+### Rounding has three separate questions
+
+1. **Calculation:** at what precision is tax calculated, and is the price inclusive or exclusive of it? **Presentation:** which rounded amounts appear on lines and totals? **Settlement or statutory payment:** what amount is finally payable under the applicable rules? These stages need explicit policies; they need not use the same rounding boundary \[Inferred\].
+2. **Documented platform alternative:** Stripe's [tax-rate rounding documentation](https://docs.stripe.com/tax/tax-rates#rounding) lets manual-tax invoices round each line or aggregate taxable amounts per tax rate before rounding. Automatic Stripe Tax uses invoice-level rounding \[Confirmed, checked 25 Oct 2026\]. This is product behavior, not a worldwide legal rule.
+3. **Indian statutory text:** CGST Section 170 on the [CBIC Act page](https://cbic-gst.gov.in/hindi/CGST-bill-e.html) rounds amounts payable or due under the Act to the nearest rupee, with fifty paise rounded upward \[Confirmed as the published statutory text\]. The passage does not specify a line-versus-invoice tax-calculation algorithm. Treating it as an instruction to round every product line, or every retail checkout total, would go beyond this evidence \[Inferred\].
+
+An invented example exposes the difference: two separate Rs 0.05 lines at 10% exclusive tax each produce Rs 0.005 unrounded tax. Half-up rounding per line gives Rs 0.01 + Rs 0.01 = Rs 0.02; rounding the combined Rs 0.10 base at 10% gives Rs 0.01. Record the selected method and any allocated rounding remainder so totals reconcile. This example illustrates arithmetic only; it does not choose a jurisdiction's legally applicable method. A whole-rupee rounding adjustment, where actually required, belongs to that separately identified payable amount rather than a silent change to the historical unit price.
+
+### Check the model by changing the requirement
+
+Try each prediction before reading its explanation. These checks establish what the report explains; they do not claim that a reader has already demonstrated mastery.
+
+| Change | Prediction and explanation | Evidence or boundary |
+| --- | --- | --- |
+| Switch from Store A to B | Same chips variant, different offer and price; B cannot supply it from zero available stock | Instacart's documented product/retailer/store distinction; exact availability policy here is synthetic |
+| Change shirt size, then add cheese to a burger | Size can select a different variant; cheese is a modifier selection. Both require valid allowed choices; either may affect price and resource consumption | Task 2a and UrbanPiper integration rules; labels alone do not determine storage |
+| Order two CHIPS-X3 combos and three singles | Nine packets required, not two, six or eleven. With 20 unreserved packets, 11 remain after dispatch | Odoo/Medusa mechanics plus the worked reservation policy; prepacked bundles need a different resource mapping |
+| Pick 1.070 kg against a 1.000 kg order | Retain both quantities; bill Rs 42.80 only under the stated permission and quantity policy | Task 2c; a packet's printed weight is a different concept from weighed quantity |
+| Rename or reprice tomorrow's catalog | Retain finalized I101 at Rs 704.02 and the original two-line example at Rs 538.02 | Task 3's snapshots and Stripe finalization boundary; drafts can still change |
+| Decline renewal, retry, or cancel at period end | A failed attempt does not erase a bill; retry settles the same period; scheduled cancellation preserves paid access until its effective end | Subscription and payment sources above; no-grace access is the example policy |
+| Refund one packet without a physical return | Rs 22.40 refund can follow a credit, while stock remains unchanged until an accepted return; S1 is unaffected | Credit-note evidence plus the example's stock policy |
+
+The model is complete for these learning questions: each has record meanings, relationships, a worked consequence, alternatives and a failure boundary. Payment-network internals, warehouse optimization, a worldwide tax policy and private company schemas remain separate research subjects. They are unnecessary to explain these transitions.
 
 ## What I couldn't find
 
@@ -442,10 +625,10 @@ Most gaps are company internals: Swiggy, Zomato, Blinkit, Amazon and Flipkart pu
 
 | Gap | What I found instead | Closest analogue used |
 | --- | --- | --- |
-| Whether Swiggy's Food, Instamart, Bolt and Toing share databases, and how the app presents them as tabs | statements that Bolt is a Food tile, Instamart has its own app, and Toing reuses existing tech and infrastructure | Grab (shared order platform), Uber (edge gateway, shared fulfillment), DoorDash |
+| Whether Swiggy's Food, Instamart, Bolt and Toing share databases, and how the app presents them together | 2021 shared-primitives article; Bolt's launch placement; distinct app shells and common publisher; Dynamic Widget covers some Track/Search widgets, not the home-page vertical composition | Grab (modular client and shared order platform), Uber (edge and fulfillment); none establishes Swiggy's database layout |
 | How Bolt listings relate to the Food catalog | press releases describing a curated menu from restaurants already on Swiggy | a filtered view of Food (my inference, Task 1a) |
-| Toing's shared login, accounts and database | letter statements and user metrics | none |
-| Zomato and Blinkit backends and catalogs | Eternal's letter says the going-out offering moves to a separate District app; nothing on backends | Grab, DoorDash |
+| Toing's shared login, accounts and database | letter statements, user metrics and shared App Store publisher; none establishes account or database sharing | conceptual distinction between publisher, identity matching and shared account storage |
+| Zomato and Blinkit transactional catalog, order and service boundaries | Eternal's app statement; Blinkit engineering articles cover CDC, analytics and search; Grofers' 2017 post covers its inventory-led business; UrbanPiper documents menu integration | Grab, DoorDash and the connected model; external contracts do not establish internal tables |
 | Where Bolt and Instamart sit in the Swiggy app today (Oct 2026) | launch-time placement and the standalone Instamart app | none |
 | Instamart's delivery-time promise (the brief says 10 to 15 minutes) | the current App Store listing states no delivery time | none |
 | Blinkit's ambulance: operator, payment, cart flow, data model, any official price | Jan 2025 press reports (Business Today, MediaNama, YourStory): bookable in the app, staffed by a paramedic, an assistant and a driver, with an unofficial price starting at Rs 2,000 | Odoo's service type, Uber's layering |
@@ -454,8 +637,10 @@ Most gaps are company internals: Swiggy, Zomato, Blinkit, Amazon and Flipkart pu
 | How dark stores expand combos into picks and deduct stock | nothing public | Odoo kits, Medusa inventory kits, Shopify bundles |
 | How quick-commerce platforms price and charge loose items | nothing public | Instacart's weighted-item modes |
 | Odoo's subscription implementation | the community code has no subscription addon, and the docs page I opened did not return its body | Stripe, Shopify selling plans, Medusa's subscription recipe |
-| Tax rounding rules per jurisdiction | not researched | none |
+| A complete tax rounding policy for each jurisdiction | Stripe documents line/invoice calculation alternatives; CGST Section 170 establishes nearest-rupee rounding for amounts under the Act, without selecting a per-line algorithm | the connected model separates calculation, presentation and payable-amount rounding; worldwide compliance remains outside this research |
 
 ### How the evidence was gathered, and its limits
 
 Open-source code was read from local clones at the commits linked in each citation. Web pages were read through a fetch tool that returns summaries, so I quote only short phrases and link every claim so you can check it. A few pages were unusable: Swiggy Bytes' serviceability post blocks automated readers (I did not work around that), Amazon Seller Central help pages need a login, the GS1 Navigator page needs JavaScript (I used GS1 Germany's copy of the GDSN attribute instead), and Amazon's Orders API model page would not load.
+
+Those are the original collection limits. The 25 Oct continuation used primary-page text and indexed excerpts for the specifically recorded additions; it did not reopen the whole register or rerun the historical 38-permalink check. Where a page failed, the log distinguishes inherited evidence from a new reading. Conceptual relationships and synthetic policies are tagged as inference rather than attributed to a private company. See the [research log](Research%20log%20how%20the%20catalog%20and%20billing%20report%20was%20built.md#continuation-on-25-oct-2026) for sources, lead dispositions and verification.
