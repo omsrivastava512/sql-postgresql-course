@@ -14,14 +14,14 @@ This log was rebuilt from this chat, the saved sub-agent records and the report'
 
 ## Where things stand
 
-The three pending corrections are applied, and the report now connects the task sections through a purchase model, alternatives, worked traces and understanding checks. Completion concerns the conceptual model, as clarified by the user; it does not require discovering every private company implementation.
+The three pending corrections are applied. The first continuation connected the task sections but its completion claim was too broad: the user's final check identified missing row-level variant resolution, seller offers and checkout writes. The database walkthrough follow-up below closes those gaps with explicit SQL and executed acceptance checks. Completion concerns the demonstrated learning questions, not discovering every private company implementation or asserting that the reader has already mastered them.
 
 | Item | State |
 | --- | --- |
-| Report | Conceptual completion on 25 Oct: 10 main sections, including the connected model; the original revision-25 counts are preserved in the historical verification record |
+| Report | 11 main sections, including the connected model and the database walkthrough; prior counts and completion claims are retained as dated history |
 | Evidence checked | Original checks: 22–24 Oct. Targeted continuation readings: 25 Oct; see its separate register |
-| Worked example | The original log says `worked_example.py` was sent with the report. That file is absent from this checkout. Inline examples supply the current deliverable; no script was restored or newly claimed to have run |
-| Checks done | Historical permalink and quote checks remain historical. Current arithmetic, links, diagrams and scope checks are recorded separately below |
+| Worked example | The historical `worked_example.py` remains absent. The current deliverable includes seven new inline PostgreSQL blocks, executed together in a disposable in-memory engine; no teaching script was added |
+| Checks done | Historical checks remain dated. The database follow-up separately records execution of all seven SQL blocks and 41 assertions covering reads, writes, constraints, rollback and snapshots |
 | Open | Company internals and a worldwide tax policy remain explicitly limited; none blocks the stated learning questions |
 
 ## Method and evidence rules
@@ -212,7 +212,7 @@ The user clarified completion on 25 Oct: finish the mental/conceptual model need
 | 7. Jurisdictional rounding | Learning gap addressed; worldwide compliance deferred | Stripe's documented line/invoice alternatives and CGST Section 170 support separate calculation, presentation and statutory-payable questions. They do not establish a universal invoice policy |
 | 8. Private internals and Odoo subscriptions | Retained as bounded unknowns; concepts covered by documented alternatives | Inventory kits, weighted-item modes, marketplace variant contracts and subscription lifecycles supply the required reasoning. The report does not claim the named private platforms use those implementations, or infer enterprise Odoo code from community folders |
 
-There is no outstanding report-writing task for the approved conceptual scope. A future investigation should start only with a specific unanswered prediction or design decision that the connected model cannot explain. New company facts can improve examples without reopening conceptual completion by themselves.
+The first continuation treated lifecycle coverage as completion. On reviewing the original brief, the user clarified that understanding actual storage and backend operations is essential. That exposed a specific gap rather than a need for more company examples: selection-to-variant resolution, two sellers' commercial and stock records, checkout writes and integrity enforcement. See [Database walkthrough follow-up on 25 Oct 2026](#database-walkthrough-follow-up-on-25-oct-2026) for the resulting work and acceptance evidence. Future investigation should likewise start from a specific unanswered learning question.
 
 ## Original report map (revision 25)
 
@@ -284,7 +284,7 @@ The model's entity meanings, owners, cardinalities and historical values are doc
 | Cart, order, invoice, payment and corrections | Record table, I101 trace and credit/refund branch | Final bill Rs 704.02; Rs 22.40 refund leaves Rs 681.62 net collected; return/restock and cancellation are independent |
 | Rounding and reconciliation | "Rounding has three separate questions"; Stripe docs and CBIC text | Separate-line versus aggregated tax differs by one paise in the counterexample; global legal policy remains unestablished |
 
-Each row has an explanation, evidence, a consequence and an explicit limit. The report's prediction table supplies answers for independent understanding checks. This audits the document's coverage; it does not claim that the user has already passed those checks. New sources are warranted only if a remaining learning question fails this test.
+Each row records the first continuation's conceptual coverage. That audit established lifecycle explanations, not concrete storage completeness: the subsequent user review exposed the missing variant/seller/write walkthrough. The follow-up below supersedes the earlier completion assessment. Neither audit claims that the user has already passed the understanding checks.
 
 ### Continuation verification
 
@@ -298,3 +298,72 @@ Each row has an explanation, evidence, a consequence and an explicit limit. The 
 | Diff and scope | `git diff --check` passed. Only the report and log are modified; no source, dependency, script or Git history changes. Course SQL/database tests were not run because no course or executable behavior changed |
 
 No verification here asserts that the missing historical Python file was recovered or run, that all external links currently resolve, that all company facts were refreshed, or that a reader has already mastered the material. The completion audit concerns the approved conceptual coverage and its stated evidence limits.
+
+## Database walkthrough follow-up on 25 Oct 2026
+
+### Why this follow-up was needed
+
+The original brief asks how sellables are stored and how backend operations connect them. The user's examples are probes into that model, rather than the limit of the desired explanation. The first continuation supplied record meanings and lifecycles, but still did not demonstrate a full product/options/variant/seller/stock read-and-write path. The user authorized one focused deepening pass, using existing research and adding sources only for specific unanswered mechanics.
+
+The agreed deliverable remains these two Markdown documents. No runnable application, standalone lab, dependency, migration or test file was requested or added. The inline SQL is a synthetic teaching design, identified as inference, rather than a reconstruction of a named company's storage.
+
+### Repository preflight
+
+Live upstream `omsrivastava512/sql-postgresql-course` default `main` was checked again before editing. Remote and local HEAD were both `9fbadbedca2e2828d619d9d47b47a6f31baf0887`: exactly 0 ahead / 0 behind, with a clean working folder. Related open/closed pull-request and issue searches returned no matches. Remote path history contained `97b7030` and `9fbadbe`; the latter's body explicitly named the row-level walkthrough as remaining work. No equivalent implementation superseded this follow-up, and no branch update or Git mutation was performed during it.
+
+### Storage decisions illustrated
+
+- **Options and variants:** product-owned option/value records, one choice per variant/option, and a canonical sorted combination key. Composite FKs enforce ownership; a deferred check compares the key and complete choice set. Blue/M, Blue/L and Red/M exist, while Red/L does not.
+- **Catalog editing:** before-triggers acquire the product lock, and deferred triggers validate the completed state. This teaches the difference between one-row constraints and a multi-row invariant. The broad per-product validation is intentionally small-scale; production performance and multi-product deadlock handling are explicit limits.
+- **Seller identity and stock:** sellers 7 and 8 share variant 101 but have separate offer IDs, seller SKUs, prices and location balances. Stock is keyed by seller/variant/location, not copied when a price changes. The example deliberately allows one offer per seller/variant and uses INR throughout.
+- **Reads:** requested IDs derive a canonical key, then join variant, selected seller's offer and that seller's stock location. Existing-but-unoffered, nonexistent, invalid and incomplete selections have separate meanings.
+- **Writes:** a short transaction rechecks choices and accepted prices, conditionally reserves two shirts, and stores goods and subscription lines. Composite references and an exclusive-choice rule replace the earlier unchecked polymorphic pointer.
+- **Billing:** accepted descriptions, option labels, amounts and periods are copied into invoice lines. The example demonstrates initial billing and snapshot retention, while identifying finalization permissions, durable fulfillment/reservation identities, recurring agreements and payment integration as separate lifecycle work.
+
+The existing [variant code](How%20commerce%20platforms%20model%20catalogs%20and%20billing.md#task-2a-variants) and [seller/location evidence](How%20commerce%20platforms%20model%20catalogs%20and%20billing.md#start-with-the-meaning-of-each-record) remain the research basis. The new example chooses and tests one coherent relational arrangement without attributing its exact schema or rules to those sources.
+
+### Targeted source checks
+
+The following official PostgreSQL 17 documentation was read on 25 Oct. It supports the SQL mechanisms; execution below used the separately identified PostgreSQL 18.6-based embedded engine.
+
+| Source | Relevant evidence |
+| --- | --- |
+| [Constraints](https://www.postgresql.org/docs/17/ddl-constraints.html) | Composite foreign keys and unique keys; nullable CHECK/FK behavior; ordinary CHECK constraints do not enforce cross-row invariants |
+| [CREATE TRIGGER](https://www.postgresql.org/docs/17/sql-createtrigger.html) | Deferred constraint triggers can check the final transaction state |
+| [Explicit locking](https://www.postgresql.org/docs/17/explicit-locking.html) | Product and price row locks coordinate catalog changes with the checkout read |
+| [Transaction isolation](https://www.postgresql.org/docs/17/transaction-iso.html) | Read Committed rechecks an UPDATE predicate after waiting for a concurrent updater |
+
+Instacart's existing minimum-catalog-requirements page was rechecked for the seller/location discussion. Attempts to reopen the existing pinned Odoo product and Medusa variant GitHub pages returned cache misses; no new code claim was derived from those failed fetches. Their previous evidence remains attributed to the original readings. The Supabase Postgres Best Practices skill was used for schema/transaction review; it did not add a Supabase integration or replace primary-source evidence.
+
+### Execution and acceptance evidence
+
+All seven SQL blocks in [Database walkthrough](How%20commerce%20platforms%20model%20catalogs%20and%20billing.md#database-walkthrough-selections-sellers-and-stored-transactions) were extracted directly from the saved Markdown and executed sequentially using the repository's installed `@electric-sql/pglite` 0.5.10. The engine reported PostgreSQL 18.6 on WebAssembly. The in-memory database was closed afterward; no persistent database or test artifact was added. This is embedded execution, not native PostgreSQL 17 or live multi-session verification.
+
+A separate check executed 41 assertions against those same extracted blocks. Expected constraint failures were forced with `SET CONSTRAINTS ALL IMMEDIATE` inside transactions and then rolled back; the successful seed and checkout blocks also exercised actual commits.
+
+| Requirement | Observed result |
+| --- | --- |
+| Same variant, two sellers | Both reads resolve variant 101; Seller A returns offer 5001, price 50000 and available 5, while Seller B returns 5002, 55000 and 7 |
+| Actual option combinations | Reversed request order resolves the same variant. Red/L, missing Color, repeated Size, phone Storage on a shirt, and Blue/L without an offer return no purchase result |
+| Choice integrity | Duplicate Size fails with 23505; wrong-product relationships fail with 23503; forged or incomplete combination keys, deleted choices and an added required axis fail with 23514. An optionless product with an empty key succeeds |
+| Seller and heterogeneous-line integrity | Wrong seller offer/location and stock ownership fail with 23503; both/neither source branches and null subscription duration fail with 23514 |
+| Quote changes and shortage | Changed price or insufficient stock rejects checkout; no purchase is left and no reservation is leaked |
+| Accepted order state | Two shirt units reserve Seller A's balance to `(5,2)`, leaving available 3. Seller B remains `(7,0)`. Goods options/price and the subscription's three-month period are stored correctly |
+| Initial mixed invoice | Net 139900, tax 19182 and gross 159082 paise: Rs 1,590.82. Invalid invoice tax or cross-order source references are rejected |
+| Retry and rollback | Repeating order 201 fails on its duplicate key and rolls back the tentative stock update. A later deliberate write failure likewise restores the reservation state |
+| Historical retention | Updating the shirt's title, offer price and plan price leaves the accepted order amounts and all invoice-line fields unchanged |
+
+The tests establish the demonstrated schema and single-session transaction behavior. They do not establish native multi-session lock behavior, production throughput, request-idempotency semantics, invoice immutability permissions, dispatch/release deduplication or a subscription scheduler. The report states those boundaries rather than presenting aggregate balances or copied values as implementations of those workflows.
+
+Final document checks passed: 693 local links across 59 Markdown files; both documents' Markdown table columns and fenced blocks; `git diff --check`; and preservation of all 38 distinct pinned GitHub link targets. The current report has 150 external link marks, 117 exact external targets and 108 page targets ignoring fragments, using the same counting method as the earlier continuation. Only the report and log differ from `9fbadbe`; no Git history operation was performed.
+
+### Final coverage check
+
+| Approved follow-up | Current report evidence |
+| --- | --- |
+| Actual stored rows and relationships | Product, required options, allowed values and three realized variants; two sellers' offers, seller SKUs, prices and stock balances |
+| Backend reads | Selection IDs become a canonical key; one join resolves the variant and chosen seller/location. Expected results include two distinct sellers and rejected or unoffered selections |
+| Backend writes including another item type | The checkout transaction creates goods and subscription lines from locked source records, reserves stock and rolls back failures; the invoice copies accepted facts and reconciles totals |
+| Integrity and failure boundaries | Composite FKs, per-option and per-combination uniqueness, deferred completeness checks and exclusive typed references are executed. Consent, finalization and durable fulfillment operations are explicitly workflow responsibilities |
+
+This closes the row-level gap identified by the user's final review. It establishes a concrete explanation that can be transferred to a new selling scenario; it does not assert mastery by the reader or require another broad company survey. No outstanding document task remains for the approved follow-up.

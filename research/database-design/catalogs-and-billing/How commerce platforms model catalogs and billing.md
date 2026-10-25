@@ -2,11 +2,11 @@
 
 Oct 21, 2026 · @Om Srivastava
 
-Conceptual completion: 25 Oct 2026. The company observations retain their original dates; the connected model and its new evidence are dated separately below.
+Research and database walkthrough updated 25 Oct 2026. The company observations retain their original dates. The connected model is followed by stored rows and SQL that demonstrate the selection-to-billing path.
 
 ## Summary
 
-Several designs recur in the sources: shared capabilities behind app shells, typed product records, independently identified sellable variants, component recipes for virtual bundles, explicit units, and historical amounts on order or invoice lines. These are alternatives with boundaries, rather than one universal schema. Most of Swiggy, Zomato, Blinkit, Amazon and Flipkart is not public, so for those I say so and name the closest documented analogue. For the complete purchase flow, read [Connecting the pieces](#connecting-the-pieces) after the task sections.
+Several designs recur in the sources: shared capabilities behind app shells, typed product records, independently identified sellable variants, component recipes for virtual bundles, explicit units, and historical amounts on order or invoice lines. These are alternatives with boundaries, rather than one universal schema. Most of Swiggy, Zomato, Blinkit, Amazon and Flipkart is not public, so for those I say so and name the closest documented analogue. Read [Connecting the pieces](#connecting-the-pieces) for the lifecycle and [Database walkthrough: selections, sellers and stored transactions](#database-walkthrough-selections-sellers-and-stored-transactions) for actual records, reads, writes and integrity rules.
 
 **How to read the tags.** \[Confirmed\] means stated in a primary source I opened (a company statement, official docs, or code at a pinned commit) and linked. \[Inferred\] means my reasoning from confirmed facts, with the reasoning stated; it also covers anything that rests only on press coverage. \[Unknown\] means I found no public evidence.
 
@@ -617,7 +617,337 @@ Try each prediction before reading its explanation. These checks establish what 
 | Decline renewal, retry, or cancel at period end | A failed attempt does not erase a bill; retry settles the same period; scheduled cancellation preserves paid access until its effective end | Subscription and payment sources above; no-grace access is the example policy |
 | Refund one packet without a physical return | Rs 22.40 refund can follow a credit, while stock remains unchanged until an accepted return; S1 is unaffected | Credit-note evidence plus the example's stock policy |
 
-The model is complete for these learning questions: each has record meanings, relationships, a worked consequence, alternatives and a failure boundary. Payment-network internals, warehouse optimization, a worldwide tax policy and private company schemas remain separate research subjects. They are unnecessary to explain these transitions.
+These explanations establish the lifecycle distinctions. The following walkthrough makes the previously missing storage mechanics concrete. Payment-network internals, warehouse optimization, a worldwide tax policy and private company schemas remain separate research subjects.
+
+## Database walkthrough: selections, sellers and stored transactions
+
+This is one synthetic PostgreSQL design \[Inferred\], not any company's schema. It turns the earlier product/variant joins and seller/location distinction into a purchase you can follow row by row. The choice of normalized options follows the inspected Medusa/Spree models in Task 2a; seller and location separation follows the Instacart evidence above. The SQL demonstrates this example's own rules, rather than proving that those companies enforce identical constraints.
+
+The example sells an Everyday shirt in Size and Color options. Two independent sellers offer the same Blue/M variant at different prices. Seller 7 also sells a Video-only subscription. All amounts are tax-exclusive integer paise in INR; all quantities here are whole units. Shirt tax is an invented 12%, subscription tax an invented 18%. Weighted items and component kits retain the separate resource rules explained earlier; this shirt example maps a variant to one stock resource per seller and location.
+
+### First store the choices, then the combinations that actually exist
+
+A product is not every possible combination of its options. The rows below permit M and L, Blue and Red, but create only Blue/M, Blue/L and Red/M variants. Red/L is therefore unavailable even before stock is considered.
+
+```sql
+CREATE TABLE product (
+  product_id INTEGER PRIMARY KEY, title TEXT NOT NULL
+);
+CREATE TABLE product_option (
+  product_id INTEGER REFERENCES product, option_id INTEGER, name TEXT NOT NULL,
+  PRIMARY KEY (product_id, option_id), UNIQUE (product_id, name)
+);
+CREATE TABLE option_value (
+  product_id INTEGER, option_id INTEGER, value_id INTEGER, label TEXT NOT NULL,
+  PRIMARY KEY (product_id, option_id, value_id),
+  FOREIGN KEY (product_id, option_id) REFERENCES product_option,
+  UNIQUE (product_id, option_id, label)
+);
+CREATE TABLE variant (
+  variant_id INTEGER PRIMARY KEY, product_id INTEGER NOT NULL REFERENCES product,
+  option_key TEXT NOT NULL,
+  UNIQUE (product_id, option_key), UNIQUE (variant_id, product_id)
+);
+CREATE TABLE variant_choice (
+  variant_id INTEGER, product_id INTEGER NOT NULL, option_id INTEGER, value_id INTEGER NOT NULL,
+  PRIMARY KEY (variant_id, option_id),
+  FOREIGN KEY (variant_id, product_id) REFERENCES variant (variant_id, product_id),
+  FOREIGN KEY (product_id, option_id, value_id) REFERENCES option_value
+);
+```
+
+`variant_choice` is the many-to-many link made explicit: variant 101 chooses one Size value and one Color value. The composite foreign keys make those values belong to that variant's product. Its primary key permits only one value per option. The extra `product_id` repeats a relationship deliberately so the database can enforce agreement between both sides.
+
+One rule still spans several rows: every variant needs all its product's required options, and its `option_key` must describe exactly those choices. A unique key alone does not prove that description is truthful. This example uses a deferred check, below, and derives the key by sorting numeric option IDs. PostgreSQL documents [composite keys and the limits of row-local CHECK constraints](https://www.postgresql.org/docs/17/ddl-constraints.html), and [deferred constraint triggers](https://www.postgresql.org/docs/17/sql-createtrigger.html) \[Confirmed\]. The function and its policy are our illustration \[Inferred\].
+
+```sql
+CREATE FUNCTION check_variant_choices() RETURNS TRIGGER LANGUAGE plpgsql AS $$
+DECLARE
+  pid INTEGER;
+  v RECORD;
+  actual_key TEXT;
+  actual_count INTEGER;
+BEGIN
+  FOR pid IN
+    SELECT DISTINCT x FROM unnest(
+      CASE WHEN TG_OP = 'INSERT' THEN ARRAY[NEW.product_id]
+           WHEN TG_OP = 'DELETE' THEN ARRAY[OLD.product_id]
+           ELSE ARRAY[OLD.product_id, NEW.product_id] END
+    ) AS affected(x) ORDER BY x
+  LOOP
+    PERFORM 1 FROM product WHERE product_id = pid FOR UPDATE;
+    IF TG_WHEN = 'AFTER' THEN
+      FOR v IN SELECT * FROM variant WHERE product_id = pid LOOP
+        SELECT count(*), COALESCE(string_agg(option_id::TEXT || '=' || value_id::TEXT,
+                                             ';' ORDER BY option_id), '')
+          INTO actual_count, actual_key FROM variant_choice WHERE variant_id = v.variant_id;
+        IF actual_count <> (SELECT count(*) FROM product_option WHERE product_id = pid)
+           OR actual_key <> v.option_key THEN
+          RAISE EXCEPTION 'Incomplete or inconsistent choices for variant %', v.variant_id
+            USING ERRCODE = '23514';
+        END IF;
+      END LOOP;
+    END IF;
+  END LOOP;
+  IF TG_OP = 'DELETE' THEN RETURN OLD; END IF;
+  RETURN NEW;
+END;
+$$;
+CREATE TRIGGER variant_lock BEFORE INSERT OR UPDATE OR DELETE ON variant
+  FOR EACH ROW EXECUTE FUNCTION check_variant_choices();
+CREATE TRIGGER choice_lock BEFORE INSERT OR UPDATE OR DELETE ON variant_choice
+  FOR EACH ROW EXECUTE FUNCTION check_variant_choices();
+CREATE TRIGGER option_lock BEFORE INSERT OR UPDATE OR DELETE ON product_option
+  FOR EACH ROW EXECUTE FUNCTION check_variant_choices();
+CREATE CONSTRAINT TRIGGER variant_complete AFTER INSERT OR UPDATE OR DELETE ON variant
+  DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION check_variant_choices();
+CREATE CONSTRAINT TRIGGER choices_complete AFTER INSERT OR UPDATE OR DELETE ON variant_choice
+  DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION check_variant_choices();
+CREATE CONSTRAINT TRIGGER options_complete AFTER INSERT OR UPDATE OR DELETE ON product_option
+  DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION check_variant_choices();
+
+BEGIN;
+INSERT INTO product VALUES (10, 'Everyday shirt'), (20, 'Phone');
+INSERT INTO product_option VALUES (10, 1, 'Size'), (10, 2, 'Color'), (20, 3, 'Storage');
+INSERT INTO option_value VALUES
+  (10, 1, 11, 'M'), (10, 1, 12, 'L'), (10, 2, 21, 'Blue'), (10, 2, 22, 'Red'),
+  (20, 3, 31, '128 GB');
+INSERT INTO variant VALUES
+  (101, 10, '1=11;2=21'), (102, 10, '1=12;2=21'), (103, 10, '1=11;2=22');
+INSERT INTO variant_choice VALUES
+  (101, 10, 1, 11), (101, 10, 2, 21),
+  (102, 10, 1, 12), (102, 10, 2, 21),
+  (103, 10, 1, 11), (103, 10, 2, 22);
+COMMIT;
+```
+
+At commit, Blue/M has two normalized rows and the canonical key `1=11;2=21`. A second variant cannot use that key, and a forged different key fails comparison with its actual rows. A variant missing Color fails at commit, allowing the parent and both choices to be inserted in one transaction first. A product with no options uses the empty key and no choice rows. Here every declared option is required; optional selections such as embroidery need a separate modifier model, rather than an incomplete variant.
+
+The before-triggers serialize variant-choice and required-option edits through a product-row lock; checkout below takes a compatible read lock on that product before resolving choices. This protects the selected combination during checkout. Descriptive labels are copied as read during acceptance; the triggers do not freeze every catalog attribute. The example validates all variants of an affected product for clarity; that is not a claim of production-scale performance. Large catalogs need a measured, narrowly scoped implementation of the same invariant. Cross-product bulk edits also need consistent lock ordering or deadlock retry. [PostgreSQL row-lock behavior](https://www.postgresql.org/docs/17/explicit-locking.html) supplies the mechanism \[Confirmed\]; this workflow is our design \[Inferred\].
+
+### Attach sellers and stock without copying the product
+
+```sql
+CREATE TABLE seller (seller_id INTEGER PRIMARY KEY, name TEXT NOT NULL);
+CREATE TABLE seller_location (
+  location_id INTEGER PRIMARY KEY, seller_id INTEGER NOT NULL REFERENCES seller,
+  UNIQUE (location_id, seller_id)
+);
+CREATE TABLE offer (
+  offer_id INTEGER PRIMARY KEY, seller_id INTEGER NOT NULL REFERENCES seller,
+  variant_id INTEGER NOT NULL REFERENCES variant, seller_sku TEXT NOT NULL,
+  unit_price BIGINT NOT NULL CHECK (unit_price >= 0),
+  tax_bp INTEGER NOT NULL CHECK (tax_bp BETWEEN 0 AND 10000), active BOOLEAN NOT NULL,
+  UNIQUE (seller_id, seller_sku), UNIQUE (seller_id, variant_id),
+  UNIQUE (offer_id, seller_id, variant_id)
+);
+CREATE TABLE inventory_balance (
+  seller_id INTEGER, variant_id INTEGER REFERENCES variant, location_id INTEGER,
+  on_hand INTEGER NOT NULL, reserved INTEGER NOT NULL,
+  PRIMARY KEY (seller_id, variant_id, location_id),
+  FOREIGN KEY (location_id, seller_id) REFERENCES seller_location (location_id, seller_id),
+  CHECK (on_hand >= 0 AND reserved >= 0 AND reserved <= on_hand)
+);
+INSERT INTO seller VALUES (7, 'Seller A'), (8, 'Seller B');
+INSERT INTO seller_location VALUES (70, 7), (80, 8);
+INSERT INTO offer VALUES
+  (5001, 7, 101, 'A-BLUE-M', 50000, 1200, TRUE),
+  (5002, 8, 101, 'B-M-BL', 55000, 1200, TRUE);
+INSERT INTO inventory_balance VALUES (7, 101, 70, 5, 0), (8, 101, 80, 7, 0);
+```
+
+| Identity | Seller A | Seller B | What is shared? |
+| --- | --- | --- | --- |
+| Product / selected configuration | 10 / Blue-M | 10 / Blue-M | Product 10, variant 101 and its option-value rows |
+| Offer / seller SKU | 5001 / A-BLUE-M | 5002 / B-M-BL | Neither: these identify each seller's commercial listing |
+| Price before tax | Rs 500.00 | Rs 550.00 | No global price is stored on variant 101 |
+| Stock identity | seller 7, variant 101, location 70 | seller 8, variant 101, location 80 | Stock is separate even though the merchandise variant is the same |
+
+This example permits one offer per seller/variant and one price on that offer, with one currency for the whole demonstration. Add price records by currency, channel or time only when those requirements exist. Inventory is keyed independently of offer so later price versions do not duplicate stock. In a marketplace with separate sellers' catalogs, linking their products to one canonical product is another matching problem; neither a similar name nor a coincidentally equal seller SKU proves they are identical.
+
+### Resolve the selected values to the selected seller's offer
+
+The request contains product 10, values Size=M and Color=Blue as IDs, seller 7, location 70 and quantity 2. It does not supply the authoritative price. Numeric IDs avoid depending on the spelling or language of a displayed label.
+
+```sql
+WITH requested (option_id, value_id) AS (VALUES (1, 11), (2, 21)),
+selected AS (
+  SELECT COALESCE(string_agg(option_id::TEXT || '=' || value_id::TEXT,
+                             ';' ORDER BY option_id), '') AS option_key
+  FROM requested
+)
+SELECT v.variant_id, o.offer_id, o.seller_sku, o.unit_price, o.tax_bp,
+       b.location_id, b.on_hand - b.reserved AS available
+FROM selected s
+JOIN variant v ON v.product_id = 10 AND v.option_key = s.option_key
+JOIN offer o ON o.variant_id = v.variant_id AND o.seller_id = 7 AND o.active
+JOIN inventory_balance b ON b.seller_id = o.seller_id AND b.variant_id = v.variant_id
+WHERE b.location_id = 70;
+```
+
+Result: `(101, 5001, A-BLUE-M, 50000, 1200, 70, 5)`. Switching both seller/location to 8/80 produces `(101, 5002, B-M-BL, 55000, 1200, 80, 7)`. Requesting Red/L, omitting Color, repeating Size or using the phone's Storage value returns no matching variant. Blue/L exists as variant 102 but has no offer in this fixture, so it returns no purchasable offer. A missing variant, missing offer, inactive offer and insufficient stock are different reasons to reject a selection; a single empty result does not by itself tell the UI which reason applies.
+
+### Store goods and a subscription through typed order lines
+
+Seller A offers a Video-only plan at Rs 399 per three-month interval. This row is a price for the whole interval, not a monthly amount to multiply by three. The line uses ordinary foreign keys to either an offer or a plan price, plus an exclusive-choice rule. It avoids the unchecked `item_type/item_id` pointer in the earlier deliberately simplified example.
+
+```sql
+CREATE TABLE plan (
+  plan_id INTEGER PRIMARY KEY, seller_id INTEGER NOT NULL REFERENCES seller, title TEXT NOT NULL,
+  UNIQUE (plan_id, seller_id)
+);
+CREATE TABLE plan_price (
+  price_id INTEGER PRIMARY KEY, plan_id INTEGER NOT NULL, seller_id INTEGER NOT NULL,
+  months INTEGER NOT NULL CHECK (months > 0), amount BIGINT NOT NULL CHECK (amount >= 0),
+  tax_bp INTEGER NOT NULL CHECK (tax_bp BETWEEN 0 AND 10000),
+  FOREIGN KEY (plan_id, seller_id) REFERENCES plan (plan_id, seller_id),
+  UNIQUE (price_id, seller_id), UNIQUE (plan_id, months)
+);
+CREATE TABLE purchase (
+  order_id INTEGER PRIMARY KEY, seller_id INTEGER NOT NULL REFERENCES seller,
+  UNIQUE (order_id, seller_id)
+);
+CREATE TABLE order_line (
+  order_id INTEGER, line_no INTEGER, seller_id INTEGER NOT NULL,
+  offer_id INTEGER, variant_id INTEGER, location_id INTEGER, price_id INTEGER,
+  description TEXT NOT NULL, selected_options JSONB NOT NULL,
+  quantity INTEGER NOT NULL CHECK (quantity > 0), unit_price BIGINT NOT NULL CHECK (unit_price >= 0),
+  tax_bp INTEGER NOT NULL CHECK (tax_bp BETWEEN 0 AND 10000),
+  period_months INTEGER, period_start DATE, period_end DATE,
+  PRIMARY KEY (order_id, line_no),
+  FOREIGN KEY (order_id, seller_id) REFERENCES purchase (order_id, seller_id),
+  FOREIGN KEY (offer_id, seller_id, variant_id) REFERENCES offer (offer_id, seller_id, variant_id),
+  FOREIGN KEY (seller_id, variant_id, location_id) REFERENCES inventory_balance,
+  FOREIGN KEY (price_id, seller_id) REFERENCES plan_price (price_id, seller_id),
+  CHECK (
+    (offer_id IS NOT NULL AND variant_id IS NOT NULL AND location_id IS NOT NULL
+     AND price_id IS NULL AND period_months IS NULL AND period_start IS NULL AND period_end IS NULL)
+    OR
+    (offer_id IS NULL AND variant_id IS NULL AND location_id IS NULL AND price_id IS NOT NULL
+     AND quantity = 1 AND period_months > 0 AND period_months IS NOT NULL
+     AND period_start IS NOT NULL AND period_end IS NOT NULL AND period_end > period_start)
+  )
+);
+INSERT INTO plan VALUES (900, 7, 'Video-only');
+INSERT INTO plan_price VALUES (7001, 900, 7, 3, 39900, 1800);
+```
+
+The goods branch requires all goods identifiers; the service branch requires the plan price and billing period. Explicit nullability checks matter because an ordinary nullable composite FK can skip validation, and a `CHECK` evaluating to null does not reject the row. The FK tuples prevent Seller B's offer or stock from being substituted into Seller A's order. They do not establish that the customer consented to the latest price or that a reservation actually happened; checkout must do that work.
+
+### Accept the order and reserve stock in one short transaction
+
+Below, product 10 and the selected variant are resolved again under the product lock. The offer and interval price are read from the database with shared row locks; the two quoted amounts are the values the example customer accepted. A price change requires a new quote, not trusting a request's arithmetic. No payment-provider call happens inside this transaction.
+
+The SQL uses literal inputs so the stored outcome can be checked. A backend would bind the requested product, seller, location, quantity and accepted quote, and derive the canonical key from the requested option IDs on the server. It must use that derived key in the locked lookup; it must not ignore the selected options or accept an unrelated offer ID merely because that ID exists.
+
+```sql
+BEGIN;
+DO $$
+DECLARE
+  chosen_variant INTEGER;
+  goods offer%ROWTYPE;
+  service plan_price%ROWTYPE;
+  product_title TEXT;
+  choices JSONB;
+BEGIN
+  PERFORM 1 FROM product WHERE product_id = 10 FOR SHARE;
+  SELECT variant_id INTO STRICT chosen_variant FROM variant
+    WHERE product_id = 10 AND option_key = '1=11;2=21';
+  SELECT * INTO STRICT goods FROM offer
+    WHERE offer_id = 5001 AND seller_id = 7 AND variant_id = chosen_variant AND active FOR SHARE;
+  SELECT * INTO STRICT service FROM plan_price WHERE price_id = 7001 AND seller_id = 7 FOR SHARE;
+  IF goods.unit_price <> 50000 OR service.amount <> 39900 THEN
+    RAISE EXCEPTION 'Quote changed' USING ERRCODE = '23514';
+  END IF;
+  SELECT p.title, jsonb_object_agg(po.name, ov.label) INTO STRICT product_title, choices
+    FROM variant v JOIN product p USING (product_id)
+    JOIN variant_choice c USING (variant_id, product_id)
+    JOIN product_option po USING (product_id, option_id)
+    JOIN option_value ov USING (product_id, option_id, value_id)
+    WHERE v.variant_id = chosen_variant GROUP BY p.title;
+  UPDATE inventory_balance SET reserved = reserved + 2
+    WHERE seller_id = goods.seller_id AND variant_id = chosen_variant AND location_id = 70
+      AND on_hand - reserved >= 2;
+  IF NOT FOUND THEN RAISE EXCEPTION 'Insufficient stock' USING ERRCODE = '23514'; END IF;
+  INSERT INTO purchase VALUES (201, 7);
+  INSERT INTO order_line VALUES
+    (201, 1, 7, goods.offer_id, chosen_variant, 70, NULL, product_title, choices,
+     2, goods.unit_price, goods.tax_bp, NULL, NULL, NULL);
+  INSERT INTO order_line
+    SELECT 201, 2, 7, NULL, NULL, NULL, service.price_id, p.title, '{}'::JSONB,
+           1, service.amount, service.tax_bp, service.months, DATE '2026-10-21',
+           (DATE '2026-10-21' + make_interval(months => service.months))::DATE
+    FROM plan p WHERE p.plan_id = service.plan_id;
+END;
+$$;
+COMMIT;
+```
+
+The conditional update both claims stock and tests availability. It is not a separate read followed by an unconditional write. If it affects no row, or any later insert fails, the transaction rolls back the reservation and order together. At PostgreSQL's default Read Committed isolation, a competing update waits and rechecks the updated row's predicate; see [transaction isolation](https://www.postgresql.org/docs/17/transaction-iso.html) \[Confirmed\]. Actual multi-session execution of this new example is not claimed; the existing course concurrency lessons cover that separate testing level.
+
+| Stored result after commit | Value |
+| --- | --- |
+| order_line (201, 1) source | Seller 7, offer 5001, variant 101, location 70 |
+| order_line (201, 1) snapshots | Everyday shirt; {"Size":"M","Color":"Blue"}; quantity 2; unit price 50000; tax 1200 bp |
+| order_line (201, 2) source and snapshots | Plan price 7001; Video-only; quantity 1; price 39900; tax 1800 bp; 3 months, 2026-10-21 to 2027-01-21 |
+| Seller A stock (7, 101, 70) | on_hand 5, reserved 2, available 3 |
+| Seller B stock (8, 101, 80) | on_hand 7, reserved 0, available 7; unaffected |
+
+The price snapshot need not equal tomorrow's offer price, which is why it is not a foreign key to a mutable amount. The FK preserves source identity; the copied fields preserve accepted commercial facts. The backend also needs to validate quote currency, tax treatment, customer authorization and period policy for its actual business; INR and the dates above are fixed example inputs. Receipt of an HTTP request alone is not authorization to write arbitrary seller records.
+
+### Create the invoice from accepted facts, not today's catalog
+
+```sql
+CREATE TABLE invoice (
+  invoice_id INTEGER PRIMARY KEY, order_id INTEGER NOT NULL UNIQUE REFERENCES purchase,
+  UNIQUE (invoice_id, order_id)
+);
+CREATE TABLE invoice_line (
+  invoice_id INTEGER, line_no INTEGER, order_id INTEGER NOT NULL,
+  description TEXT NOT NULL, selected_options JSONB NOT NULL, quantity INTEGER NOT NULL,
+  unit_price BIGINT NOT NULL, tax_bp INTEGER NOT NULL,
+  period_months INTEGER, period_start DATE, period_end DATE,
+  net BIGINT NOT NULL, tax BIGINT NOT NULL,
+  PRIMARY KEY (invoice_id, line_no),
+  FOREIGN KEY (invoice_id, order_id) REFERENCES invoice (invoice_id, order_id),
+  FOREIGN KEY (order_id, line_no) REFERENCES order_line,
+  CHECK (quantity > 0 AND unit_price >= 0 AND tax_bp BETWEEN 0 AND 10000),
+  CHECK (net = quantity::BIGINT * unit_price AND tax = (net * tax_bp + 5000) / 10000)
+);
+BEGIN;
+INSERT INTO invoice VALUES (301, 201);
+INSERT INTO invoice_line
+  SELECT 301, line_no, order_id, description, selected_options, quantity, unit_price, tax_bp,
+         period_months, period_start, period_end, quantity::BIGINT * unit_price,
+         (quantity::BIGINT * unit_price * tax_bp + 5000) / 10000
+  FROM order_line WHERE order_id = 201;
+COMMIT;
+SELECT invoice_id, sum(net) AS net, sum(tax) AS tax, sum(net + tax) AS gross
+FROM invoice_line WHERE invoice_id = 301 GROUP BY invoice_id;
+```
+
+Result in paise: `(301, 139900, 19182, 159082)`: two shirts contribute Rs 1,000 net and Rs 120 tax; the plan contributes Rs 399 net and Rs 71.82 tax. The gross is **Rs 1,590.82**. This is a separate example from invoices I101 and the original chips example.
+
+If offer 5001 later rises to 60000, product 10 is renamed, or the plan's current price changes, the accepted order and invoice retain the copied values. The application must permit invoice finalization only from the accepted order version and protect finalized lines from later updates. This sample tests the snapshot boundary; it does not implement roles, an invoice state machine or an append-only accounting ledger. Its one-invoice-per-order simplification excludes split invoicing and later subscription renewals, whose lifecycles were explained above. A subscription agreement and payment/access records are separate from this initial plan-purchase line.
+
+For this shirt, dispatch after successful collection would change Seller A's `(on_hand=5, reserved=2)` to `(3, 0)` in a guarded transaction linked to the reservation's source line. Abandonment would release the two reserved units without decrementing on-hand. Retain a durable reservation/fulfillment identity to prevent applying either transition twice; the aggregate balance and source location shown here do not implement a complete dispatch/release protocol. A virtual bundle would instead reserve all of its component resources together, using the recipe version or copied requirements attached to the accepted order. Its invoice price need not be the sum of current component prices.
+
+### What rejects a bad write, and what needs a workflow?
+
+| Attempt | Enforcement and expected outcome |
+| --- | --- |
+| Give variant 101 two Size values | `variant_choice` primary key rejects the second Size row; SQLSTATE 23505 |
+| Attach the phone's value to the shirt, or lie about the variant's product | Composite foreign key rejects the mismatched relationship; SQLSTATE 23503 |
+| Create a second Blue/M variant | Canonical `option_key` uniqueness rejects the duplicate; a forged key is rejected by the deferred comparison with the actual choices |
+| Commit a variant missing Color, change a populated product's required axes without updating its variants, or remove a required choice | Deferred validation rejects the inconsistent final state; SQLSTATE 23514; the whole transaction must roll back |
+| Use Seller B's offer in Seller A's order, or stock from Seller B's location | Composite seller/variant/location references reject the substitution; SQLSTATE 23503 |
+| Make a line point to both an offer and a plan price, or neither | Exclusive-choice `CHECK` rejects it; SQLSTATE 23514 |
+| Reserve more shirts than remain available | Conditional update affects zero rows; checkout raises an error, preserving both stock and order state |
+| Retry the same order creation after stock was tentatively updated | Duplicate order key aborts this transaction, including its tentative reservation; returning the existing purchase safely is a separate request-idempotency policy |
+| Change a quote, or accept a row without first reserving | Quote comparison and the short checkout transaction are workflow rules; source FKs alone cannot establish consent or stock allocation |
+| Rewrite a finalized invoice or move a reservation twice | Requires controlled finalization and durable operation identities; copying amounts and checking a balance alone do not enforce these lifecycle rules |
+
+The table is deliberately explicit about the boundary: a database key proves related identities exist and agree; it does not prove that a business event occurred. A stored snapshot proves what was recorded, while finalization rules govern who may change it. We have closed the selection, seller-price and typed-line storage questions without claiming that this teaching slice implements an entire commerce backend.
 
 ## What I couldn't find
 
