@@ -36,8 +36,13 @@ The examples use fictional applications. The first drafts use a clinic; the wide
 | [The invoice failed. Did its number disappear?](articles/06-transaction-boundaries.md) | Locate rollback boundaries and distinguish them from a lost response. |
 | [Can two callers claim the last item?](articles/16-competing-claims.md) | Repair a stale decision, observe blocking and retry a complete transaction. |
 | [Can old callers survive a required new field?](articles/17-compatible-change.md) | Resume a bounded backfill, preserve old/new callers and inspect migration failures. |
+| [Where did this query spend its work?](articles/18-query-plans.md) | Read estimated/actual work and measure a change without changing its answer. |
+| [Which index earns its cost?](articles/19-index-decisions.md) | Compare index candidates against reads, writes, storage and a scoped uniqueness rule. |
+| [Why does the later page do more work?](articles/20-deep-pages.md) | Compare matching offset/cursor pages, preserve ties and test changing sort values. |
+| [Why did yesterday's plan stop fitting today's data?](articles/21-statistics-maintenance.md) | Distinguish statistics from cleanup and observe an old snapshot delaying vacuum. |
+| [How much database work does one request cause?](articles/22-request-work.md) | Count calls, preserve nested results, bind inputs and identify a pool wait. |
 
-There are **eighteen article drafts and seventeen labs**. The latest pilots add competing claims and a compatible field addition. Deeper modelling, request retries, access control, performance, broader migrations, recovery and the integrated capstone still need substantial work. The [topic inventory](TOPIC_INVENTORY.md) records evidence and gaps; a topic being listed does not mean it has been taught.
+There are **twenty-three article drafts and twenty-two labs**. The latest batch adds practical performance diagnosis, index choices, pagination, maintenance and request query counts. Deeper modelling, request retries, access control, broader migrations, recovery and the integrated capstone still need substantial work. The [topic inventory](TOPIC_INVENTORY.md) records evidence and gaps; a topic being listed does not mean it has been taught.
 
 These are editorial drafts. Embedded and native local PostgreSQL checks passed on 2026-10-21, including separate concurrent sessions. Docker setup, hosted Supabase and reader trials remain unverified. See the [verification record](VERIFICATION.md) for dates and limits.
 
@@ -51,7 +56,7 @@ Articles can be published as the author learns and verifies them. Planned lesson
 
 ## Real engineering, with attribution
 
-The [source notebook](SOURCES.md) connects specific questions to engineers' own accounts: retries at Stripe, related data at Notion, database boundaries at GitHub, and deletion tradeoffs discussed by Brandur Leach. Fictional exercises do not reproduce those companies' systems.
+The [source notebook](SOURCES.md) connects specific questions to engineers' own accounts: retries and migrations at Stripe, pagination at Shopify, related data at Notion, database boundaries at GitHub, and deletion tradeoffs discussed by Brandur Leach. Fictional exercises do not reproduce those companies' systems.
 
 This draft was prepared with AI assistance. The course author should revise it after doing the labs; we do not invent personal experience or claim the draft was entirely human-written.
 

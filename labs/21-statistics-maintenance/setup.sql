@@ -1,0 +1,10 @@
+DROP SCHEMA IF EXISTS course_maintenance CASCADE;
+CREATE SCHEMA course_maintenance;
+CREATE TABLE course_maintenance.tasks (id integer PRIMARY KEY, status text NOT NULL, payload text NOT NULL) WITH (autovacuum_enabled = false);
+ALTER TABLE course_maintenance.tasks ALTER COLUMN status SET STATISTICS 1000;
+INSERT INTO course_maintenance.tasks SELECT g, CASE WHEN g <= 40 THEN 'open' ELSE 'closed' END, repeat('x', 80) FROM generate_series(1, 40000) g;
+CREATE TABLE course_maintenance.mail (id integer PRIMARY KEY, status text NOT NULL) WITH (autovacuum_enabled = false);
+ALTER TABLE course_maintenance.mail ALTER COLUMN status SET STATISTICS 1000;
+INSERT INTO course_maintenance.mail SELECT g, CASE WHEN g <= 20 THEN 'queued' ELSE 'sent' END FROM generate_series(1, 4000) g;
+ANALYZE course_maintenance.tasks;
+ANALYZE course_maintenance.mail;

@@ -14,6 +14,7 @@ Checked 2026-10-17. Sources are selected for a specific teaching purpose. "Read"
 | [Zero-downtime Postgres migrations — the hard parts](https://gocardless.com/blog/zero-downtime-postgres-migrations-the-hard-parts/) | Chris Sinjakli, GoCardless; page says last edited June 2024, account discusses older PostgreSQL versions; read | Future migration lab: a quick DDL change can still wait on locks and disrupt requests. | Historical lock modes or table-rewrite advice describe current PostgreSQL unchanged. Recheck the target version. |
 | [Postmortem of database outage of January 31](https://about.gitlab.com/blog/postmortem-of-database-outage-of-january-31/) | GitLab engineering incident account, 2017-02-10; read | Future operations article: restoring a backup is a separate capability from transaction rollback. | The course's DELETE lab reproduces this filesystem-level incident. |
 | [Online migrations at scale](https://stripe.com/blog/online-migrations) | Jacqueline Xu, Stripe, 2017-02-02; read 2026-10-21 | Article 17: separate compatibility, backfill, read transition and eventual removal; our additive exercise adapts staging and reconciliation. | Our exercise reproduces Stripe's architecture, scale or dual-write transition. It does not replace an existing field. |
+| [Paginating requests in APIs using relative cursors](https://shopify.engineering/pagination-relative-cursors) | Drew Martin, Shopify, 2019-08-12; read 2026-10-21 | Article 20: deep offsets, connection occupancy, complete cursor keys and suitable indexes. | Shopify's historical timings are not our measurements or a general speedup guarantee. Our generated PostgreSQL events are an original exercise. |
 
 Each source contributes a short connection, not a retelling of the whole article. Keep source-derived text across the course brief and avoid copying snippets from a company merely to look authentic.
 
@@ -72,6 +73,14 @@ Checked 2026-10-21. The two new pilots use PostgreSQL 17 [transaction isolation]
 Article 17 uses the Stripe account above as its main engineering connection. [GitLab's migration guidance](https://docs.gitlab.com/development/database/avoiding_downtime_in_migrations/) adds a short compatibility check for later renames/removals. Neither source proves that this small lab is a production migration system. Additional company stories were not added merely to increase their count.
 
 The native Windows test runtime came from the [official PostgreSQL Windows download route](https://www.postgresql.org/download/windows/) and its linked [EDB binary archive](https://www.enterprisedb.com/download-postgresql-binaries). Exact version, local artifact hash and execution limits are in [verification](VERIFICATION.md).
+
+## Practical performance references
+
+Checked 2026-10-21. PostgreSQL 17 authorities for this batch are [using EXPLAIN](https://www.postgresql.org/docs/17/using-explain.html), [EXPLAIN options](https://www.postgresql.org/docs/17/sql-explain.html), [multicolumn indexes](https://www.postgresql.org/docs/17/indexes-multicolumn.html), [partial indexes](https://www.postgresql.org/docs/17/indexes-partial.html), [index-only scans](https://www.postgresql.org/docs/17/indexes-index-only-scans.html), [planner statistics](https://www.postgresql.org/docs/17/planner-stats.html), [routine vacuuming](https://www.postgresql.org/docs/17/routine-vacuuming.html) and [VACUUM](https://www.postgresql.org/docs/17/sql-vacuum.html). Pagination uses the ordering and row-comparison references linked in article 20.
+
+The request module follows node-postgres guidance on [bound query values](https://node-postgres.com/features/queries) and [connection pooling](https://node-postgres.com/features/pooling). The installed pg-pool implementation was also inspected for waitingCount and checkout timeout behaviour; the native checker then observed a queued checkout and backend reuse. These are client-pool observations, not verification of hosted Supabase pool modes.
+
+The review rejected blanket rules such as “a sequential scan means a missing index,” “a B-tree cannot be used without its leading key,” and “every foreign key needs another index.” The lessons use the target-version documentation, a named workload and actual plans. No source's benchmark ratio is presented as a course result. Shopify supplies the single new company connection; the other four labs need no additional company narrative.
 
 ## Learning format references
 

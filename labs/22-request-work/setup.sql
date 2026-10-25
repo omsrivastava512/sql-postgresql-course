@@ -1,0 +1,13 @@
+DROP SCHEMA IF EXISTS course_request CASCADE;
+CREATE SCHEMA course_request;
+CREATE TABLE course_request.customers (id integer PRIMARY KEY, name text NOT NULL, active boolean NOT NULL);
+INSERT INTO course_request.customers SELECT g, 'Customer ' || g, g <= 30 FROM generate_series(1, 40) g;
+CREATE TABLE course_request.orders (id integer PRIMARY KEY, customer_id integer NOT NULL REFERENCES course_request.customers(id), status text NOT NULL, cents integer NOT NULL);
+INSERT INTO course_request.orders SELECT g, (g - 1) % 24 + 1, CASE WHEN (g - 1) / 24 % 2 = 0 THEN 'paid' ELSE 'pending' END, g * 100 FROM generate_series(1, 120) g;
+CREATE INDEX orders_customer_idx ON course_request.orders (customer_id);
+CREATE TABLE course_request.projects (id integer PRIMARY KEY, active boolean NOT NULL);
+INSERT INTO course_request.projects VALUES (1, true), (2, true), (3, true), (4, false);
+CREATE TABLE course_request.tasks (id integer PRIMARY KEY, project_id integer NOT NULL REFERENCES course_request.projects(id), done boolean NOT NULL);
+INSERT INTO course_request.tasks VALUES (1, 1, false), (2, 1, false), (3, 2, true), (4, 4, false);
+ANALYZE course_request.customers;
+ANALYZE course_request.orders;

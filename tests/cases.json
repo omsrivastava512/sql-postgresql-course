@@ -3573,6 +3573,495 @@
         ]
       }
     ]
+  },
+  {
+    "lab": "18-query-plans",
+    "steps": [
+      {
+        "query": "SELECT count(*)::integer AS n, sum(amount_cents)::integer AS cents FROM course_plan.orders WHERE customer_id = 42",
+        "rows": [
+          {
+            "n": 40,
+            "cents": 5680
+          }
+        ]
+      },
+      {
+        "sql": "BEGIN"
+      },
+      {
+        "sql": "EXPLAIN (ANALYZE, BUFFERS) UPDATE course_plan.orders SET amount_cents = amount_cents + 1 WHERE id = 1"
+      },
+      {
+        "query": "SELECT amount_cents FROM course_plan.orders WHERE id = 1",
+        "rows": [
+          {
+            "amount_cents": 102
+          }
+        ]
+      },
+      {
+        "sql": "ROLLBACK"
+      },
+      {
+        "query": "SELECT amount_cents FROM course_plan.orders WHERE id = 1",
+        "rows": [
+          {
+            "amount_cents": 101
+          }
+        ]
+      }
+    ],
+    "solution": [
+      {
+        "query": "SELECT count(*)::integer AS n, sum(amount_cents)::integer AS cents FROM course_plan.orders WHERE customer_id = 42",
+        "rows": [
+          {
+            "n": 40,
+            "cents": 5680
+          }
+        ]
+      },
+      {
+        "query": "SELECT count(*)::integer AS n, sum(package_units)::integer AS units FROM course_plan.deliveries WHERE route_id = 7 AND NOT delivered",
+        "rows": [
+          {
+            "n": 20,
+            "units": 80
+          }
+        ]
+      },
+      {
+        "query": "SELECT indexname FROM pg_indexes WHERE schemaname = 'course_plan' AND indexname NOT LIKE '%pkey' ORDER BY indexname",
+        "rows": [
+          {
+            "indexname": "deliveries_route_idx"
+          },
+          {
+            "indexname": "orders_customer_idx"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "lab": "19-index-decisions",
+    "steps": [
+      {
+        "query": "SELECT indexname FROM pg_indexes WHERE schemaname = 'course_index' AND tablename = 'orders' ORDER BY indexname",
+        "rows": [
+          {
+            "indexname": "orders_pkey"
+          }
+        ]
+      },
+      {
+        "sql": "CREATE UNIQUE INDEX subscriptions_one_active_idx ON course_index.subscriptions (customer_id) WHERE active"
+      },
+      {
+        "sql": "INSERT INTO course_index.subscriptions VALUES (4, 1, 'second', true)",
+        "error": "23505"
+      },
+      {
+        "sql": "UPDATE course_index.subscriptions SET active = true WHERE id = 2",
+        "error": "23505"
+      },
+      {
+        "sql": "INSERT INTO course_index.subscriptions VALUES (4, 1, 'second', false)"
+      },
+      {
+        "query": "SELECT id, active FROM course_index.subscriptions WHERE customer_id = 1 ORDER BY id",
+        "rows": [
+          {
+            "id": 1,
+            "active": true
+          },
+          {
+            "id": 2,
+            "active": false
+          },
+          {
+            "id": 4,
+            "active": false
+          }
+        ]
+      },
+      {
+        "sql": "INSERT INTO course_index.orders VALUES (60001, 1001, now(), 'open', 100)",
+        "error": "23503"
+      }
+    ],
+    "solution": [
+      {
+        "query": "SELECT id, total_cents FROM course_index.orders WHERE customer_id = 42 ORDER BY placed_at DESC, id DESC LIMIT 5",
+        "rows": [
+          {
+            "id": 59042,
+            "total_cents": 142
+          },
+          {
+            "id": 58042,
+            "total_cents": 142
+          },
+          {
+            "id": 57042,
+            "total_cents": 142
+          },
+          {
+            "id": 56042,
+            "total_cents": 142
+          },
+          {
+            "id": 55042,
+            "total_cents": 142
+          }
+        ]
+      },
+      {
+        "query": "SELECT id FROM course_index.orders WHERE status = 'open' ORDER BY placed_at, id LIMIT 5",
+        "rows": [
+          {
+            "id": 100
+          },
+          {
+            "id": 200
+          },
+          {
+            "id": 300
+          },
+          {
+            "id": 400
+          },
+          {
+            "id": 500
+          }
+        ]
+      },
+      {
+        "query": "SELECT id FROM course_index.tickets WHERE project_id = 8 ORDER BY created_at DESC, id DESC LIMIT 3",
+        "rows": [
+          {
+            "id": 11808
+          },
+          {
+            "id": 11608
+          },
+          {
+            "id": 11408
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "lab": "20-deep-pages",
+    "steps": [
+      {
+        "query": "SELECT id FROM course_page.events WHERE workspace_id = 7 AND (occurred_at, id) > (timestamptz '2026-01-01 05:33:20+00', 60001) ORDER BY occurred_at, id LIMIT 3",
+        "rows": [
+          {
+            "id": 60002
+          },
+          {
+            "id": 60003
+          },
+          {
+            "id": 60004
+          }
+        ]
+      },
+      {
+        "query": "SELECT id FROM course_page.events WHERE workspace_id = 7 AND occurred_at > timestamptz '2026-01-01 05:33:20+00' ORDER BY occurred_at, id LIMIT 3",
+        "rows": [
+          {
+            "id": 60004
+          },
+          {
+            "id": 60005
+          },
+          {
+            "id": 60006
+          }
+        ]
+      },
+      {
+        "sql": "UPDATE course_page.events SET occurred_at = '2025-12-31 00:00+00' WHERE id = 69005"
+      },
+      {
+        "query": "SELECT id FROM course_page.events WHERE workspace_id = 7 AND (occurred_at, id) > (timestamptz '2026-01-01 06:23:19+00', 69000) ORDER BY occurred_at, id LIMIT 10",
+        "rows": [
+          {
+            "id": 69001
+          },
+          {
+            "id": 69002
+          },
+          {
+            "id": 69003
+          },
+          {
+            "id": 69004
+          },
+          {
+            "id": 69006
+          },
+          {
+            "id": 69007
+          },
+          {
+            "id": 69008
+          },
+          {
+            "id": 69009
+          },
+          {
+            "id": 69010
+          },
+          {
+            "id": 69011
+          }
+        ]
+      }
+    ],
+    "solution": [
+      {
+        "query": "SELECT id FROM course_page.events WHERE workspace_id = 7 ORDER BY occurred_at, id LIMIT 10 OFFSET 9000",
+        "rows": [
+          {
+            "id": 69001
+          },
+          {
+            "id": 69002
+          },
+          {
+            "id": 69003
+          },
+          {
+            "id": 69004
+          },
+          {
+            "id": 69005
+          },
+          {
+            "id": 69006
+          },
+          {
+            "id": 69007
+          },
+          {
+            "id": 69008
+          },
+          {
+            "id": 69009
+          },
+          {
+            "id": 69010
+          }
+        ]
+      },
+      {
+        "query": "SELECT id FROM course_page.events WHERE workspace_id = 7 AND (occurred_at, id) > (timestamptz '2026-01-01 06:23:19+00', 69000) ORDER BY occurred_at, id LIMIT 10",
+        "rows": [
+          {
+            "id": 69001
+          },
+          {
+            "id": 69002
+          },
+          {
+            "id": 69003
+          },
+          {
+            "id": 69004
+          },
+          {
+            "id": 69005
+          },
+          {
+            "id": 69006
+          },
+          {
+            "id": 69007
+          },
+          {
+            "id": 69008
+          },
+          {
+            "id": 69009
+          },
+          {
+            "id": 69010
+          }
+        ]
+      },
+      {
+        "query": "SELECT id FROM course_page.messages WHERE channel_id = 2 AND (sent_at, id) < (timestamptz '2026-01-01 00:37:29+00', 4500) ORDER BY sent_at DESC, id DESC LIMIT 5",
+        "rows": [
+          {
+            "id": 4499
+          },
+          {
+            "id": 4498
+          },
+          {
+            "id": 4497
+          },
+          {
+            "id": 4496
+          },
+          {
+            "id": 4495
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "lab": "21-statistics-maintenance",
+    "steps": [
+      {
+        "query": "SELECT count(*)::integer AS n FROM course_maintenance.tasks WHERE status = 'open'",
+        "rows": [
+          {
+            "n": 40
+          }
+        ]
+      },
+      {
+        "sql": "UPDATE course_maintenance.tasks SET status = 'open' WHERE id BETWEEN 41 AND 20000"
+      },
+      {
+        "query": "SELECT count(*)::integer AS n FROM course_maintenance.tasks WHERE status = 'open'",
+        "rows": [
+          {
+            "n": 20000
+          }
+        ]
+      },
+      {
+        "sql": "ANALYZE course_maintenance.tasks"
+      },
+      {
+        "query": "SELECT count(*)::integer AS n FROM course_maintenance.tasks WHERE status = 'open'",
+        "rows": [
+          {
+            "n": 20000
+          }
+        ]
+      }
+    ],
+    "solution": [
+      {
+        "query": "SELECT status, count(*)::integer AS n FROM course_maintenance.tasks GROUP BY status ORDER BY status",
+        "rows": [
+          {
+            "status": "closed",
+            "n": 20000
+          },
+          {
+            "status": "open",
+            "n": 20000
+          }
+        ]
+      },
+      {
+        "query": "SELECT status, count(*)::integer AS n FROM course_maintenance.mail GROUP BY status ORDER BY status",
+        "rows": [
+          {
+            "status": "queued",
+            "n": 1000
+          },
+          {
+            "status": "sent",
+            "n": 3000
+          }
+        ]
+      },
+      {
+        "query": "SELECT relname, reloptions FROM pg_class WHERE oid IN ('course_maintenance.tasks'::regclass, 'course_maintenance.mail'::regclass) ORDER BY relname",
+        "rows": [
+          {
+            "relname": "mail",
+            "reloptions": null
+          },
+          {
+            "relname": "tasks",
+            "reloptions": null
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "lab": "22-request-work",
+    "steps": [
+      {
+        "query": "SELECT count(*)::integer AS n FROM course_request.customers WHERE active",
+        "rows": [
+          {
+            "n": 30
+          }
+        ]
+      },
+      {
+        "query": "SELECT count(*)::integer AS n FROM course_request.orders WHERE status = 'paid'",
+        "rows": [
+          {
+            "n": 72
+          }
+        ]
+      },
+      {
+        "query": "SELECT c.id FROM course_request.customers c WHERE c.active AND NOT EXISTS (SELECT 1 FROM course_request.orders o WHERE o.customer_id = c.id AND o.status = 'paid') ORDER BY c.id",
+        "rows": [
+          {
+            "id": 25
+          },
+          {
+            "id": 26
+          },
+          {
+            "id": 27
+          },
+          {
+            "id": 28
+          },
+          {
+            "id": 29
+          },
+          {
+            "id": 30
+          }
+        ]
+      }
+    ],
+    "solution": [
+      {
+        "query": "SELECT count(*)::integer AS n FROM course_request.customers c LEFT JOIN course_request.orders o ON o.customer_id = c.id AND o.status = 'paid' WHERE c.active",
+        "rows": [
+          {
+            "n": 78
+          }
+        ]
+      },
+      {
+        "query": "SELECT p.id, count(t.id)::integer AS open_tasks FROM course_request.projects p LEFT JOIN course_request.tasks t ON t.project_id = p.id AND NOT t.done WHERE p.active GROUP BY p.id ORDER BY p.id",
+        "rows": [
+          {
+            "id": 1,
+            "open_tasks": 2
+          },
+          {
+            "id": 2,
+            "open_tasks": 0
+          },
+          {
+            "id": 3,
+            "open_tasks": 0
+          }
+        ]
+      }
+    ]
   }
 ]
 

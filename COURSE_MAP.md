@@ -31,6 +31,8 @@ The transaction lab supplies its trigger, so you can observe rollback before lea
 
 After transactions and [CTEs](articles/12-query-shapes.md), continue to [competing claims](articles/16-competing-claims.md), then [a compatible field addition](articles/17-compatible-change.md). These pilots require separate persistent connections.
 
+After query correctness, follow [execution plans](articles/18-query-plans.md) → [index decisions](articles/19-index-decisions.md) → [deep pages](articles/20-deep-pages.md). Branch to [statistics and maintenance](articles/21-statistics-maintenance.md) after transaction snapshots, or to [request work](articles/22-request-work.md) after joins. The request harness uses the existing Node/pg tooling; it adds no web framework.
+
 ## The wider course
 
 Topic IDs refer to the [inventory](TOPIC_INVENTORY.md), which records the narrower objectives actually covered. A route below can contain several short articles and labs.
@@ -44,7 +46,7 @@ Topic IDs refer to the [inventory](TOPIC_INVENTORY.md), which records the narrow
 | Transactions and concurrency | Atomic groups, deferral, counters, locking, isolation, retries; T, R11 | Writes and constraints; CTEs for the claim | Rollback, deferral and competing-claim drafts; deadlocks, optimistic checks and full request retries remain planned |
 | Identity and access | Authentication, privileges, RLS, function execution identity, tenants; A | Filtering, relationships; functions for definer work | Planned |
 | Data over time | Generated values, views, snapshots, exact money, calendars and audits; D | Expressions; joins and grouping for reports | Historical price, exact-cent, period-boundary and view examples in the report draft; broader lifecycle/calendar rules planned |
-| Performance and recovery | Indexes, query plans, statistics, pooling, imports, backup restoration; O01–O06, O15–O19 | Queries; transactions for locks and recovery | Small CSV handoff draft; performance and operational recovery remain planned |
+| Performance and recovery | Indexes, query plans, statistics, pooling, imports, backup restoration; O01–O06, O15–O19 | Queries; transactions for locks, cleanup and recovery | Plans, measured index choices, pagination, statistics/maintenance and request/pool work drafted; specialized indexes, deployment-scale tuning and backup restoration remain planned |
 | Evolution and integration | Versioned migrations, compatibility, APIs, safe parameters, useful errors; O07–O14, O20–O21 | Constraints, transactions and locks; access for API work | Additive migration with backfill and old/new SQL callers drafted; renames, removal, restore and full API workflow remain planned |
 
 The scope is application-focused SQL/PostgreSQL, from foundations through maintaining a database-backed service. Full database administration, replication, and sharding are optional future case-study directions, not hidden requirements for finishing this course. The inventory can grow when new learning questions justify it.
@@ -106,6 +108,11 @@ For the advanced branches, learn concurrency before implementing concurrent retr
 | Charges: ties and previous values | Meters: repeated readings and a reset | State ordering and meaning before calculating; available lab 13 transfer |
 | Sales: monthly net and weighted average | Subscriptions: usage per active account | Define period, eligibility and denominator; available lab 14 transfer |
 | Import: a repeated source event | Import: a new event with identical amounts | Compare event identity and payload, then reconcile; available lab 15 requirement changes |
+| Shop: find a customer's orders | Deliveries: find a route's undelivered packages | Preserve exact results while comparing plan work; available lab 18 transfer |
+| Shop: five latest orders for one customer | Projects: three latest tickets | Match filtering and ordering, then weigh index costs; available lab 19 transfer |
+| Workspace: ascending event pages | Channel: descending messages with ties | Preserve the complete cursor and reverse the comparison correctly; available lab 20 transfer |
+| Tasks: forty open become twenty thousand | Mail: twenty queued become one thousand | Inspect estimates separately from actual rows and refresh statistics; available lab 21 transfer |
+| Customers: paid orders including empty collections | Projects: open-task counts including zero | Reduce per-parent calls without losing empty results; available lab 22 transfer |
 | Team: a user sees only their workspace | Clinic: a staff member has limited branch access | Trace identity through privileges and row policy; planned |
 | Subscriptions: a retry repeats a charge request | Reservations: a confirmation response disappears | Separate rollback from deduplication; planned |
 
@@ -133,6 +140,11 @@ Every planned route needs a worked example, a changed-setting task with feedback
 | Transaction boundaries | Atomic groups versus network outcomes | Trigger rollback and ordinary table counters | Connection/request guidance only |
 | Competing claims | Stale decisions, atomic claims and retry boundaries | Read Committed, Repeatable Read, row locks and pg_blocking_pids | Requires persistent connections; MCP/editor calls alone do not prove concurrency |
 | Compatible change | Existing data, future defaults and old/new callers | Transactional DDL, NOT VALID, validation and lock_timeout | No hosted migration deployment is claimed |
+| Query plans | Correct results versus measured work | EXPLAIN ANALYZE, loops, buffers and executed writes | Hosted timings untested |
+| Index decisions | Workload benefit versus write/storage cost | Composite, INCLUDE and partial/unique B-tree indexes; WAL observations | Hosted deployment untested |
+| Deep pages | Continuation, ties and changing datasets | Tuple comparisons and measured cursor/offset plans | No API paging contract claimed |
+| Statistics and maintenance | Estimates versus live facts and cleanup | ANALYZE, VACUUM reports and retained snapshots | Privileged hosted maintenance untested |
+| Request work | Query count, response shape and bounded connection reuse | Parameterized pg calls and actual pool checkout wait | Direct Node pool only; Supabase pooling modes remain planned |
 
 These labels do not certify cross-database portability. Future Supabase identity/Data API lessons will name the platform explicitly; PostgreSQL roles and RLS will first get their own explanation.
 

@@ -96,7 +96,15 @@ Two new article/lab pairs implement the competing-claim and bounded additive-cha
 
 Native local PostgreSQL 17.11 passed all 270 single-session assertions and 100 separate live-session assertions, including observed blockers, commit/rollback branches, a complete retry after 40001, interrupted backfill, caller overlap and failed validation/DDL rollback. Reverse suite order also passed. Embedded execution passed the 270 reference assertions. These are execution results, not learner mastery or production deployment evidence.
 
-All 132 topic IDs remain. Only demonstrated sub-outcomes are promoted in the [inventory](TOPIC_INVENTORY.md). Deadlocks, optimistic locking, HTTP idempotency, authorization, measured performance, full migration deployment/removal, backup restoration and the capstone remain planned. Hosted and reader trials are open; connecting Supabase MCP did not constitute a course test run.
+At that checkpoint all 132 topic IDs remained. Only demonstrated sub-outcomes were promoted in the [inventory](TOPIC_INVENTORY.md). Deadlocks, optimistic locking, HTTP idempotency, authorization, measured performance, full migration deployment/removal, backup restoration and the capstone remained planned. Hosted and reader trials were open; connecting Supabase MCP did not constitute a course test run.
+
+## Practical performance implementation — 2026-10-21
+
+Five article/lab pairs implement execution-plan diagnosis, measured index choices, deep pagination, statistics/maintenance and request query-count/pooling work. They preserve all 132 topic IDs and include independent transfer fixtures. The supplied request module binds values and allowlists sort fragments; it uses existing pg tooling rather than adding a web framework.
+
+The exact result suite passed 301 assertions on embedded and native PostgreSQL. The native checker passed 107 further checks, including repeated plans/timings, one-index write comparison, old-snapshot vacuum observations, complete nested-response equality and actual pool queue/reuse. Reverse suite order and the learner command passed. The Shopify pagination account supplies one short attributed connection; its benchmarks are not copied as course results.
+
+Coverage changes remain narrow: direct Node pooling does not establish Supabase pool modes, parameter probes are not a security audit, and local timing is not production capacity. Authorization, request idempotency, deadlocks/optimistic locking, broader temporal modelling, full migration/restore rehearsal and the integrated capstone remain unfinished. Human learning trials and hosted verification remain separate release gates.
 
 ## Coverage acceptance
 

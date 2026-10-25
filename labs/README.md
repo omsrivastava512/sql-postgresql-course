@@ -72,7 +72,7 @@ For a real database run, set COURSE_DATABASE_URL in your local environment to th
 npm run test:database
 ```
 
-The runner uses one persistent connection and resets the seventeen named course schemas. It prints server version and results, never the connection string. For Supabase, use a direct or session-mode connection string with the appropriate SSL settings. Do not paste passwords into chats or commit them.
+The runner uses one persistent connection and resets the twenty-two named course schemas. It prints server version and results, never the connection string. For Supabase, use a direct or session-mode connection string with the appropriate SSL settings. Do not paste passwords into chats or commit them.
 
 For the two concurrent-session labs, with the same disposable database variable set:
 
@@ -83,4 +83,18 @@ node tests/verify-sessions.mjs
 This separate checker uses the existing pg driver and three connections. It resets only course_race and course_change, observes blockers through pg_blocking_pids and checks stored results after waits, failures and retries. It uses 10-second statement and 60-second idle-transaction limits; manual exercises allow longer pauses. Use --lab=16 or --lab=17 for one suite, or --reverse to check the opposite order. Do not run reset scripts or another checker against those schemas concurrently. The embedded runner checks their single-session reference examples only.
 
 The runner checks failure categories and stored state, including rejected writes and commit-time failures. See [verification](../VERIFICATION.md).
+
+## Performance labs
+
+Labs 18–22 supply generated fixtures, preserving independent resettable schemas. Embedded checks verify reference results and failures. Measure plans, buffer/WAL work, vacuum behaviour and pool waits on a real server:
+
+```sh
+node tests/verify-performance.mjs
+```
+
+Set COURSE_DATABASE_URL first. This checker reuses pg, resets only course_plan, course_index, course_page, course_maintenance and course_request, and prints JSON evidence followed by a passing assertion count. It records the server/settings, first plans and five subsequent observations. No fixed timing or speedup is required. Use --lab=18 through --lab=22 to select one lab, or --reverse to verify the opposite order.
+
+Do not run another checker against those schemas at the same time. The maintenance fixture temporarily disables autovacuum on its two tables to isolate the experiment; the solution/checker restores their settings. Its VACUUM runs as a standalone command. The request module's separate learner command is documented in [lab 22](22-request-work/README.md); it reads an already-created fixture and does not reset it.
+
+These measurements do not establish hosted latency, production throughput or Docker setup. Keep role, version, data distribution, cache limitations, result equality and write/storage trade-offs with any conclusion. The wider concurrency checker remains separate because sequential performance measurements cannot establish a race.
 

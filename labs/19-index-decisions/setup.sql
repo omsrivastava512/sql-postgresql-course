@@ -1,0 +1,12 @@
+DROP SCHEMA IF EXISTS course_index CASCADE;
+CREATE SCHEMA course_index;
+CREATE TABLE course_index.customers (id integer PRIMARY KEY, name text NOT NULL);
+INSERT INTO course_index.customers SELECT g, 'Customer ' || g FROM generate_series(1, 1000) g;
+CREATE TABLE course_index.orders (id integer PRIMARY KEY, customer_id integer NOT NULL REFERENCES course_index.customers(id), placed_at timestamptz NOT NULL, status text NOT NULL, total_cents integer NOT NULL);
+INSERT INTO course_index.orders SELECT g, (g - 1) % 1000 + 1, timestamptz '2026-01-01 00:00:00+00' + g * interval '1 second', CASE WHEN g % 100 = 0 THEN 'open' ELSE 'closed' END, 100 + g % 1000 FROM generate_series(1, 60000) g;
+CREATE TABLE course_index.subscriptions (id integer PRIMARY KEY, customer_id integer NOT NULL REFERENCES course_index.customers(id), tier text NOT NULL, active boolean NOT NULL);
+INSERT INTO course_index.subscriptions VALUES (1, 1, 'basic', true), (2, 1, 'legacy', false), (3, 2, 'pro', true);
+CREATE TABLE course_index.tickets (id integer PRIMARY KEY, project_id integer NOT NULL, created_at timestamptz NOT NULL, subject text NOT NULL);
+INSERT INTO course_index.tickets SELECT g, (g - 1) % 200 + 1, timestamptz '2026-01-01 00:00:00+00' + g * interval '1 second', 'Ticket ' || g FROM generate_series(1, 12000) g;
+ANALYZE course_index.orders;
+ANALYZE course_index.tickets;

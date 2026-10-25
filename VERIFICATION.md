@@ -1,15 +1,16 @@
 # Verification record
 
-Status: draft. Initial SQL execution dated 2026-10-17 (Asia/Kolkata); documentation audit added 2026-10-19; foundation and query/data-handoff execution added 2026-10-20; native concurrent-session and migration execution added 2026-10-21.
+Status: draft. Initial SQL execution dated 2026-10-17 (Asia/Kolkata); documentation audit added 2026-10-19; foundation and query/data-handoff execution added 2026-10-20; native concurrency, migration and practical performance execution added 2026-10-21.
 
 | Check | Result |
 |---|---|
-| Embedded PostgreSQL execution | PASS: 270 assertions across 17 labs on PostgreSQL 18.6 / PGlite 0.5.10 (2026-10-21) |
-| Native local PostgreSQL 17.11 | PASS: 270 assertions across 17 labs, Windows x64, role course_author (2026-10-21) |
+| Embedded PostgreSQL execution | PASS: 301 assertions across 22 labs on PostgreSQL 18.6 / PGlite 0.5.10 (2026-10-21) |
+| Native local PostgreSQL 17.11 | PASS: 301 assertions across 22 labs, Windows x64, role course_author (2026-10-21) |
 | Independent concurrent sessions | PASS: 100 assertions across labs 16/17 using three distinct connections; also passed in reverse suite order on native PostgreSQL 17.11 (2026-10-21) |
+| Practical performance | PASS: 107 assertions across labs 18–22, normal and reverse suite order, native PostgreSQL 17.11; learner request command also passed (2026-10-21) |
 | Local Docker PostgreSQL 17.11 | Not run; Docker is not installed on this host |
 | Hosted Supabase | MCP connected and project inventory read; no SQL run or project changed. No dedicated course project used; hosted verification remains open. |
-| Local Markdown links, current package | PASS: 558 local links across 47 Markdown files, including heading targets (2026-10-21) |
+| Local Markdown links, current package | PASS: 683 local links across 57 Markdown files, including heading targets (2026-10-21) |
 | Author learning trial and editorial revision | Pending |
 | Public publication | Not performed |
 
@@ -19,9 +20,67 @@ The six initial labs cover foreign-key failures, role validation and its update 
 
 No test in this package claims to verify HTTP requests, API retries, production authorization, or a deployed clinic schema. Live SQL sessions are tested separately from application requests. Earlier sections below preserve dated checkpoints; this opening table and the latest section describe the current package.
 
+## Practical performance implementation — 2026-10-21
+
+Five new article/lab pairs add plan reading, measured index choices, deep pagination, statistics/maintenance and database work per request. The package contains 115 source files, twenty-three articles and twenty-two labs. All 132 topic IDs remain. No dependency or package file changed. The original seventeen reference suites are unchanged; the regular checker adds 31 assertions, for 301 on each engine.
+
+| Suite | Observed behaviour checked | Not established |
+|---|---|---|
+| 18-query-plans | Complete ordered result equality before/after indexing; estimated/actual rows, buffers and repeated execution; inner operation loops three times; broad scan; EXPLAIN versus executing/rolling back EXPLAIN ANALYZE on an ordinary update; independent delivery query | Production latency, disk reads inferred from buffer reads, arbitrary external-effect rollback or fixed plan selection |
+| 19-index-decisions | Primary-key/FK index inventory; single-column versus ordered composite/covering access; queue partial index and full-index storage; active-subscription uniqueness on INSERT/UPDATE; exact results after rolled-back writes; independent ticket query | Production index build/deployment, sustained write throughput, generic prepared-plan predicate implication or indexing every FK |
+| 20-deep-pages | Equivalent offset/cursor rows; shallow/deep consumed rows; timestamp ties; earlier insert and moved future row; descending message transfer | Frozen history, nullable/mixed-direction keys, free arbitrary page jumps or HTTP cursor design |
+| 21-statistics-maintenance | Exact live counts and estimate improvement after distribution changes; old snapshot holds deleted versions; VACUUM reports before/after snapshot release; fixture autovacuum settings restored; independent mailbox estimates | Full autovacuum tuning, exact physical interpretation of statistics-view estimates or production administration |
+| 22-request-work | Complete nested response against independently constructed expected data; 31/2/1 calls; empty search, selected-parent limits, bound values and allowed sorts; project-count transfer; actual pool checkout queue and backend reuse | HTTP integration, authorization, wire-byte measurement, deployed latency or correct production pool sizing |
+
+Native environment: PostgreSQL 17.11, Windows x64, role course_author, Node.js v24.15.0; shared_buffers 32MB, work_mem 4MB, random_page_cost 4, effective_cache_size 4GB, max_parallel_workers_per_gather 2. The runtime used the same official 17.11-5 bundle and local archive hash recorded in the earlier section below. Each performance suite resets its own named schema. The full suite passed again in reverse order, and the learner request command passed against the resulting fixture.
+
+### Recorded observations
+
+These are observations from one local run, not speed thresholds. Each repeated comparison records its first execution separately and five subsequent executions. Data loading, earlier queries and maintenance can warm caches; neither the first nor subsequent sample is a controlled cold-cache measurement. Plans and timing can vary on another machine.
+
+| Comparison | First execution | Five subsequent executions | Other evidence |
+|---|---|---|---|
+| Customer lookup, no secondary index | 1.853 ms | 1.795–2.070 ms | 616 shared hits; scan returns 40 and removes 39,960 |
+| Same lookup, customer index | 0.058 ms | 0.037–0.059 ms | 42 shared hits; identical forty rows |
+| Latest five orders, no secondary index / composite index | 2.769 / 0.018 ms | 2.532–2.803 / 0.012–0.024 ms | Same five IDs; composite plan has zero heap fetches in this run |
+| Deep offset / supplied cursor | 1.525 / 0.018 ms | 1.372–1.480 / 0.020–0.033 ms | 9,010 / 10 entries consumed; 114 / 4 shared hits; same ten IDs |
+| Update 1,000 rows, primary key only / primary key plus composite | 6.648 / 8.418 ms | 4.348–5.841 / 5.938–20.105 ms | First WAL 232,986 / 300,920 bytes; all stored facts restored after every trial |
+| Customer operation, loop / batch / join | 14.206 / 0.897 / 1.404 ms | 6.494–8.563 / 0.539–0.613 / 0.439–0.596 ms | 31 / 2 / 1 calls; exact same thirty customers, 72 paid orders and six empty collections |
+
+The open-queue index occupied 40,960 bytes; the full index with the same keys occupied 1,900,544 bytes; the customer composite occupied 2,457,600 bytes. The full and partial queue candidates were removed before measuring composite-index write cost, so that comparison changes only the secondary composite index. Six ordinary updates per variant were rolled back. Rollback preserves logical facts, not the physical/cache state: dead versions, page changes and WAL still matter. Subsequent indexed write WAL ranged from 303,242 to 725,421 bytes. These observations do not isolate a universal per-index overhead or sustained throughput effect.
+
+Task estimates changed from 40 for 40 actual rows, to 60 for 20,000 actual rows after the update, to 20,000 after ANALYZE. The mailbox transfer moved from an estimate of 25 to 1,000 for 1,000 actual rows. With the old snapshot held, VACUUM reported zero removed and 30,000 dead but not yet removable tuples; after release it reported 30,000 removed and zero held. Live SELECT still counted 10,000. The post-vacuum n_live_tup estimate was 2,539 in this run, illustrating why the statistics view is not an exact row count. Ordinary vacuum also truncated empty trailing pages here; it does not generally compact all free space inside a relation.
+
+The loop/batch/join returned 102/102/78 driver rows, with 2,629/3,791/4,507 bytes of UTF-8 JSON encoding of those rows. That proxy includes different repeated fields and is not PostgreSQL wire traffic. The pool test held its only client, observed waitingCount 1 while the backend was idle waiting for its client, then released it and verified the next borrower reused the same backend. It distinguishes checkout waiting from database lock waiting without inventing a production pool size.
+
+### Commands and limits
+
+With COURSE_DATABASE_URL set in the test process environment to the dedicated loopback database:
+
+```text
+npm run test:embedded
+PASS 301 assertions across 22 labs.
+
+npm run test:database
+PASS 301 assertions across 22 labs.
+
+node tests/verify-performance.mjs
+PASS 107 performance/correctness assertions across 5 labs; timings are observations, not speed thresholds.
+
+node tests/verify-performance.mjs --reverse
+PASS 107 performance/correctness assertions across 5 labs; timings are observations, not speed thresholds.
+
+node labs/22-request-work/request.mjs
+Completed six samples per mode with identical nested results.
+```
+
+The separate concurrency checker was unchanged; its earlier 100-assertion native result below is retained, not claimed as rerun in this batch. The embedded checker verifies exact SQL results and errors; it does not measure native plans, live snapshots or connection pools. Human learning trials, Docker setup, hosted execution, production workloads and the wider unfinished curriculum remain open.
+
+The temporary performance server listened only on 127.0.0.1:55433 and installed no Windows service. Previously authorized elevated runtime/test access was used for initialization, launch and native connections. Shutdown completed after the tests; pg_ctl confirmed no server running. The exact resolved task runtime folder was checked for containment and reparse points, then its archive, binaries and synthetic database were removed. Both evidence outputs remain outside the course repository. No Supabase project, hosted SQL or paid feature was used. This batch was not staged, committed, pushed or published.
+
 ## Concurrency and migration pilots — 2026-10-21
 
-Two new article/lab pairs add a competing stock claim and a bounded additive schema change. The package now contains 92 source files, eighteen articles and seventeen labs. All 132 topic IDs remain. No dependency or package file changed; the approved separate session checker uses the existing pg driver.
+Two new article/lab pairs add a competing stock claim and a bounded additive schema change. At that checkpoint the package contained 92 source files, eighteen articles and seventeen labs. All 132 topic IDs remained. No dependency or package file changed; the approved separate session checker uses the existing pg driver.
 
 | Suite | Observed behaviour checked | Not established |
 |---|---|---|

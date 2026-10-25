@@ -2,15 +2,15 @@
 
 ## What the files are for
 
-The original package contained 42 files. It now contains 92 after adding the author-only curriculum audit, three foundation sets, six query/data-handoff sets with a CSV fixture, and two concurrency/migration sets with a separate session checker; this is a file count, not a lesson count.
+The original package contained 42 files. It now contains 115 after adding the author-only curriculum audit, three foundation sets, six query/data-handoff sets with a CSV fixture, two concurrency/migration sets and five practical performance sets; this is a file count, not a lesson count.
 
 | Files | Purpose | Intended audience |
 |---|---|---|
-| 18 article files | One SQL onramp, six mechanism-focused lessons, three foundation lessons, six query/data-handoff lessons and two concurrency/migration pilots | Readers |
-| 56 lab files | Shared instructions plus seventeen sets of tasks, setup SQL and solutions, with one CSV fixture and three migration phase files | Readers; authors verifying examples |
+| 23 article files | One SQL onramp, six mechanism-focused lessons, three foundation lessons, six query/data-handoff lessons, two concurrency/migration pilots and five practical performance lessons | Readers |
+| 73 lab files | Shared instructions plus twenty-two sets of tasks, setup SQL and solutions, with one CSV fixture, three migration phase files, a standalone vacuum command and a request module | Readers; authors verifying examples |
 | 11 top-level Markdown files | Navigation, review, sources, curriculum, authoring and verification records | Mixed; author records are labelled |
-| 7 tooling files | Git ignore rules, package files and four verification files | Maintainers |
-| 92 total | Current source package, excluding Git metadata and installed dependencies | Not 92 lessons |
+| 8 tooling files | Git ignore rules, package files and five verification files | Maintainers |
+| 115 total | Current source package, excluding Git metadata and installed dependencies | Not 115 lessons |
 
 Readers start at the [README](README.md), [course map](COURSE_MAP.md), articles, labs and [review prompts](REVIEW.md). Authors additionally use the [curriculum audit](CURRICULUM_AUDIT.md), teaching guide, publication queue, provenance and verification records. No reader needs the private source application.
 
@@ -173,3 +173,46 @@ This batch adds twelve files and updates thirteen against local commit 564ed9d. 
 | [labs/17-compatible-change/setup.sql](labs/17-compatible-change/setup.sql) | 1–11 (new file) |
 | [labs/17-compatible-change/solution.sql](labs/17-compatible-change/solution.sql) | 1–50 (new file) |
 | [tests/verify-sessions.mjs](tests/verify-sessions.mjs) | 1–295 (new file) |
+
+## Practical performance delivery on 2026-10-21
+
+This batch adds twenty-three files and updates eleven against 9686887720f4f37573040dcd5ee921a5db4b4b77. Live upstream main and local HEAD matched, 0 ahead/0 behind with a clean tree at preflight; no PRs/issues or equivalent work were found. No staging, commit, push or publication was performed. All original seventeen reference suites and 132 topic IDs remain. Existing runner/dependency files are unchanged.
+
+The five lessons use generated fixtures, exact results, changed-setting tasks and bounded native observations. The temporary server was stopped and removed after verification. Evidence outputs and the requested approval log are outside the repository. Locations below describe this delivery; later changes can move them.
+
+| File | Added or updated line locations |
+|---|---|
+| [COURSE_MAP.md](COURSE_MAP.md) | 34–35, 49, 111–115, 143–147 |
+| [CURRICULUM_AUDIT.md](CURRICULUM_AUDIT.md) | 99–107 |
+| [NEW_FILES.md](NEW_FILES.md) | 5, 9–10, 12–13, 176–218 |
+| [PUBLICATION.md](PUBLICATION.md) | 13, 55–68, 71, 73 |
+| [README.md](README.md) | 39–43, 45, 59 |
+| [REVIEW.md](REVIEW.md) | 34–43, 72 |
+| [SOURCES.md](SOURCES.md) | 17, 77–84 |
+| [TOPIC_INVENTORY.md](TOPIC_INVENTORY.md) | 14, 76, 168–170, 172–173, 184–188 |
+| [VERIFICATION.md](VERIFICATION.md) | 3, 7–8, 10, 13, 23–80, 83 |
+| [labs/README.md](labs/README.md) | 75, 87–100 |
+| [tests/cases.json](tests/cases.json) | 3576–4064 |
+| [articles/18-query-plans.md](articles/18-query-plans.md) | 1–66 (new file) |
+| [articles/19-index-decisions.md](articles/19-index-decisions.md) | 1–68 (new file) |
+| [articles/20-deep-pages.md](articles/20-deep-pages.md) | 1–64 (new file) |
+| [articles/21-statistics-maintenance.md](articles/21-statistics-maintenance.md) | 1–47 (new file) |
+| [articles/22-request-work.md](articles/22-request-work.md) | 1–61 (new file) |
+| [labs/18-query-plans/README.md](labs/18-query-plans/README.md) | 1–75 (new file) |
+| [labs/18-query-plans/setup.sql](labs/18-query-plans/setup.sql) | 1–8 (new file) |
+| [labs/18-query-plans/solution.sql](labs/18-query-plans/solution.sql) | 1–8 (new file) |
+| [labs/19-index-decisions/README.md](labs/19-index-decisions/README.md) | 1–83 (new file) |
+| [labs/19-index-decisions/setup.sql](labs/19-index-decisions/setup.sql) | 1–12 (new file) |
+| [labs/19-index-decisions/solution.sql](labs/19-index-decisions/solution.sql) | 1–9 (new file) |
+| [labs/20-deep-pages/README.md](labs/20-deep-pages/README.md) | 1–66 (new file) |
+| [labs/20-deep-pages/setup.sql](labs/20-deep-pages/setup.sql) | 1–8 (new file) |
+| [labs/20-deep-pages/solution.sql](labs/20-deep-pages/solution.sql) | 1–5 (new file) |
+| [labs/21-statistics-maintenance/README.md](labs/21-statistics-maintenance/README.md) | 1–77 (new file) |
+| [labs/21-statistics-maintenance/setup.sql](labs/21-statistics-maintenance/setup.sql) | 1–10 (new file) |
+| [labs/21-statistics-maintenance/solution.sql](labs/21-statistics-maintenance/solution.sql) | 1–8 (new file) |
+| [labs/21-statistics-maintenance/vacuum.sql](labs/21-statistics-maintenance/vacuum.sql) | 1–1 (new file) |
+| [labs/22-request-work/README.md](labs/22-request-work/README.md) | 1–67 (new file) |
+| [labs/22-request-work/request.mjs](labs/22-request-work/request.mjs) | 1–87 (new file) |
+| [labs/22-request-work/setup.sql](labs/22-request-work/setup.sql) | 1–13 (new file) |
+| [labs/22-request-work/solution.sql](labs/22-request-work/solution.sql) | 1–6 (new file) |
+| [tests/verify-performance.mjs](tests/verify-performance.mjs) | 1–317 (new file) |

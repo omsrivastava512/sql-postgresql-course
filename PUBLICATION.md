@@ -10,7 +10,7 @@ The source-study objectives are a minimum baseline, documented in the [author au
 
 ## Current package
 
-Eighteen article drafts, seventeen independent labs, and a curriculum of 132 topic groups with explicit evidence and gaps. The onramp, six mechanism-focused lessons, three foundation lessons, six query/reporting lessons and two concurrency/migration pilots are drafted; further foundations and later routes remain unfinished. All remain drafts.
+Twenty-three article drafts, twenty-two independent labs, and a curriculum of 132 topic groups with explicit evidence and gaps. The onramp, six mechanism-focused lessons, three foundation lessons, six query/reporting lessons, two concurrency/migration pilots and five practical performance lessons are drafted; further foundations and later routes remain unfinished. All remain drafts.
 
 The [first route](COURSE_MAP.md#the-first-route) remains usable now. The [beginner route](COURSE_MAP.md#the-beginner-route) connects the available foundations and identifies the missing steps. Existing numbers and URLs stay stable.
 
@@ -52,11 +52,25 @@ Local PostgreSQL 17.11 passed 270 assertions across seventeen lab suites and 100
 
 The migration pilot is one additive change, with a short attributed Stripe comparison. It does not implement a full deployment pipeline, rename/removal bridge or backup restore. The concurrency pilot has no HTTP retry store or external effects. These boundaries keep each learning question concrete.
 
+## Practical performance batch — 2026-10-21
+
+| Draft | Concrete outcome and changed setting |
+|---|---|
+| [Query plans](articles/18-query-plans.md) | Preserve exact results while reading estimates, actual rows, loops and buffers; transfer customer lookup diagnosis to deliveries. |
+| [Index decisions](articles/19-index-decisions.md) | Compare single/composite/partial/covering candidates, enforce scoped uniqueness and measure write/storage costs; transfer to project tickets. |
+| [Deep pages](articles/20-deep-pages.md) | Compare matching offset/cursor pages, preserve ties and inspect changed sort values; transfer to descending channel messages. |
+| [Statistics and maintenance](articles/21-statistics-maintenance.md) | Refresh estimates after distribution changes, distinguish vacuum cleanup and observe a retained snapshot; transfer to queued mail. |
+| [Request work](articles/22-request-work.md) | Compare 31/2/1 database calls with equal nested results, bind input and observe a pool checkout wait; transfer to active-project task counts. |
+
+The user selected this branch after the concurrency/migration pilots. It follows the accepted performance scope, including pagination, maintenance, pooling and N+1/query counts. It uses the existing pg dependency, a supplied request module and a separate native checker; no framework, dependency or runner refactor was introduced.
+
+Embedded and native PostgreSQL passed 301 reference assertions. Native PostgreSQL 17.11 passed 107 further checks with measured plans, repeated observations, write/storage comparisons and actual snapshot/pool behaviour. Reverse suite order and the learner request command also passed. Results and limits belong in [verification](VERIFICATION.md); no fixed speedup is a mastery claim.
+
 ## Later branches
 
-The query, concurrency and bounded migration pilots now have drafts and execution evidence, but no human learning-time or comprehension evidence. Next, have the author attempt these pilots and record effort, help and wrong predictions. Use that evidence to choose the next implementation batch; do not equate passing reference SQL with mastery. Continue broader implementation according to prerequisites:
+The query, concurrency, bounded migration and performance drafts have execution evidence, but no human learning-time or comprehension evidence. Have the author attempt them and record effort, help and wrong predictions before publication. Use that evidence when choosing further batches; do not equate passing reference SQL with mastery. Continue broader implementation according to prerequisites:
 
-- A correct report is slow: query plans and measured index choices, building on the new joins, views and windows.
+- A deployed request is slow: extend local plan/query-count diagnosis to actual deployment latency and workload measurements when an application harness warrants it.
 - Two workflows acquire several resources: deadlocks, lock ordering and optimistic version checks, building on the claim pilot.
 - A successful request loses its response: idempotency, payload comparison and concurrent duplicate requests.
 - A user logs in but cannot see a row: identity, privileges, RLS, then invoker/definer and full request tracing.
