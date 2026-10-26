@@ -65,7 +65,7 @@ The following line counts are historical, not the current diff. At initial deliv
 
 This delivery record itself was the 42nd file. Temporary runtime dependencies and node_modules were excluded. The curriculum audit was added on 2026-10-19; the table above remains the original delivery snapshot.
 
-See VERIFICATION.md for executed checks and outstanding release gates. These files are saved drafts, not a public deployment.
+See VERIFICATION.md for executed checks and outstanding release gates. These are saved authoring files, not a public deployment.
 
 ## Foundation delivery on 2026-10-20
 

@@ -4,17 +4,17 @@ A standalone course about storing facts, asking questions, and understanding wha
 
 **For:** programmers new to databases. **Focus:** SQL and PostgreSQL, with backend context where it helps explain the database. **Format:** connected short articles and separate, resettable labs.
 
-The examples use fictional applications. The first drafts use a clinic; the wider curriculum also uses shops, reservations, subscriptions, and shared workspaces. Everything needed for a lab is supplied here. You need no existing application, private notes, or medical knowledge.
+The examples use fictional applications. The first lessons use a clinic; the wider curriculum also uses shops, reservations, subscriptions, and shared workspaces. Everything needed for a lab is supplied here. You need no existing application, private notes, or medical knowledge.
 
 ## Choose a way in
 
-- **New to databases:** see the [beginner route](COURSE_MAP.md#the-beginner-route). It distinguishes available drafts from lessons still to be written. The [SQL onramp](articles/00-reading-the-examples.md) and three foundation lessons are available now.
-- **Ready to explore the current drafts:** follow the [first route](COURSE_MAP.md#the-first-route), starting with foreign keys.
+- **New to databases:** see the [beginner route](COURSE_MAP.md#the-beginner-route). It distinguishes available lessons from topics still to be written. The [SQL onramp](articles/00-reading-the-examples.md) and three foundation lessons are available now.
+- **Ready to explore the current lessons:** follow the [first route](COURSE_MAP.md#the-first-route), starting with foreign keys.
 - **Returning after a gap:** choose a [review prompt](REVIEW.md), then revisit the relevant article's return note.
 - **Following a question:** use the [course map](COURSE_MAP.md). Related ideas are linked; there is no locked sequence.
 - **Ready to run SQL:** choose local PostgreSQL or Supabase in the [lab guide](labs/README.md).
 
-## Available drafts
+## Available lessons
 
 | Article | What you should be able to do afterward |
 |---|---|
@@ -46,9 +46,9 @@ The examples use fictional applications. The first drafts use a clinic; the wide
 | [Who belongs to this workspace?](articles/25-tenant-membership.md) | Protect memberships, enforce tenant write rights and preserve tenant-consistent references. |
 | [Whose permissions does this helper use?](articles/26-privileged-code.md) | Inspect view/function execution identity and repair excess access and unsafe name resolution. |
 
-There are **twenty-seven article drafts and twenty-six labs**. The latest batch adds local PostgreSQL privileges, row policies, tenant membership and privileged-code checks. Deeper modelling, request retries, authenticated API integration, broader migrations, recovery and the integrated capstone still need substantial work. The [topic inventory](TOPIC_INVENTORY.md) records evidence and gaps; a topic being listed does not mean it has been taught.
+There are **twenty-seven lesson articles and twenty-six labs**. The latest batch adds local PostgreSQL privileges, row policies, tenant membership and privileged-code checks. Deeper modelling, request retries, authenticated API integration, broader migrations, recovery and the integrated capstone still need substantial work. The [topic inventory](TOPIC_INVENTORY.md) records evidence and gaps; a topic being listed does not mean it has been taught.
 
-These are editorial drafts. Embedded and native reference checks passed on 2026-10-26, including separate restricted-login access checks; earlier session/performance results retain their original dates. Docker setup, hosted Supabase and reader trials remain unverified. Access labs require a disposable local cluster. See the [verification record](VERIFICATION.md) for dates and limits.
+The lesson articles are written, but the collection is still in editorial development. Embedded and native reference checks passed on 2026-10-26, including separate restricted-login access checks; earlier session/performance results retain their original dates. Docker setup, hosted Supabase and reader trials remain unverified. Access labs require a disposable local cluster. See the [verification record](VERIFICATION.md) for dates and limits.
 
 ## How the ideas connect
 
@@ -62,7 +62,7 @@ Articles can be published as the author learns and verifies them. Planned lesson
 
 The [source notebook](SOURCES.md) connects specific questions to engineers' own accounts: retries and migrations at Stripe, pagination at Shopify, tenant isolation guidance from AWS, related data at Notion, database boundaries at GitHub, and deletion tradeoffs discussed by Brandur Leach. Fictional exercises do not reproduce those companies' systems.
 
-This draft was prepared with AI assistance. The course author should revise it after doing the labs; we do not invent personal experience or claim the draft was entirely human-written.
+This README was prepared with AI assistance. The course author should revise it after doing the labs; we do not invent personal experience or claim it was entirely human-written.
 
 ## For authors and maintainers
 

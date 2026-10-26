@@ -1,10 +1,10 @@
 # Course map
 
-Start with a question, then follow its connections. This map describes both available drafts and planned destinations. Article numbers are stable filenames, not a required study sequence.
+Start with a question, then follow its connections. This map describes both available lessons and planned destinations. Article numbers are stable filenames, not a required study sequence.
 
 ## The beginner route
 
-The beginner and query/reporting routes now have drafts. Follow the foreign-key lesson before row identity, where references are used to build memberships. Full type selection and deeper modelling remain planned.
+The beginner and query/reporting routes now have lessons. Follow the foreign-key lesson before row identity, where references are used to build memberships. Full type selection and deeper modelling remain planned.
 
 | Stop | Question and outcome | State |
 |---|---|---|
@@ -21,7 +21,7 @@ From there, branch into rules, transactions, access, reporting, or operational w
 
 ## The first route
 
-This shorter route uses only existing drafts. It explores guarantees and failures; it complements the beginner route above.
+This shorter route uses only existing lessons. It explores guarantees and failures; it complements the beginner route above.
 
 [Read the SQL](articles/00-reading-the-examples.md) → [Foreign keys](articles/01-foreign-keys.md) → [Business rules](articles/02-business-rules.md) → [Derived values](articles/03-derived-values.md).
 
@@ -41,15 +41,15 @@ Topic IDs refer to the [inventory](TOPIC_INVENTORY.md), which records the narrow
 
 | Route | Destination and topic families | Prior knowledge | State |
 |---|---|---|---|
-| Values and identity | Select types, distinguish missing values, define keys and row constraints; F, Q05–Q07, B13 | Reading simple statements | Stored values and identity drafts; wider types and modelling depth planned |
-| Relationships and modelling | Cardinality, junctions, optional references, deletion, normalization; R, D03, D13 | Keys and row meaning | FK, deletion and membership drafts; deeper modelling planned |
-| Query meaning and reporting | Joins, grouping, subqueries, CTEs, windows, sets and pagination; Q | Values and basic SELECT; relationships for joins | Filtering, joins, grouping, subqueries/sets, CTEs, windows and reusable-report drafts; recursion and specialized query depth remain planned |
-| Rules and automation | Constraints, functions, trigger events, derived values, transitions; B | Writes, constraints; lookups for cross-table rules | Validation and derivation drafts; remaining coverage planned |
-| Transactions and concurrency | Atomic groups, deferral, counters, locking, isolation, retries; T, R11 | Writes and constraints; CTEs for the claim | Rollback, deferral and competing-claim drafts; deadlocks, optimistic checks and full request retries remain planned |
-| Identity and access | Authentication, privileges, RLS, function execution identity, tenants; A | Filtering, relationships/EXISTS; snapshots for revocation; functions/views for helper checks | Local grants, row-policy matrices, membership and privileged-code drafts; Supabase auth/JWT/Data API integration and onboarding remain planned |
-| Data over time | Generated values, views, snapshots, exact money, calendars and audits; D | Expressions; joins and grouping for reports | Historical price, exact-cent, period-boundary and view examples in the report draft; broader lifecycle/calendar rules planned |
-| Performance and recovery | Indexes, query plans, statistics, pooling, imports, backup restoration; O01–O06, O15–O19 | Queries; transactions for locks, cleanup and recovery | Plans, measured index choices, pagination, statistics/maintenance and request/pool work drafted; specialized indexes, deployment-scale tuning and backup restoration remain planned |
-| Evolution and integration | Versioned migrations, compatibility, APIs, safe parameters, useful errors; O07–O14, O20–O21 | Constraints, transactions and locks; access for API work | Additive migration with backfill and old/new SQL callers drafted; renames, removal, restore and full API workflow remain planned |
+| Values and identity | Select types, distinguish missing values, define keys and row constraints; F, Q05–Q07, B13 | Reading simple statements | Lessons on stored values and identity; wider types and modelling depth planned |
+| Relationships and modelling | Cardinality, junctions, optional references, deletion, normalization; R, D03, D13 | Keys and row meaning | Lessons on foreign keys, deletion and membership; deeper modelling planned |
+| Query meaning and reporting | Joins, grouping, subqueries, CTEs, windows, sets and pagination; Q | Values and basic SELECT; relationships for joins | Lessons on filtering, joins, grouping, subqueries/sets, CTEs, windows and reusable reports; recursion and specialized query depth remain planned |
+| Rules and automation | Constraints, functions, trigger events, derived values, transitions; B | Writes, constraints; lookups for cross-table rules | Lessons on validation and derivation; remaining coverage planned |
+| Transactions and concurrency | Atomic groups, deferral, counters, locking, isolation, retries; T, R11 | Writes and constraints; CTEs for the claim | Lessons on rollback, deferral and competing claims; deadlocks, optimistic checks and full request retries remain planned |
+| Identity and access | Authentication, privileges, RLS, function execution identity, tenants; A | Filtering, relationships/EXISTS; snapshots for revocation; functions/views for helper checks | Lessons on local grants, row-policy matrices, membership and privileged code; Supabase auth/JWT/Data API integration and onboarding remain planned |
+| Data over time | Generated values, views, snapshots, exact money, calendars and audits; D | Expressions; joins and grouping for reports | Lessons on historical price, exact cents, period boundaries and views; broader lifecycle/calendar rules planned |
+| Performance and recovery | Indexes, query plans, statistics, pooling, imports, backup restoration; O01–O06, O15–O19 | Queries; transactions for locks, cleanup and recovery | Lessons on plans, measured index choices, pagination, statistics/maintenance and request/pool work; specialized indexes, deployment-scale tuning and backup restoration remain planned |
+| Evolution and integration | Versioned migrations, compatibility, APIs, safe parameters, useful errors; O07–O14, O20–O21 | Constraints, transactions and locks; access for API work | Lesson on additive migration with backfill and old/new SQL callers; renames, removal, restore and full API workflow remain planned |
 
 The scope is application-focused SQL/PostgreSQL, from foundations through maintaining a database-backed service. Full database administration, replication, and sharding are optional future case-study directions, not hidden requirements for finishing this course. The inventory can grow when new learning questions justify it.
 
@@ -125,7 +125,7 @@ Every planned route needs a worked example, a changed-setting task with feedback
 
 ## Which system are we discussing?
 
-| Available draft | General SQL idea | PostgreSQL focus | Supabase focus |
+| Available lesson | General SQL idea | PostgreSQL focus | Supabase focus |
 |---|---|---|---|
 | Reading the examples | Rows, columns and basic statements | Qualified names and runnable lab syntax | None; optional setup only |
 | Stored values | Missing information, defaults, predicates and row rules | NULL comparisons, casts and constraint behaviour | None |

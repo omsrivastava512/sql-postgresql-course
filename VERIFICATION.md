@@ -43,7 +43,7 @@ A separate task-local verifier executed the SQL blocks extracted from the revise
 - **17:** the inline manual backfill matches 02-backfill.sql's transaction apart from its explicit 60-second lock timeout and 90-second statement timeout. After a deliberate three-second delay, B was still blocked by A; committing A preserved 120 and returned only booking 4/30. A separate run reached 55P03 after about 60.027 seconds. A query in the failed transaction returned 25P02; ROLLBACK, committing A, inspecting the rows and rerunning the original script completed only booking 4. Both local timeouts reverted afterward. The unchanged expansion script still reached its deliberate 55P03 after about 1.013 seconds, left no column/version record after rollback, then succeeded after releasing A.
 - **25:** both connections logged in as course_author; A used SET ROLE course_tenant_alice while Alice remained NOLOGIN. A read 11/12, B deleted and committed Alice's membership, A still read 11/12 in its old snapshot, then saw no tasks after COMMIT and received 42501 for the new insert. Administrator inspection confirmed no task changes and no Alice membership. RESET ROLE and cleanup succeeded. This demonstrates the documented role-switched snapshot path; the separate actual-login checker supplies different evidence.
 
-The first execution of the revised snapshot draft exposed SQLSTATE 25001 when the identity SELECT and BEGIN ISOLATION LEVEL were sent in one multi-statement request. The final instructions separate those executions and explain recovery; that corrected sequence passed. The earlier successful ownership and timeout checks were retained, and only the revised snapshot sequence and subsequent plan capture were resumed. No failed attempt is counted as a pass.
+The first execution of the revised snapshot lesson exposed SQLSTATE 25001 when the identity SELECT and BEGIN ISOLATION LEVEL were sent in one multi-statement request. The final instructions separate those executions and explain recovery; that corrected sequence passed. The earlier successful ownership and timeout checks were retained, and only the revised snapshot sequence and subsequent plan capture were resumed. No failed attempt is counted as a pass.
 
 The earlier full 100-assertion concurrency, 107-assertion performance and 157-assertion access runs elsewhere in this record remain dated evidence from their implementation batches. Those full specialized suites and their reverse-order variants were not rerun here; the selected runs above were.
 
@@ -61,7 +61,7 @@ Final local navigation passed 822 links across 67 Markdown files; diff whitespac
 
 The revised explanations were reviewed as a separate pass: 03 follows three concrete row states before comparing business meanings; 18 reads an observed plan from scan to output before the independent task; 20 explains the existing source's decision and costs, then labels our interpretation and local measurement limits. The Shopify original was reread, including its limited-adoption qualification. No benchmark ratio or full-rollout outcome was invented. Manual 17/25 instructions now supply executable intermediate steps and their recovery/identity boundaries.
 
-Actual human trials remain unperformed. A learner still needs to try switching sessions within the bounded window, explain the old snapshot without spoken help, interpret a different plan and distinguish the source's account from the lab's evidence. Docker setup and hosted verification remain open. These revisions do not make the draft publication-ready.
+Actual human trials remain unperformed. A learner still needs to try switching sessions within the bounded window, explain the old snapshot without spoken help, interpret a different plan and distinguish the source's account from the lab's evidence. Docker setup and hosted verification remain open. These revisions do not make the course publication-ready.
 
 Changed course files: [article 03](articles/03-derived-values.md), [lab 03](labs/03-derived-values/README.md), [lab 17](labs/17-compatible-change/README.md), [article 18](articles/18-query-plans.md), [lab 18](labs/18-query-plans/README.md), [article 20](articles/20-deep-pages.md), [lab 25](labs/25-tenant-membership/README.md), [sources](SOURCES.md) and this verification record. Other retrospective findings remain outside the approved set. No staging, commit or push was performed.
 
@@ -189,7 +189,7 @@ The native runtime was EDB's PostgreSQL 17.11-5 Windows x64 binary bundle, obtai
 
 The temporary server listened only on 127.0.0.1:55433, used a dedicated disposable course database and role course_author, and installed no Windows service. A sandboxed background launch did not persist and local socket access was denied; the already-approved runtime and test commands therefore ran with elevated tool access. Shutdown completed after testing; pg_ctl confirmed no server running. The task's temporary archive, runtime and data directory were then removed after checking their resolved cleanup path. No Supabase SQL, paid feature or hosted resource was used.
 
-These checks do not run the Docker/psql CSV transport, prove learner comprehension or complete the wider curriculum. The article/lab drafts include independent transfer and retrieval prompts; actual author/new-reader time, errors and assistance remain unrecorded until a person attempts them. Hosted execution, Docker setup and reader trials remain release work.
+These checks do not run the Docker/psql CSV transport, prove learner comprehension or complete the wider curriculum. The article/lab materials include independent transfer and retrieval prompts; actual author/new-reader time, errors and assistance remain unrecorded until a person attempts them. Hosted execution, Docker setup and reader trials remain release work.
 
 ## Query and data-handoff implementation — 2026-10-20
 
@@ -208,7 +208,7 @@ The six new suites also passed independently in fresh embedded databases, run in
 
 A separate check loaded the actual CSV through PostgreSQL's parser and matched all ten raw rows to the SQL snapshot, including quoted commas, quotes, NULL and empty text. Processing yielded four facts totalling 5250 cents, replay left those facts unchanged, and an exported CSV re-imported to equal facts. The command below makes that author check repeatable; the normal runner uses the SQL snapshot.
 
-At this checkpoint the package contained 80 source files, sixteen articles and fifteen labs. All 132 topic IDs remained. No dependencies or runner architecture changed. Docker and psql were unavailable on this host; local PostgreSQL 17 and hosted Supabase execution had not been performed. The later native concurrency/migration checks are recorded above. This batch was a verified draft, not a public release or completion of the course.
+At this checkpoint the package contained 80 source files, sixteen articles and fifteen labs. All 132 topic IDs remained. No dependencies or runner architecture changed. Docker and psql were unavailable on this host; local PostgreSQL 17 and hosted Supabase execution had not been performed. The later native concurrency/migration checks are recorded above. This batch's checks passed, but it was not a public release or completion of the course.
 
 ### Repeat the actual-file check
 
@@ -287,7 +287,7 @@ npm run check:links
 PASS 161 local links in 24 Markdown files.
 ```
 
-The draft uses PostgreSQL 17 documentation and a PostgreSQL 17.11 Docker tag. Embedded execution on PostgreSQL 18.6 is useful cross-version evidence, but does not replace the planned version-17 and hosted tests. No Docker engine or connected Supabase test project was available for this draft session.
+The course material uses PostgreSQL 17 documentation and a PostgreSQL 17.11 Docker tag. Embedded execution on PostgreSQL 18.6 is useful cross-version evidence, but does not replace the planned version-17 and hosted tests. No Docker engine or connected Supabase test project was available for this verification session.
 
 ## Standalone curriculum revision — 2026-10-19
 
@@ -300,7 +300,7 @@ Documentation-only revision. SQL setup/solution files, lab instructions, test co
 | Source-study coverage | Author review: every named concept, exercise and domain question in the ten-module source plan has a destination in CURRICULUM_AUDIT.md, including both parts of 8 |
 | Coverage honesty | Author review: each introduced/explained/practised claim names its narrower objective and an existing article section or task; remaining objectives are separate |
 | Reader independence | No private module labels or source-repository paths in learner materials; source-study numbering confined to author provenance/audit |
-| Graph and routes | Prerequisite arrows checked for cycles; current-draft route is distinct from the intended beginner route; future destinations visibly planned |
+| Graph and routes | Prerequisite arrows checked for cycles; current-lesson route is distinct from the intended beginner route; future destinations visibly planned |
 | Transfer and retrieval | Existing transfer prompts retained; reservation reasoning prompt added; all nine wider routes have explicit future retrieval targets |
 | File count | 43 source files: original 42 plus the curriculum audit; installed dependencies/Git metadata excluded |
 | Change scope | No SQL, lab instructions, dependencies, application code, commits or remote changes in this revision |

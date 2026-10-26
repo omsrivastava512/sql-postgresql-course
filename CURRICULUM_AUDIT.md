@@ -86,7 +86,7 @@ At that foundation checkpoint, joins, aggregation, group filters, reports and a 
 
 Six new article/lab pairs now cover joins, aggregate grain, scalar/existence/set shapes, nonrecursive CTEs, windows, views, reusable reports and a small reconciled import. The two original business briefs from the practical-course plan are implemented with synthetic datasets: the monthly sales/usage report and the CSV handoff.
 
-The [inventory](TOPIC_INVENTORY.md) records narrower outcomes under existing IDs. All 132 IDs remain; no row is promoted to whole-course mastery. Reference examples passed 252 embedded assertions; actual CSV parsing, replay and export/re-import were checked separately. The query pilot is an executed draft, not a measured learner trial.
+The [inventory](TOPIC_INVENTORY.md) records narrower outcomes under existing IDs. All 132 IDs remain; no row is promoted to whole-course mastery. Reference examples passed 252 embedded assertions; actual CSV parsing, replay and export/re-import were checked separately. The query pilot is an executed lesson set, not a measured learner trial.
 
 At that checkpoint, concurrent writes/retries, authorization, measured performance, inherited-database repair, migrations, restore and the integrated capstone remained future implementation. The next two pilots are recorded below.
 
@@ -112,7 +112,7 @@ Four article/lab pairs add database-role privileges, per-command row policies, p
 
 The reference suite passed 399 assertions across twenty-six labs on embedded PostgreSQL 18.6 and native PostgreSQL 17.11. A separate native checker uses actual restricted logins, wrong-password rejection and forbidden role-switch tests, rather than treating administrator SET ROLE as authentication proof. The [verification record](VERIFICATION.md) contains its final normal/reverse results, cleanup evidence and limits.
 
-These drafts do not complete A02–A04 or A11–A13: auth accounts/profiles, JWT validation, Supabase identity/editor differences, Data API access, onboarding and full request tracing remain planned. The custom-setting experiment explicitly rejects caller-controlled context as identity. Membership revocation is tested against an established snapshot rather than described as universally immediate. Hosted verification and human learning trials remain open.
+These lessons do not complete A02–A04 or A11–A13: auth accounts/profiles, JWT validation, Supabase identity/editor differences, Data API access, onboarding and full request tracing remain planned. The custom-setting experiment explicitly rejects caller-controlled context as identity. Membership revocation is tested against an established snapshot rather than described as universally immediate. Hosted verification and human learning trials remain open.
 
 The [publication queue](PUBLICATION.md#later-branches) now groups the remaining work into authenticated application access, reliable operations, deeper modelling/history, targeted query/rule depth, change/recovery and integration/release. The separate catalog research remains research; this access batch does not modify or certify its proposed models.
 
@@ -120,7 +120,7 @@ The [publication queue](PUBLICATION.md#later-branches) now groups the remaining 
 
 - Each source-study objective above has a course destination; unresolved product choices remain comparative exercises.
 - Each inventory coverage claim names a narrower outcome and existing evidence. Remaining subtopics stay planned.
-- Reader-facing routes require no source repository and distinguish available drafts from intended routes.
+- Reader-facing routes require no source repository and distinguish available lessons from intended routes.
 - At least one changed-setting prompt and later retrieval opportunity belongs to each route; planned prompts are labelled planned.
 - SQL, PostgreSQL and Supabase are separated in the map and authoring contract.
 - Execution evidence is tracked by environment, separately from editorial coverage. Hosted testing remains unperformed.
