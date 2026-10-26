@@ -1,6 +1,6 @@
 # Verification record
 
-Status: draft. Initial SQL execution dated 2026-10-17 (Asia/Kolkata); documentation audit added 2026-10-19; foundation and query/data-handoff execution added 2026-10-20; native concurrency, migration and practical performance execution added 2026-10-21; PostgreSQL access-control execution added 2026-10-26.
+Status: draft. Initial SQL execution dated 2026-10-17 (Asia/Kolkata); documentation audit added 2026-10-19; foundation and query/data-handoff execution added 2026-10-20; native concurrency, migration and practical performance execution added 2026-10-21; PostgreSQL access-control execution and focused editorial revisions added 2026-10-26.
 
 | Check | Result |
 |---|---|
@@ -11,8 +11,9 @@ Status: draft. Initial SQL execution dated 2026-10-17 (Asia/Kolkata); documentat
 | Restricted database logins | PASS: 157 assertions across labs 23–26 with 11 actual restricted logins, normal and reverse suite order; each suite and its cleanup also passed independently (2026-10-26) |
 | Local Docker PostgreSQL 17.11 | Not run; Docker is not installed on this host |
 | Hosted Supabase | MCP connected and project inventory read; no SQL run or project changed. No dedicated course project used; hosted verification remains open. |
-| Local Markdown links, current package | PASS: 807 local links across 67 Markdown files, including heading targets (2026-10-26) |
-| Author learning trial and editorial revision | Pending |
+| Local Markdown links, current package | PASS: 822 local links across 67 Markdown files, including heading targets (2026-10-26, focused revision) |
+| Editorial review | Retrospective inspection of 27 articles/26 lab guides completed; approved focused revisions reviewed separately below (2026-10-26). Other findings remain outside this revision set. |
+| Actual human learner trials | Pending; automated execution of documented steps is not a human trial. |
 | Public publication | Not performed |
 
 The embedded runtime tests SQL behavior only. It cannot establish Docker setup, hosted permissions, or concurrent-session behavior. Native local execution now establishes the SQL and session results described below, but not Docker startup. A public release still requires hosted verification and an editorial learning trial.
@@ -20,6 +21,49 @@ The embedded runtime tests SQL behavior only. It cannot establish Docker setup, 
 The six initial labs cover foreign-key failures, role validation and its update gap, derived values and stale copies, delete actions, deferred-check timing, and invoice failure rollback. The test cases also run every successful solution after a fresh setup and exercise setup reset twice.
 
 No test in this package claims to verify HTTP requests, API retries, production authorization, or a deployed clinic schema. Live SQL sessions are tested separately from application requests. Earlier sections below preserve dated checkpoints; this opening table and the latest section describe the current package.
+
+## Focused editorial revisions — 2026-10-26
+
+The approved scope was five items: manual backfill observation, a role-switched snapshot exercise, copied-owner reasoning, an annotated real plan and a developed existing Shopify connection. No new lesson, fixture, dependency or course checker was added. The intentionally incomplete ownership trigger and all supplied SQL scripts remain unchanged.
+
+### Checks rerun for these revisions
+
+| Check | Fresh result | What it establishes |
+|---|---|---|
+| npm run test:embedded | PASS: 399 assertions across 26 labs, PostgreSQL 18.6 / PGlite 0.5.10 | Existing reference SQL behavior and reset/solution checks |
+| npm run test:database | PASS: 399 assertions across 26 labs, native PostgreSQL 17.11 | Same reference behavior on the temporary native server |
+| node tests/verify-sessions.mjs --lab=17 | PASS: 45 assertions on three distinct connections | Existing compatibility, backfill, DDL failure/recovery and transfer behavior |
+| node tests/verify-access.mjs --lab=25 | PASS: 49 assertions with three actual restricted logins | Existing membership permissions, identity restrictions, snapshot behavior and temporary-login cleanup |
+| node tests/verify-performance.mjs --lab=18 | PASS: 10 assertions | Existing complete-result checks, before/after plans, repeated lookup and write/rollback observations |
+| node tests/verify-performance.mjs --lab=20 | PASS: 7 assertions | Existing equal-page, incomplete-cursor, changed-data and descending-transfer checks, with native observations |
+
+A separate task-local verifier executed the SQL blocks extracted from the revised lab Markdown, using the existing pg dependency and three persistent native connections. It is retained with the evidence outside the course repository; it is not a new learner dependency or course test framework.
+
+- **03:** the three observed owner triples (patient, note 100, note 101) were (1,1,1), (2,1,1), (2,2,1), matching the article's table. No trigger repair was made.
+- **17:** the inline manual backfill matches 02-backfill.sql's transaction apart from its explicit 60-second lock timeout and 90-second statement timeout. After a deliberate three-second delay, B was still blocked by A; committing A preserved 120 and returned only booking 4/30. A separate run reached 55P03 after about 60.027 seconds. A query in the failed transaction returned 25P02; ROLLBACK, committing A, inspecting the rows and rerunning the original script completed only booking 4. Both local timeouts reverted afterward. The unchanged expansion script still reached its deliberate 55P03 after about 1.013 seconds, left no column/version record after rollback, then succeeded after releasing A.
+- **25:** both connections logged in as course_author; A used SET ROLE course_tenant_alice while Alice remained NOLOGIN. A read 11/12, B deleted and committed Alice's membership, A still read 11/12 in its old snapshot, then saw no tasks after COMMIT and received 42501 for the new insert. Administrator inspection confirmed no task changes and no Alice membership. RESET ROLE and cleanup succeeded. This demonstrates the documented role-switched snapshot path; the separate actual-login checker supplies different evidence.
+
+The first execution of the revised snapshot draft exposed SQLSTATE 25001 when the identity SELECT and BEGIN ISOLATION LEVEL were sent in one multi-statement request. The final instructions separate those executions and explain recovery; that corrected sequence passed. The earlier successful ownership and timeout checks were retained, and only the revised snapshot sequence and subsequent plan capture were resumed. No failed attempt is counted as a pass.
+
+The earlier full 100-assertion concurrency, 107-assertion performance and 157-assertion access runs elsewhere in this record remain dated evidence from their implementation batches. Those full specialized suites and their reverse-order variants were not rerun here; the selected runs above were.
+
+### Captured plan and environment
+
+[Article 18's plan](articles/18-query-plans.md#follow-one-captured-plan) is the complete text output of its EXPLAIN (ANALYZE, BUFFERS) query, captured after fresh setup.sql and its ANALYZE statements, before adding the customer index. Capture time: 2026-10-26 10:27:12 UTC. The forty ordered result rows and 5680-cent total were checked separately. A sequential scan emitted 40 and filtered 39,960 rows, followed by a sort; observed execution time was 2.103 ms. The article's text block was compared verbatim with the saved native output. It is one observation, not a required plan shape or timing target.
+
+Environment: PostgreSQL 17.11 on Windows x64, Node.js v24.15.0, pg 8.16.3, role course_author, work_mem 4MB, shared_buffers 32MB and default planner enable settings. The database was recently loaded and read; this was not a controlled cold-cache measurement. The same official PostgreSQL 17.11-5 archive size and locally computed SHA-256 documented below were checked. The dedicated server used 127.0.0.1:55435, no Windows service, and SCRAM for temporary restricted logins. No hosted SQL or paid resource was used.
+
+Task-local evidence includes focused-revision-evidence-20261026.json, lesson-18-plan-20261026.txt, the documented-step verifier and individual native reference/session/access/performance outputs. These author artifacts are outside the repository; learners need only the included output and runnable fixture.
+
+Final local navigation passed 822 links across 67 Markdown files; diff whitespace, Markdown fences/tables and the exact nine-file scope passed. Before shutdown, there were no other database sessions and all thirteen fixture roles were NOLOGIN with no password. pg_ctl stopped the exact temporary server and returned status 3 (no server running). Runtime removal was confined to its resolved task-artifact child directory after checking for reparse points and a remaining server PID file. The archive, binaries and synthetic database were removed; evidence files were retained outside that directory.
+
+### Editorial review and remaining learner evidence
+
+The revised explanations were reviewed as a separate pass: 03 follows three concrete row states before comparing business meanings; 18 reads an observed plan from scan to output before the independent task; 20 explains the existing source's decision and costs, then labels our interpretation and local measurement limits. The Shopify original was reread, including its limited-adoption qualification. No benchmark ratio or full-rollout outcome was invented. Manual 17/25 instructions now supply executable intermediate steps and their recovery/identity boundaries.
+
+Actual human trials remain unperformed. A learner still needs to try switching sessions within the bounded window, explain the old snapshot without spoken help, interpret a different plan and distinguish the source's account from the lab's evidence. Docker setup and hosted verification remain open. These revisions do not make the draft publication-ready.
+
+Changed course files: [article 03](articles/03-derived-values.md), [lab 03](labs/03-derived-values/README.md), [lab 17](labs/17-compatible-change/README.md), [article 18](articles/18-query-plans.md), [lab 18](labs/18-query-plans/README.md), [article 20](articles/20-deep-pages.md), [lab 25](labs/25-tenant-membership/README.md), [sources](SOURCES.md) and this verification record. Other retrospective findings remain outside the approved set. No staging, commit or push was performed.
 
 ## PostgreSQL access-control implementation — 2026-10-26
 

@@ -46,12 +46,53 @@ The real-login checker additionally requires SET ROLE course_tenant_bob to fail.
 
 ## Revoke membership with a snapshot still open
 
-Use an actual Alice connection and a separate administrator connection. Reset the fixture/solution before beginning, and never reset while another session's transaction is open.
+Use two persistent connections to the disposable cluster, both opened as its administrator. Call them A (the learner) and B (the administrator). End earlier transactions and RESET ROLE in both, then run setup.sql and solution.sql in B. Never reset while another session's transaction is open.
 
-1. Alice: BEGIN ISOLATION LEVEL REPEATABLE READ; then read tasks 11/12, establishing the snapshot.
-2. Administrator: delete Alice's workspace membership and commit.
-3. Alice: the same transaction still reads 11/12.
-4. Alice: COMMIT; a new query returns no tasks and a new insert into Alpha is denied.
+Setup creates Alice as NOLOGIN, so this guided exercise does not ask you to log in as Alice or change her credentials. In A, switch the effective role and inspect the identities:
+
+```sql
+SET ROLE course_tenant_alice;
+SELECT session_user, current_user;
+```
+
+session_user remains the administrator; current_user is course_tenant_alice, which the policies use. Finish that execution before starting the next block. Sending the identity query and BEGIN ISOLATION LEVEL together as one multi-statement request can establish an implicit transaction before the isolation change and fail with 25001. If that happens, ROLLBACK and repeat the two blocks separately.
+
+Now establish the snapshot in A:
+
+```sql
+BEGIN ISOLATION LEVEL REPEATABLE READ;
+SELECT id FROM course_tenant.tasks ORDER BY id;
+```
+
+The task read returns 11 and 12 and establishes the snapshot. Keep A's transaction open.
+
+In B, revoke the membership and commit:
+
+```sql
+BEGIN;
+DELETE FROM course_tenant.memberships
+WHERE workspace_id = 1 AND actor = 'course_tenant_alice';
+COMMIT;
+```
+
+Return to A. Predict the two query results before running:
+
+```sql
+SELECT id FROM course_tenant.tasks ORDER BY id;
+COMMIT;
+SELECT id FROM course_tenant.tasks ORDER BY id;
+```
+
+The first still returns 11 and 12: the membership lookup sees the old snapshot. The second returns no tasks because the transaction ended and the new statement sees the committed revocation. SET ROLE remains active across COMMIT. Now run this separately in A, outside an explicit transaction:
+
+```sql
+INSERT INTO course_tenant.tasks (id, workspace_id, project_id, title)
+VALUES (13, 1, 10, 'After revocation');
+```
+
+Expect 42501 and no inserted task. In B, confirm that tasks 11, 12 and 21 are unchanged and no Alice membership remains. Finish A with RESET ROLE.
+
+These two administrator-controlled connections demonstrate snapshot behaviour under Alice's effective role. They do not prove login isolation: their administrator session identity can switch roles. The existing node tests/verify-access.mjs --lab=25 checker separately tests actual restricted logins, prohibited role switches and the snapshot sequence; its temporary credentials are not needed for this guided exercise.
 
 This is a demonstrated limit of the chosen snapshot model, not an instruction to keep long transactions open. Revocation cannot retrieve information already returned. For a stricter requirement, identify the additional request/session control needed.
 

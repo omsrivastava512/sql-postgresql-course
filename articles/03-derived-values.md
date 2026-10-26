@@ -64,11 +64,19 @@ Our patient setup supplies owner 1 explicitly. It does not demonstrate a product
 
 ## A copied value can become stale
 
-Change Riya's owner in the patients table. Existing notes do not magically update: this trigger runs when a **note** is written.
+Both notes above now belong to Meera, owner 1. Suppose Riya's patient record is reassigned to Dev, owner 2. Then someone edits only the body of note 100. Follow the three stored owner values:
 
-Is that wrong? It depends on whether note ownership is meant to follow the patient or record the historical owner. If it must follow, the design needs a way to keep it synchronized, or queries can obtain the owner through the patient instead of storing another copy.
+| After this action | Patient 10 | Note 100 | Note 101 |
+|---|---:|---:|---:|
+| Create both notes | 1 | 1 | 1 |
+| Change the patient's owner to 2 | 2 | 1 | 1 |
+| Edit only note 100's body | 2 | 2 | 1 |
 
-That question connects to the later topics of normalization, snapshots, and audit history.
+Why does the second row leave both notes unchanged? The trigger is attached to INSERT OR UPDATE on **notes**, not to changes on patients. Reassigning Riya does not run it. Editing note 100 does run it, even though the edit mentions only body: the function reads Riya's current owner and overwrites NEW.owner_id again. Note 101 has not been edited, so its copy stays 1. [Run the sequence](../labs/03-derived-values/README.md#a-later-change).
+
+Now test two possible meanings of “note owner”. If it means the patient's **current owner**, the notes fail that contract as soon as Riya is reassigned. If it means the **owner when the note was created**, changing note 100's body must not rewrite that history, but this trigger does. It produces neither consistently current ownership nor an immutable historical snapshot. Each note reflects the patient's owner at that note's most recent write.
+
+We leave the trigger incomplete so those differences stay observable. Before choosing a repair, decide which business meaning is intended and list the writes that could break it. That question connects to the later topics of normalization, snapshots, and audit history.
 
 ## An engineer's use of the same mechanism
 

@@ -49,11 +49,15 @@ Insert an event before the saved boundary. A later cursor request does not trave
 
 For a changing feed, decide whether those effects are acceptable. A stable sort key, a snapshot requirement and an export consistency policy are different design choices. The lab demonstrates changes between requests rather than claiming a universal paging guarantee.
 
-## One engineering connection
+## Why Shopify changed the pagination contract
 
-Drew Martin's [Shopify account from 12 August 2019](https://shopify.engineering/pagination-relative-cursors) connects deep offsets with growing work and occupied database connections. It also shows why a nonunique sort value needs a unique tie-breaker and a suitable index.
+In [his Shopify account from 12 August 2019](https://shopify.engineering/pagination-relative-cursors), Drew Martin describes applications synchronizing large product catalogs through successive pages. Slow deep-offset queries occupied limited database connections; unrelated requests, including those for other shops sharing an instance, could wait or time out. The problem extended beyond one slow page.
 
-Our generated events test those ideas on PostgreSQL. Shopify's reported timings and architecture are not our benchmark or a promise for another workload.
+Shopify chose relative cursors to continue from the previous position. That changed what clients could request: continuation replaced arbitrary page-number jumps. Nonunique sort values also needed a unique tie-breaker and a matching index. Martin reports that changing external endpoints required a coordinated, versioned API transition; adoption was still limited when he wrote, so the full rollout's effects were not yet established. These are the author's reported circumstances, not measurements from this course.
+
+Our interpretation is that a pagination decision must account for both traversal work and the navigation callers need. The PostgreSQL exercise makes the first part observable: establish that both queries return 69001–69010, then compare the work below Limit with the complete-key index in place. The supplied cursor removes acquisition cost from that local comparison; an application's cost of finding a position still counts. The changed-data exercise tests another boundary: continuation does not freeze history.
+
+Reducing per-page work can help explain the connection pressure in Shopify's account, but our single-client measurements do not reproduce its shared workload or establish a throughput gain. Keep Shopify's historical timings separate from your own plans and observations. The [request-work lesson](22-request-work.md) returns to the difference between one SQL statement and the work of a whole request.
 
 ## Practise and transfer
 

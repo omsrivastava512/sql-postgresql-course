@@ -18,7 +18,7 @@ SELECT id, amount_cents FROM course_plan.orders
 WHERE customer_id = 42 ORDER BY id;
 ```
 
-Locate the scan, filter and any sort. Identify estimated rows, actual rows, loops and rows removed by the filter. Explain why estimated cost is not elapsed milliseconds. For any repeated node, distinguish per-loop rows from the total emitted across loops.
+First walk through the [article's captured plan](../../articles/18-query-plans.md#follow-one-captured-plan). Then locate the scan, filter and any sort in your own output. Identify estimated rows, actual rows, loops and rows removed by the filter. Can you account for the 40,000 input rows and forty output rows in this baseline? If your plan differs, trace its nodes rather than forcing the illustrated shape. Explain why estimated cost is not elapsed milliseconds. For any repeated node, distinguish per-loop rows from the total emitted across loops.
 
 Record the server version, role, table count, query, first execution and five subsequent executions. Keep the plan and root buffer totals with the times. These runs share a recently loaded database and caches; do not call the first run a controlled cold-cache run.
 

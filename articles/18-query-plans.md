@@ -29,9 +29,35 @@ FROM course_plan.orders
 WHERE customer_id = 42 ORDER BY id;
 ```
 
-Read from the row-producing nodes toward the final output. A scan finds rows; a sort can establish ordering; a limit can stop consumption early. Cost is a planner estimate in configured units, not milliseconds. Actual rows and time on a node with multiple loops are averages per loop. Multiplying rows by loops helps interpret repeated work.
+### Follow one captured plan
 
-Do not add parent and child times or buffer totals as if they were independent bills. An upper node includes work beneath it. A count query's final one row also does not mean it examined one row. [Plan-reading reference](https://www.postgresql.org/docs/17/using-explain.html)
+This is the actual output of the command above, captured on 26 October 2026 using PostgreSQL 17.11, Windows x64, role course_author, through Node.js 24.15.0 and pg 8.16.3. It follows a fresh run of setup.sql, including its ANALYZE statements, before adding the customer index. Planner enable settings were left at their defaults; shared_buffers was 32MB and work_mem was 4MB. The table had just been loaded and read, so this is not a cold-cache measurement.
+
+```text
+Sort  (cost=1117.06..1117.16 rows=40 width=8) (actual time=2.081..2.083 rows=40 loops=1)
+  Sort Key: id
+  Sort Method: quicksort  Memory: 25kB
+  Buffers: shared hit=616
+  ->  Seq Scan on orders  (cost=0.00..1116.00 rows=40 width=8) (actual time=0.013..2.068 rows=40 loops=1)
+        Filter: (customer_id = 42)
+        Rows Removed by Filter: 39960
+        Buffers: shared hit=616
+Planning Time: 0.069 ms
+Execution Time: 2.103 ms
+```
+
+Read this from the scan toward the final output:
+
+1. **Find the matching orders.** Seq Scan visits the table and tests customer_id = 42. It emits forty rows and removes 39,960. With loops=1, those counts account for all 40,000 supplied orders. The scan's rows=40 describes rows passed onward, not rows inspected.
+2. **Compare the prediction with the observation.** The rows=40 beside cost is the planner's estimate; the rows=40 beside actual time is observed output. They agree here because the estimate fits this evenly distributed fixture. That agreement is something to check, not an assumption for the next query. Cost is in planner units, not elapsed milliseconds.
+3. **Order the survivors.** Sort receives those forty rows and orders them by id, using 25kB in this run. It does not filter out more orders. The query must still return 42, 1042, …, 39042 with amount 142 each. A plan's row count cannot prove the IDs or the 5680-cent total; the saved query result supplies that check.
+4. **Keep nested work separate from output size.** Both nodes report 616 shared buffer hits. The upper total includes its child's work; adding them would count that activity twice. The measured execution time, 2.103 ms, is one server observation, not the time to deliver and render a customer page.
+
+Your plan shape, estimates, buffer activity and times may differ with version, statistics, settings and cache state. Use this output to learn what to inspect, not as a required transcript or speed target. [Capture and verification record](../VERIFICATION.md#focused-editorial-revisions--2026-10-26)
+
+This plan has no repeated node. In the lab's later three-customer lookup, inspect loops again: actual rows and node times are averages per execution, so forty rows over three loops means 120 emitted rows across those lookups. A limit can stop consumption early; an aggregate can reduce many input rows to one answer.
+
+Node times also include work below them, so summing parent and child times overstates the total. [Plan-reading reference](https://www.postgresql.org/docs/17/using-explain.html)
 
 ## Change one hypothesis
 

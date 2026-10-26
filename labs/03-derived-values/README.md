@@ -43,7 +43,9 @@ RETURNING owner_id;
 
 That note now shows 2 because its trigger runs again. Note 101 still shows 1.
 
-Explain why this would be a problem if every note were required to always match the patient's current owner.
+Record the patient and both note owners after creation, patient reassignment and the body edit. Compare your trace with the [article's table](../../articles/03-derived-values.md#a-copied-value-can-become-stale).
+
+Which step first breaks “every note always follows the patient's current owner”? Which step breaks “the note keeps the owner it had at creation”? Explain why a body-only edit changes ownership and why note 101 does not change with it. Keep the supplied trigger unchanged; the task is to distinguish those contracts from the behaviour it actually provides.
 
 ## Hint and solution
 

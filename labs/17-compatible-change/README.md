@@ -57,11 +57,44 @@ Re-run the backfill: zero changed rows. A rerunnable data batch is different fro
 
 ## An application update races with a backfill
 
-Reset and expand. Run one batch so only 3 and 4 remain NULL.
+End any earlier transactions, then reset and expand. Run one batch so only 3 and 4 remain NULL. Open a third persistent connection for observation. In A and B, run SELECT pg_backend_pid(); and record which PID belongs to each connection before starting the wait.
 
-A begins a transaction and sets booking 3's reminder to 120 without committing. B runs 02-backfill.sql; its candidate selection encounters the locked row. Observe B's blocker using a third connection as in lab 16, then commit A.
+In A, leave this change uncommitted:
+
+```sql
+BEGIN;
+UPDATE course_change.bookings SET reminder_minutes = 120 WHERE id = 3;
+```
+
+For this observation, run the following transaction in B **instead of running 02-backfill.sql**. It uses the same two-row backfill, with a 60-second lock timeout so you have time to inspect the wait and return to A. The script itself sets SET LOCAL lock_timeout = '1s'; a session-level SET before running that script would be overridden. The 90-second statement timeout also bounds this demonstration's query while allowing the lock-observation window.
+
+```sql
+BEGIN;
+SET LOCAL lock_timeout = '60s';
+SET LOCAL statement_timeout = '90s';
+WITH batch AS (
+  SELECT id FROM course_change.bookings
+  WHERE reminder_minutes IS NULL ORDER BY id LIMIT 2 FOR UPDATE
+)
+UPDATE course_change.bookings b SET reminder_minutes = 30
+FROM batch WHERE b.id = batch.id AND b.reminder_minutes IS NULL
+RETURNING b.id, b.reminder_minutes;
+COMMIT;
+```
+
+While B is waiting, run this in the observer connection:
+
+```sql
+SELECT pid, wait_event_type, pg_blocking_pids(pid) AS blockers
+FROM pg_stat_activity
+WHERE datname = current_database() AND wait_event_type = 'Lock';
+```
+
+Find B's PID with A's PID among its blockers. Now run COMMIT in A, before B's lock wait reaches 60 seconds. The limit applies to each lock acquisition, not to the whole transaction. [PostgreSQL timeout settings](https://www.postgresql.org/docs/17/runtime-config-client.html#GUC-LOCK-TIMEOUT)
 
 B must preserve 120, fill only booking 4 with 30 and commit. Check the actual rows. The repeated NULL predicate and row locking are part of this lab's single-backfill-worker contract; worker distribution and SKIP LOCKED job systems remain later topics.
+
+If B times out with 55P03 before you release A, run ROLLBACK in B; its batch has not committed. Do not keep querying inside the failed transaction, which produces 25P02. Commit A, then inspect the rows: booking 3 should be 120 and booking 4 should still be NULL. Run 02-backfill.sql after the blocker is gone; it should fill only 4. To observe the wait again, end all transactions and repeat from reset. The local timeout settings end with the transaction; this does not change the separate one-second DDL experiment below.
 
 ## A schema change waits
 
