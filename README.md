@@ -41,10 +41,14 @@ The examples use fictional applications. The first drafts use a clinic; the wide
 | [Why does the later page do more work?](articles/20-deep-pages.md) | Compare matching offset/cursor pages, preserve ties and test changing sort values. |
 | [Why did yesterday's plan stop fitting today's data?](articles/21-statistics-maintenance.md) | Distinguish statistics from cleanup and observe an old snapshot delaying vacuum. |
 | [How much database work does one request cause?](articles/22-request-work.md) | Count calls, preserve nested results, bind inputs and identify a pool wait. |
+| [I connected successfully. Why is this query denied?](articles/23-database-roles.md) | Separate database identity from profile labels and test schema/table/column/sequence grants. |
+| [Which rows may this role change?](articles/24-row-policies.md) | Implement and test allowed/forbidden reads and writes with row policies. |
+| [Who belongs to this workspace?](articles/25-tenant-membership.md) | Protect memberships, enforce tenant write rights and preserve tenant-consistent references. |
+| [Whose permissions does this helper use?](articles/26-privileged-code.md) | Inspect view/function execution identity and repair excess access and unsafe name resolution. |
 
-There are **twenty-three article drafts and twenty-two labs**. The latest batch adds practical performance diagnosis, index choices, pagination, maintenance and request query counts. Deeper modelling, request retries, access control, broader migrations, recovery and the integrated capstone still need substantial work. The [topic inventory](TOPIC_INVENTORY.md) records evidence and gaps; a topic being listed does not mean it has been taught.
+There are **twenty-seven article drafts and twenty-six labs**. The latest batch adds local PostgreSQL privileges, row policies, tenant membership and privileged-code checks. Deeper modelling, request retries, authenticated API integration, broader migrations, recovery and the integrated capstone still need substantial work. The [topic inventory](TOPIC_INVENTORY.md) records evidence and gaps; a topic being listed does not mean it has been taught.
 
-These are editorial drafts. Embedded and native local PostgreSQL checks passed on 2026-10-21, including separate concurrent sessions. Docker setup, hosted Supabase and reader trials remain unverified. See the [verification record](VERIFICATION.md) for dates and limits.
+These are editorial drafts. Embedded and native reference checks passed on 2026-10-26, including separate restricted-login access checks; earlier session/performance results retain their original dates. Docker setup, hosted Supabase and reader trials remain unverified. Access labs require a disposable local cluster. See the [verification record](VERIFICATION.md) for dates and limits.
 
 ## How the ideas connect
 
@@ -56,7 +60,7 @@ Articles can be published as the author learns and verifies them. Planned lesson
 
 ## Real engineering, with attribution
 
-The [source notebook](SOURCES.md) connects specific questions to engineers' own accounts: retries and migrations at Stripe, pagination at Shopify, related data at Notion, database boundaries at GitHub, and deletion tradeoffs discussed by Brandur Leach. Fictional exercises do not reproduce those companies' systems.
+The [source notebook](SOURCES.md) connects specific questions to engineers' own accounts: retries and migrations at Stripe, pagination at Shopify, tenant isolation guidance from AWS, related data at Notion, database boundaries at GitHub, and deletion tradeoffs discussed by Brandur Leach. Fictional exercises do not reproduce those companies' systems.
 
 This draft was prepared with AI assistance. The course author should revise it after doing the labs; we do not invent personal experience or claim the draft was entirely human-written.
 
@@ -69,4 +73,4 @@ Readers can skip these records:
 - [Repository evidence](REPOSITORY_EVIDENCE.md): historical provenance, not reader prerequisites.
 - [File guide](NEW_FILES.md): what the repository's supporting files are for.
 
-The SQL uses synthetic data in dedicated course schemas. Use a disposable learning database; setup scripts reset their named lab schema.
+The SQL uses synthetic data in dedicated course schemas. Use a disposable learning database; setup scripts reset their named lab schema. Access labs additionally create dedicated cluster-wide roles and provide cleanup scripts.

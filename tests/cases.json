@@ -4062,6 +4062,945 @@
         ]
       }
     ]
+  },
+  {
+    "lab": "23-database-roles",
+    "steps": [
+      {
+        "sql": "SET ROLE course_priv_reader"
+      },
+      {
+        "sql": "SELECT id, subject FROM course_priv.tickets",
+        "error": "42501"
+      },
+      {
+        "sql": "RESET ROLE"
+      },
+      {
+        "sql": "GRANT USAGE ON SCHEMA course_priv TO course_priv_reader; GRANT SELECT ON course_priv.profiles TO course_priv_reader"
+      },
+      {
+        "sql": "SET ROLE course_priv_reader"
+      },
+      {
+        "query": "SELECT app_role FROM course_priv.profiles WHERE db_role = current_user",
+        "rows": [
+          {
+            "app_role": "admin"
+          }
+        ]
+      },
+      {
+        "sql": "SELECT id, subject FROM course_priv.tickets",
+        "error": "42501"
+      },
+      {
+        "sql": "RESET ROLE"
+      },
+      {
+        "sql": "GRANT USAGE ON SCHEMA course_priv TO course_priv_reader, course_priv_writer, course_priv_dispatch;\nGRANT SELECT ON course_priv.profiles TO course_priv_reader, course_priv_writer;\nGRANT SELECT (id, subject) ON course_priv.tickets TO course_priv_reader;\nGRANT SELECT, INSERT ON course_priv.tickets TO course_priv_writer;\nGRANT UPDATE (subject) ON course_priv.tickets TO course_priv_writer;\nGRANT USAGE ON SEQUENCE course_priv.tickets_id_seq TO course_priv_writer;\nGRANT SELECT (id, tracking, status), UPDATE (status) ON course_priv.deliveries TO course_priv_dispatch;\n"
+      },
+      {
+        "sql": "SET ROLE course_priv_reader"
+      },
+      {
+        "query": "SELECT id, subject FROM course_priv.tickets ORDER BY id",
+        "rows": [
+          {
+            "id": 1,
+            "subject": "Late delivery"
+          },
+          {
+            "id": 2,
+            "subject": "Missing item"
+          }
+        ]
+      },
+      {
+        "sql": "SELECT * FROM course_priv.tickets",
+        "error": "42501"
+      },
+      {
+        "sql": "UPDATE course_priv.tickets SET subject = 'Changed' WHERE id = 1",
+        "error": "42501"
+      },
+      {
+        "sql": "DELETE FROM course_priv.tickets WHERE id = 1",
+        "error": "42501"
+      },
+      {
+        "sql": "RESET ROLE"
+      },
+      {
+        "sql": "REVOKE USAGE ON SEQUENCE course_priv.tickets_id_seq FROM course_priv_writer"
+      },
+      {
+        "sql": "SET ROLE course_priv_writer"
+      },
+      {
+        "sql": "INSERT INTO course_priv.tickets (subject) VALUES ('Third')",
+        "error": "42501"
+      },
+      {
+        "sql": "RESET ROLE"
+      },
+      {
+        "sql": "GRANT USAGE ON SEQUENCE course_priv.tickets_id_seq TO course_priv_writer"
+      },
+      {
+        "sql": "SET ROLE course_priv_writer"
+      },
+      {
+        "query": "INSERT INTO course_priv.tickets (subject) VALUES ('Third') RETURNING subject",
+        "rows": [
+          {
+            "subject": "Third"
+          }
+        ]
+      },
+      {
+        "query": "UPDATE course_priv.tickets SET subject = 'Resolved' WHERE id = 1 RETURNING id, subject",
+        "rows": [
+          {
+            "id": 1,
+            "subject": "Resolved"
+          }
+        ]
+      },
+      {
+        "sql": "UPDATE course_priv.tickets SET internal_note = 'Overwrite' WHERE id = 1",
+        "error": "42501"
+      },
+      {
+        "sql": "TRUNCATE course_priv.tickets",
+        "error": "42501"
+      },
+      {
+        "sql": "RESET ROLE"
+      },
+      {
+        "query": "SELECT count(*)::integer AS n FROM course_priv.tickets",
+        "rows": [
+          {
+            "n": 3
+          }
+        ]
+      },
+      {
+        "query": "SELECT internal_note FROM course_priv.tickets WHERE id = 1",
+        "rows": [
+          {
+            "internal_note": "Customer called twice"
+          }
+        ]
+      },
+      {
+        "sql": "REVOKE SELECT (id, subject) ON course_priv.tickets FROM course_priv_reader"
+      },
+      {
+        "sql": "SET ROLE course_priv_reader"
+      },
+      {
+        "sql": "SELECT id, subject FROM course_priv.tickets",
+        "error": "42501"
+      },
+      {
+        "sql": "RESET ROLE"
+      },
+      {
+        "sql": "SET ROLE course_priv_dispatch"
+      },
+      {
+        "query": "SELECT id, tracking, status FROM course_priv.deliveries ORDER BY id",
+        "rows": [
+          {
+            "id": 10,
+            "tracking": "TRACK-10",
+            "status": "queued"
+          },
+          {
+            "id": 20,
+            "tracking": "TRACK-20",
+            "status": "sent"
+          }
+        ]
+      },
+      {
+        "query": "UPDATE course_priv.deliveries SET status = 'sent' WHERE id = 10 RETURNING id, status",
+        "rows": [
+          {
+            "id": 10,
+            "status": "sent"
+          }
+        ]
+      },
+      {
+        "sql": "SELECT private_address FROM course_priv.deliveries",
+        "error": "42501"
+      },
+      {
+        "sql": "UPDATE course_priv.deliveries SET tracking = 'OTHER' WHERE id = 10",
+        "error": "42501"
+      },
+      {
+        "sql": "RESET ROLE"
+      }
+    ],
+    "solution": [
+      {
+        "query": "SELECT has_column_privilege('course_priv_reader','course_priv.tickets','subject','SELECT') AS allowed, has_column_privilege('course_priv_reader','course_priv.tickets','internal_note','SELECT') AS private_allowed",
+        "rows": [
+          {
+            "allowed": true,
+            "private_allowed": false
+          }
+        ]
+      },
+      {
+        "query": "SELECT has_column_privilege('course_priv_writer','course_priv.tickets','subject','UPDATE') AS allowed, has_table_privilege('course_priv_writer','course_priv.tickets','DELETE') AS delete_allowed",
+        "rows": [
+          {
+            "allowed": true,
+            "delete_allowed": false
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "lab": "24-row-policies",
+    "steps": [
+      {
+        "sql": "SET ROLE course_policy_alice"
+      },
+      {
+        "query": "SELECT id FROM course_policy.documents ORDER BY id",
+        "rows": [
+          {
+            "id": 1
+          },
+          {
+            "id": 2
+          },
+          {
+            "id": 3
+          }
+        ]
+      },
+      {
+        "sql": "RESET ROLE"
+      },
+      {
+        "sql": "ALTER TABLE course_policy.documents ENABLE ROW LEVEL SECURITY"
+      },
+      {
+        "sql": "SET ROLE course_policy_alice"
+      },
+      {
+        "query": "SELECT id FROM course_policy.documents",
+        "rows": []
+      },
+      {
+        "sql": "INSERT INTO course_policy.documents VALUES (4, current_user, 'New', false)",
+        "error": "42501"
+      },
+      {
+        "sql": "RESET ROLE"
+      },
+      {
+        "sql": "CREATE POLICY implicit_check ON course_policy.documents TO course_policy_alice, course_policy_bob USING (owner_role = current_user)"
+      },
+      {
+        "sql": "SET ROLE course_policy_alice"
+      },
+      {
+        "query": "SELECT id FROM course_policy.documents ORDER BY id",
+        "rows": [
+          {
+            "id": 1
+          },
+          {
+            "id": 3
+          }
+        ]
+      },
+      {
+        "sql": "UPDATE course_policy.documents SET owner_role = 'course_policy_bob' WHERE id = 1",
+        "error": "42501"
+      },
+      {
+        "sql": "RESET ROLE"
+      },
+      {
+        "reset": true
+      },
+      {
+        "sql": "ALTER TABLE course_policy.documents ENABLE ROW LEVEL SECURITY;\nCREATE POLICY document_read ON course_policy.documents FOR SELECT TO course_policy_alice, course_policy_bob USING (owner_role = current_user);\nCREATE POLICY document_insert ON course_policy.documents FOR INSERT TO course_policy_alice, course_policy_bob WITH CHECK (owner_role = current_user);\nCREATE POLICY document_update ON course_policy.documents FOR UPDATE TO course_policy_alice, course_policy_bob USING (owner_role = current_user) WITH CHECK (owner_role = current_user);\nCREATE POLICY document_delete ON course_policy.documents FOR DELETE TO course_policy_alice, course_policy_bob USING (owner_role = current_user AND NOT archived);\nALTER TABLE course_policy.messages ENABLE ROW LEVEL SECURITY;\nCREATE POLICY own_messages ON course_policy.messages TO course_policy_alice, course_policy_bob USING (recipient_role = current_user) WITH CHECK (recipient_role = current_user);\n"
+      },
+      {
+        "sql": "SET ROLE course_policy_alice"
+      },
+      {
+        "query": "SELECT id FROM course_policy.documents ORDER BY id",
+        "rows": [
+          {
+            "id": 1
+          },
+          {
+            "id": 3
+          }
+        ]
+      },
+      {
+        "query": "SELECT id FROM course_policy.documents WHERE id = 2",
+        "rows": []
+      },
+      {
+        "query": "INSERT INTO course_policy.documents VALUES (4, current_user, 'New', false) RETURNING id",
+        "rows": [
+          {
+            "id": 4
+          }
+        ]
+      },
+      {
+        "sql": "INSERT INTO course_policy.documents VALUES (5, 'course_policy_bob', 'Wrong owner', false)",
+        "error": "42501"
+      },
+      {
+        "query": "UPDATE course_policy.documents SET title = 'Alice revised' WHERE id = 1 RETURNING id",
+        "rows": [
+          {
+            "id": 1
+          }
+        ]
+      },
+      {
+        "query": "UPDATE course_policy.documents SET title = 'Cross user' WHERE id = 2 RETURNING id",
+        "rows": []
+      },
+      {
+        "sql": "UPDATE course_policy.documents SET owner_role = 'course_policy_bob' WHERE id = 1",
+        "error": "42501"
+      },
+      {
+        "query": "DELETE FROM course_policy.documents WHERE id = 2 RETURNING id",
+        "rows": []
+      },
+      {
+        "query": "DELETE FROM course_policy.documents WHERE id = 3 RETURNING id",
+        "rows": []
+      },
+      {
+        "query": "DELETE FROM course_policy.documents WHERE id = 4 RETURNING id",
+        "rows": [
+          {
+            "id": 4
+          }
+        ]
+      },
+      {
+        "sql": "RESET ROLE"
+      },
+      {
+        "query": "SELECT id, title FROM course_policy.documents ORDER BY id",
+        "rows": [
+          {
+            "id": 1,
+            "title": "Alice revised"
+          },
+          {
+            "id": 2,
+            "title": "Bob draft"
+          },
+          {
+            "id": 3,
+            "title": "Alice archive"
+          }
+        ]
+      },
+      {
+        "sql": "SET ROLE course_policy_bob"
+      },
+      {
+        "query": "SELECT id FROM course_policy.documents ORDER BY id",
+        "rows": [
+          {
+            "id": 2
+          }
+        ]
+      },
+      {
+        "sql": "RESET ROLE"
+      },
+      {
+        "sql": "CREATE POLICY accidental_read_all ON course_policy.documents FOR SELECT USING (true)"
+      },
+      {
+        "sql": "SET ROLE course_policy_alice"
+      },
+      {
+        "query": "SELECT id FROM course_policy.documents ORDER BY id",
+        "rows": [
+          {
+            "id": 1
+          },
+          {
+            "id": 2
+          },
+          {
+            "id": 3
+          }
+        ]
+      },
+      {
+        "sql": "RESET ROLE"
+      },
+      {
+        "sql": "DROP POLICY accidental_read_all ON course_policy.documents; CREATE POLICY no_archives ON course_policy.documents AS RESTRICTIVE FOR SELECT USING (NOT archived)"
+      },
+      {
+        "sql": "SET ROLE course_policy_alice"
+      },
+      {
+        "query": "SELECT id FROM course_policy.documents ORDER BY id",
+        "rows": [
+          {
+            "id": 1
+          }
+        ]
+      },
+      {
+        "sql": "RESET ROLE"
+      },
+      {
+        "sql": "REVOKE SELECT ON course_policy.documents FROM course_policy_alice"
+      },
+      {
+        "sql": "SET ROLE course_policy_alice"
+      },
+      {
+        "sql": "SELECT id FROM course_policy.documents",
+        "error": "42501"
+      },
+      {
+        "query": "SELECT id FROM course_policy.messages ORDER BY id",
+        "rows": [
+          {
+            "id": 10
+          }
+        ]
+      },
+      {
+        "query": "UPDATE course_policy.messages SET body = 'Read' WHERE id = 10 RETURNING id",
+        "rows": [
+          {
+            "id": 10
+          }
+        ]
+      },
+      {
+        "sql": "UPDATE course_policy.messages SET recipient_role = 'course_policy_bob' WHERE id = 10",
+        "error": "42501"
+      },
+      {
+        "sql": "TRUNCATE course_policy.messages",
+        "error": "42501"
+      },
+      {
+        "sql": "RESET ROLE"
+      }
+    ],
+    "solution": [
+      {
+        "query": "SELECT count(*)::integer AS n FROM pg_policies WHERE schemaname = 'course_policy'",
+        "rows": [
+          {
+            "n": 5
+          }
+        ]
+      },
+      {
+        "query": "SELECT count(*)::integer AS n FROM course_policy.documents",
+        "rows": [
+          {
+            "n": 3
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "lab": "25-tenant-membership",
+    "steps": [
+      {
+        "sql": "SET ROLE course_tenant_alice"
+      },
+      {
+        "query": "SELECT id FROM course_tenant.tasks",
+        "rows": []
+      },
+      {
+        "sql": "RESET ROLE"
+      },
+      {
+        "sql": "CREATE POLICY own_membership ON course_tenant.memberships FOR SELECT USING (actor = current_user);\nCREATE POLICY workspace_member ON course_tenant.workspaces FOR SELECT USING (EXISTS (SELECT FROM course_tenant.memberships m WHERE m.workspace_id = workspaces.id AND m.actor = current_user));\nCREATE POLICY project_member ON course_tenant.projects FOR SELECT USING (EXISTS (SELECT FROM course_tenant.memberships m WHERE m.workspace_id = projects.workspace_id AND m.actor = current_user));\nCREATE POLICY task_read ON course_tenant.tasks FOR SELECT USING (EXISTS (SELECT FROM course_tenant.memberships m WHERE m.workspace_id = tasks.workspace_id AND m.actor = current_user));\nCREATE POLICY task_insert ON course_tenant.tasks FOR INSERT WITH CHECK (EXISTS (SELECT FROM course_tenant.memberships m WHERE m.workspace_id = tasks.workspace_id AND m.actor = current_user AND m.can_write));\nCREATE POLICY task_update ON course_tenant.tasks FOR UPDATE USING (EXISTS (SELECT FROM course_tenant.memberships m WHERE m.workspace_id = tasks.workspace_id AND m.actor = current_user AND m.can_write)) WITH CHECK (EXISTS (SELECT FROM course_tenant.memberships m WHERE m.workspace_id = tasks.workspace_id AND m.actor = current_user AND m.can_write));\nCREATE POLICY task_delete ON course_tenant.tasks FOR DELETE USING (EXISTS (SELECT FROM course_tenant.memberships m WHERE m.workspace_id = tasks.workspace_id AND m.actor = current_user AND m.can_write));\nCREATE POLICY own_branch_membership ON course_tenant.branch_staff FOR SELECT USING (actor = current_user);\nCREATE POLICY visit_read ON course_tenant.visits FOR SELECT USING (EXISTS (SELECT FROM course_tenant.branch_staff s WHERE s.branch_id = visits.branch_id AND s.actor = current_user));\nCREATE POLICY visit_insert ON course_tenant.visits FOR INSERT WITH CHECK (EXISTS (SELECT FROM course_tenant.branch_staff s WHERE s.branch_id = visits.branch_id AND s.actor = current_user AND s.can_edit));\nCREATE POLICY visit_update ON course_tenant.visits FOR UPDATE USING (EXISTS (SELECT FROM course_tenant.branch_staff s WHERE s.branch_id = visits.branch_id AND s.actor = current_user AND s.can_edit)) WITH CHECK (EXISTS (SELECT FROM course_tenant.branch_staff s WHERE s.branch_id = visits.branch_id AND s.actor = current_user AND s.can_edit));\nCREATE POLICY visit_delete ON course_tenant.visits FOR DELETE USING (EXISTS (SELECT FROM course_tenant.branch_staff s WHERE s.branch_id = visits.branch_id AND s.actor = current_user AND s.can_edit));\n"
+      },
+      {
+        "sql": "SET ROLE course_tenant_alice"
+      },
+      {
+        "query": "SELECT id FROM course_tenant.tasks ORDER BY id",
+        "rows": [
+          {
+            "id": 11
+          },
+          {
+            "id": 12
+          }
+        ]
+      },
+      {
+        "query": "SELECT workspace_id, can_write FROM course_tenant.memberships ORDER BY workspace_id",
+        "rows": [
+          {
+            "workspace_id": 1,
+            "can_write": true
+          }
+        ]
+      },
+      {
+        "query": "INSERT INTO course_tenant.tasks VALUES (13, 1, 10, 'Alpha new') RETURNING id",
+        "rows": [
+          {
+            "id": 13
+          }
+        ]
+      },
+      {
+        "sql": "INSERT INTO course_tenant.tasks VALUES (22, 2, 20, 'Cross tenant')",
+        "error": "42501"
+      },
+      {
+        "sql": "UPDATE course_tenant.tasks SET workspace_id = 2, project_id = 20 WHERE id = 11",
+        "error": "42501"
+      },
+      {
+        "query": "UPDATE course_tenant.tasks SET title = 'Hidden' WHERE id = 21 RETURNING id",
+        "rows": []
+      },
+      {
+        "sql": "INSERT INTO course_tenant.tasks VALUES (14, 1, 20, 'Mismatched project')",
+        "error": "23503"
+      },
+      {
+        "sql": "INSERT INTO course_tenant.memberships VALUES (2, current_user, true)",
+        "error": "42501"
+      },
+      {
+        "sql": "SET course.actor = 'course_tenant_bob'"
+      },
+      {
+        "query": "SELECT id FROM course_tenant.tasks ORDER BY id",
+        "rows": [
+          {
+            "id": 11
+          },
+          {
+            "id": 12
+          },
+          {
+            "id": 13
+          }
+        ]
+      },
+      {
+        "sql": "RESET course.actor"
+      },
+      {
+        "sql": "RESET ROLE"
+      },
+      {
+        "sql": "SET ROLE course_tenant_bob"
+      },
+      {
+        "query": "SELECT id FROM course_tenant.tasks ORDER BY id",
+        "rows": [
+          {
+            "id": 11
+          },
+          {
+            "id": 12
+          },
+          {
+            "id": 13
+          },
+          {
+            "id": 21
+          }
+        ]
+      },
+      {
+        "query": "UPDATE course_tenant.tasks SET title = 'Reader edit' WHERE id = 11 RETURNING id",
+        "rows": []
+      },
+      {
+        "sql": "INSERT INTO course_tenant.tasks VALUES (15, 1, 10, 'Reader insert')",
+        "error": "42501"
+      },
+      {
+        "query": "UPDATE course_tenant.tasks SET title = 'Beta revised' WHERE id = 21 RETURNING id",
+        "rows": [
+          {
+            "id": 21
+          }
+        ]
+      },
+      {
+        "sql": "RESET ROLE"
+      },
+      {
+        "sql": "SET ROLE course_tenant_outsider"
+      },
+      {
+        "query": "SELECT id FROM course_tenant.tasks",
+        "rows": []
+      },
+      {
+        "query": "SELECT actor FROM course_tenant.memberships",
+        "rows": []
+      },
+      {
+        "sql": "INSERT INTO course_tenant.tasks VALUES (16, 1, 10, 'Outsider')",
+        "error": "42501"
+      },
+      {
+        "sql": "RESET ROLE"
+      },
+      {
+        "sql": "DELETE FROM course_tenant.memberships WHERE actor = 'course_tenant_alice'"
+      },
+      {
+        "sql": "SET ROLE course_tenant_alice"
+      },
+      {
+        "query": "SELECT id FROM course_tenant.tasks",
+        "rows": []
+      },
+      {
+        "query": "SELECT id FROM course_tenant.visits",
+        "rows": [
+          {
+            "id": 101
+          }
+        ]
+      },
+      {
+        "query": "UPDATE course_tenant.visits SET subject = 'Changed checkup' WHERE id = 101 RETURNING id",
+        "rows": [
+          {
+            "id": 101
+          }
+        ]
+      },
+      {
+        "sql": "UPDATE course_tenant.visits SET branch_id = 2 WHERE id = 101",
+        "error": "42501"
+      },
+      {
+        "sql": "RESET ROLE"
+      },
+      {
+        "sql": "SET ROLE course_tenant_bob"
+      },
+      {
+        "query": "SELECT id FROM course_tenant.visits",
+        "rows": [
+          {
+            "id": 201
+          }
+        ]
+      },
+      {
+        "query": "UPDATE course_tenant.visits SET subject = 'No edit right' WHERE id = 201 RETURNING id",
+        "rows": []
+      },
+      {
+        "sql": "RESET ROLE"
+      },
+      {
+        "query": "SELECT id, workspace_id, project_id, title FROM course_tenant.tasks WHERE id = 21",
+        "rows": [
+          {
+            "id": 21,
+            "workspace_id": 2,
+            "project_id": 20,
+            "title": "Beta revised"
+          }
+        ]
+      }
+    ],
+    "solution": [
+      {
+        "query": "SELECT count(*)::integer AS n FROM pg_policies WHERE schemaname = 'course_tenant'",
+        "rows": [
+          {
+            "n": 12
+          }
+        ]
+      },
+      {
+        "query": "SELECT count(*)::integer AS n FROM course_tenant.tasks",
+        "rows": [
+          {
+            "n": 3
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "lab": "26-privileged-code",
+    "steps": [
+      {
+        "sql": "SET ROLE course_code_alice"
+      },
+      {
+        "query": "SELECT id FROM course_code.documents",
+        "rows": [
+          {
+            "id": 1
+          }
+        ]
+      },
+      {
+        "query": "SELECT id FROM course_code.document_list ORDER BY id",
+        "rows": [
+          {
+            "id": 1
+          },
+          {
+            "id": 2
+          }
+        ]
+      },
+      {
+        "query": "SELECT course_code.document_count() AS n",
+        "rows": [
+          {
+            "n": 2
+          }
+        ]
+      },
+      {
+        "query": "SELECT course_code.worker_count() AS n",
+        "rows": [
+          {
+            "n": 0
+          }
+        ]
+      },
+      {
+        "sql": "SELECT * FROM course_code.labels",
+        "error": "42501"
+      },
+      {
+        "sql": "RESET ROLE"
+      },
+      {
+        "sql": "ALTER TABLE course_code.documents FORCE ROW LEVEL SECURITY"
+      },
+      {
+        "sql": "SET ROLE course_code_owner"
+      },
+      {
+        "query": "SELECT id FROM course_code.documents",
+        "rows": []
+      },
+      {
+        "sql": "RESET ROLE"
+      },
+      {
+        "query": "SELECT id FROM course_code.documents ORDER BY id",
+        "rows": [
+          {
+            "id": 1
+          },
+          {
+            "id": 2
+          }
+        ]
+      },
+      {
+        "sql": "ALTER TABLE course_code.documents NO FORCE ROW LEVEL SECURITY"
+      },
+      {
+        "sql": "SET ROLE course_code_outsider"
+      },
+      {
+        "query": "SELECT course_code.document_count() AS n",
+        "rows": [
+          {
+            "n": 2
+          }
+        ]
+      },
+      {
+        "sql": "RESET ROLE"
+      },
+      {
+        "sql": "SET ROLE course_code_alice"
+      },
+      {
+        "sql": "CREATE TEMP TABLE labels (code integer, label text); INSERT INTO labels VALUES (1, 'Fake label'); GRANT SELECT ON labels TO course_code_worker"
+      },
+      {
+        "query": "SELECT course_code.label_for(1) AS label",
+        "rows": [
+          {
+            "label": "Fake label"
+          }
+        ]
+      },
+      {
+        "sql": "RESET ROLE"
+      },
+      {
+        "sql": "BEGIN;\nALTER VIEW course_code.document_list SET (security_invoker = true);\nALTER FUNCTION course_code.document_count() SECURITY INVOKER;\nALTER FUNCTION course_code.label_for(integer) SET search_path = pg_catalog, course_code, pg_temp;\nCREATE FUNCTION course_code.delivery_label_for(p_code integer) RETURNS text LANGUAGE sql SECURITY DEFINER SET search_path = pg_catalog, course_code, pg_temp AS $$ SELECT label FROM course_code.delivery_labels WHERE code = p_code $$;\nALTER FUNCTION course_code.delivery_label_for(integer) OWNER TO course_code_worker;\nREVOKE EXECUTE ON ALL FUNCTIONS IN SCHEMA course_code FROM PUBLIC;\nGRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA course_code TO course_code_alice, course_code_bob;\nCOMMIT;\n"
+      },
+      {
+        "sql": "SET ROLE course_code_alice"
+      },
+      {
+        "query": "SELECT id FROM course_code.document_list",
+        "rows": [
+          {
+            "id": 1
+          }
+        ]
+      },
+      {
+        "query": "SELECT course_code.document_count() AS n",
+        "rows": [
+          {
+            "n": 1
+          }
+        ]
+      },
+      {
+        "query": "SELECT course_code.label_for(1) AS label",
+        "rows": [
+          {
+            "label": "Queued"
+          }
+        ]
+      },
+      {
+        "query": "SELECT course_code.label_for(999) AS label",
+        "rows": [
+          {
+            "label": null
+          }
+        ]
+      },
+      {
+        "query": "SELECT course_code.delivery_label_for(5) AS label",
+        "rows": [
+          {
+            "label": "Collected"
+          }
+        ]
+      },
+      {
+        "sql": "SELECT * FROM course_code.delivery_labels",
+        "error": "42501"
+      },
+      {
+        "sql": "CREATE TABLE course_code.spoof (id integer)",
+        "error": "42501"
+      },
+      {
+        "sql": "DROP TABLE pg_temp.labels"
+      },
+      {
+        "sql": "RESET ROLE"
+      },
+      {
+        "sql": "SET ROLE course_code_bob"
+      },
+      {
+        "query": "SELECT id FROM course_code.document_list",
+        "rows": [
+          {
+            "id": 2
+          }
+        ]
+      },
+      {
+        "query": "SELECT course_code.document_count() AS n",
+        "rows": [
+          {
+            "n": 1
+          }
+        ]
+      },
+      {
+        "sql": "RESET ROLE"
+      },
+      {
+        "sql": "SET ROLE course_code_outsider"
+      },
+      {
+        "sql": "SELECT course_code.document_count()",
+        "error": "42501"
+      },
+      {
+        "sql": "SELECT course_code.label_for(1)",
+        "error": "42501"
+      },
+      {
+        "sql": "SELECT course_code.delivery_label_for(5)",
+        "error": "42501"
+      },
+      {
+        "sql": "RESET ROLE"
+      },
+      {
+        "sql": "REVOKE SELECT ON course_code.documents FROM course_code_alice"
+      },
+      {
+        "sql": "SET ROLE course_code_alice"
+      },
+      {
+        "sql": "SELECT * FROM course_code.document_list",
+        "error": "42501"
+      },
+      {
+        "sql": "SELECT course_code.document_count()",
+        "error": "42501"
+      },
+      {
+        "sql": "RESET ROLE"
+      }
+    ],
+    "solution": [
+      {
+        "query": "SELECT p.prosecdef FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace WHERE n.nspname='course_code' AND p.proname='document_count'",
+        "rows": [
+          {
+            "prosecdef": false
+          }
+        ]
+      },
+      {
+        "query": "SELECT has_function_privilege('course_code_outsider','course_code.label_for(integer)','EXECUTE') AS allowed",
+        "rows": [
+          {
+            "allowed": false
+          }
+        ]
+      }
+    ]
   }
 ]
 

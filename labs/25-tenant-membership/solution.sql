@@ -1,0 +1,12 @@
+CREATE POLICY own_membership ON course_tenant.memberships FOR SELECT USING (actor = current_user);
+CREATE POLICY workspace_member ON course_tenant.workspaces FOR SELECT USING (EXISTS (SELECT FROM course_tenant.memberships m WHERE m.workspace_id = workspaces.id AND m.actor = current_user));
+CREATE POLICY project_member ON course_tenant.projects FOR SELECT USING (EXISTS (SELECT FROM course_tenant.memberships m WHERE m.workspace_id = projects.workspace_id AND m.actor = current_user));
+CREATE POLICY task_read ON course_tenant.tasks FOR SELECT USING (EXISTS (SELECT FROM course_tenant.memberships m WHERE m.workspace_id = tasks.workspace_id AND m.actor = current_user));
+CREATE POLICY task_insert ON course_tenant.tasks FOR INSERT WITH CHECK (EXISTS (SELECT FROM course_tenant.memberships m WHERE m.workspace_id = tasks.workspace_id AND m.actor = current_user AND m.can_write));
+CREATE POLICY task_update ON course_tenant.tasks FOR UPDATE USING (EXISTS (SELECT FROM course_tenant.memberships m WHERE m.workspace_id = tasks.workspace_id AND m.actor = current_user AND m.can_write)) WITH CHECK (EXISTS (SELECT FROM course_tenant.memberships m WHERE m.workspace_id = tasks.workspace_id AND m.actor = current_user AND m.can_write));
+CREATE POLICY task_delete ON course_tenant.tasks FOR DELETE USING (EXISTS (SELECT FROM course_tenant.memberships m WHERE m.workspace_id = tasks.workspace_id AND m.actor = current_user AND m.can_write));
+CREATE POLICY own_branch_membership ON course_tenant.branch_staff FOR SELECT USING (actor = current_user);
+CREATE POLICY visit_read ON course_tenant.visits FOR SELECT USING (EXISTS (SELECT FROM course_tenant.branch_staff s WHERE s.branch_id = visits.branch_id AND s.actor = current_user));
+CREATE POLICY visit_insert ON course_tenant.visits FOR INSERT WITH CHECK (EXISTS (SELECT FROM course_tenant.branch_staff s WHERE s.branch_id = visits.branch_id AND s.actor = current_user AND s.can_edit));
+CREATE POLICY visit_update ON course_tenant.visits FOR UPDATE USING (EXISTS (SELECT FROM course_tenant.branch_staff s WHERE s.branch_id = visits.branch_id AND s.actor = current_user AND s.can_edit)) WITH CHECK (EXISTS (SELECT FROM course_tenant.branch_staff s WHERE s.branch_id = visits.branch_id AND s.actor = current_user AND s.can_edit));
+CREATE POLICY visit_delete ON course_tenant.visits FOR DELETE USING (EXISTS (SELECT FROM course_tenant.branch_staff s WHERE s.branch_id = visits.branch_id AND s.actor = current_user AND s.can_edit));

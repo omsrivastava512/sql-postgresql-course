@@ -1,16 +1,17 @@
 # Verification record
 
-Status: draft. Initial SQL execution dated 2026-10-17 (Asia/Kolkata); documentation audit added 2026-10-19; foundation and query/data-handoff execution added 2026-10-20; native concurrency, migration and practical performance execution added 2026-10-21.
+Status: draft. Initial SQL execution dated 2026-10-17 (Asia/Kolkata); documentation audit added 2026-10-19; foundation and query/data-handoff execution added 2026-10-20; native concurrency, migration and practical performance execution added 2026-10-21; PostgreSQL access-control execution added 2026-10-26.
 
 | Check | Result |
 |---|---|
-| Embedded PostgreSQL execution | PASS: 301 assertions across 22 labs on PostgreSQL 18.6 / PGlite 0.5.10 (2026-10-21) |
-| Native local PostgreSQL 17.11 | PASS: 301 assertions across 22 labs, Windows x64, role course_author (2026-10-21) |
+| Embedded PostgreSQL execution | PASS: 399 assertions across 26 labs on PostgreSQL 18.6 / PGlite 0.5.10 (2026-10-26) |
+| Native local PostgreSQL 17.11 | PASS: 399 assertions across 26 labs, Windows x64, role course_author (2026-10-26) |
 | Independent concurrent sessions | PASS: 100 assertions across labs 16/17 using three distinct connections; also passed in reverse suite order on native PostgreSQL 17.11 (2026-10-21) |
 | Practical performance | PASS: 107 assertions across labs 18–22, normal and reverse suite order, native PostgreSQL 17.11; learner request command also passed (2026-10-21) |
+| Restricted database logins | PASS: 157 assertions across labs 23–26 with 11 actual restricted logins, normal and reverse suite order; each suite and its cleanup also passed independently (2026-10-26) |
 | Local Docker PostgreSQL 17.11 | Not run; Docker is not installed on this host |
 | Hosted Supabase | MCP connected and project inventory read; no SQL run or project changed. No dedicated course project used; hosted verification remains open. |
-| Local Markdown links, current package | PASS: 683 local links across 57 Markdown files, including heading targets (2026-10-21) |
+| Local Markdown links, current package | PASS: 807 local links across 67 Markdown files, including heading targets (2026-10-26) |
 | Author learning trial and editorial revision | Pending |
 | Public publication | Not performed |
 
@@ -20,9 +21,44 @@ The six initial labs cover foreign-key failures, role validation and its update 
 
 No test in this package claims to verify HTTP requests, API retries, production authorization, or a deployed clinic schema. Live SQL sessions are tested separately from application requests. Earlier sections below preserve dated checkpoints; this opening table and the latest section describe the current package.
 
+## PostgreSQL access-control implementation — 2026-10-26
+
+Four new article/lab pairs add ordinary privileges, row policies, tenant membership and privileged access paths. The current package has 138 source files, twenty-seven articles and twenty-six labs. That includes two previously committed research documents, unchanged by this batch. All 132 topic IDs remain. The original twenty-two reference suites are unchanged; four additional suites add 98 assertions, for 399 on each engine. No dependency, package file or existing checker changed.
+
+| Suite | Observed behaviour checked | Not established |
+|---|---|---|
+| 23-database-roles | Schema/table/column/sequence privileges; profile labels confer no SQL grant; allowed writes and unchanged forbidden fields; revocation on an existing connection; dispatch transfer | Website authentication, inherited-role administration or production provisioning |
+| 24-row-policies | Default deny; allowed and forbidden CRUD; hidden writes return zero rows; reassignment fails; omitted WITH CHECK inherits USING in the tested ALL policy; permissive/restrictive combinations; missing table privilege; failed RLS-disable, TRUNCATE, role-switch and row_security-off bypass attempts; message transfer | Every policy combination, archive immutability or a complete security audit |
+| 25-tenant-membership | Member/read-only/nonmember matrix; protected membership writes; composite tenant/parent FK; caller-writable setting does not replace current_user; old Repeatable Read snapshot retains revoked membership until transaction end; branch/visit transfer | Immediate revocation of existing snapshots, authenticated request context, pooled identity lifecycle or absence of error side channels |
+| 26-privileged-code | Owner-view/function exposure; narrower definer remains subject to RLS; FORCE affects an ordinary owner but not the superuser; temporary-table shadowing reproduced then repaired in the same connection; explicit function execution grants; invoker reads require base-table privileges; delivery lookup transfer | General privileged-function safety, arbitrary dynamic SQL, Supabase API exposure or user-specific privileged operations |
+
+The ordinary reference runner uses administrator-controlled SET ROLE. That establishes statement behaviour, not login isolation. The separate access checker connects as eleven actual restricted roles, with independently generated temporary passwords. For every role it checks non-superuser/non-BYPASSRLS attributes, absence of memberships, wrong-password rejection (28P01), current_user/session_user and rejection of switching to the administrator. The two owner/worker roles remain NOLOGIN. The final cleanup closes caller connections, restores all temporary callers to NOLOGIN with no password and verifies that result before reporting PASS.
+
+Native environment: PostgreSQL 17.11 on Windows x64, Node.js v24.15.0, administrator course_author, SCRAM-SHA-256 password storage, max_connections 30 and shared_buffers 32MB. The dedicated server's first host rule trusted only course_author on 127.0.0.1; other loopback roles matched scram-sha-256. This was an isolated test configuration, not a production recommendation. Both full access runs passed 157 assertions and used eleven restricted connections. Each suite also passed starting without any access schemas/roles: 36 assertions for lab 23, 34 for 24, 49 for 25 and 44 for 26. Independent counts include the administrator and credential-cleanup assertions per run, so their sum is not the full-run count.
+
+```text
+npm run test:embedded
+PASS 399 assertions across 26 labs.
+
+npm run test:database
+PASS 399 assertions across 26 labs.
+
+node tests/verify-access.mjs
+PASS 157 access assertions across 4 labs with 11 actual restricted logins.
+
+node tests/verify-access.mjs --reverse
+PASS 157 access assertions across 4 labs with 11 actual restricted logins.
+```
+
+The four supplied cleanup scripts were executed before and after independent suites. Catalog queries confirmed all four access schemas and all thirteen named access roles were absent afterward. Setup reset and fresh-setup solutions also passed in the ordinary runner. Native checks verify the actual login/snapshot paths; embedded checks do not substitute for them. The older 100-assertion concurrency and 107-assertion performance results above are dated evidence, not claims that those separate checkers were rerun in this batch.
+
+The official PostgreSQL 17.11-5 archive had the same 381531864-byte size and locally computed SHA-256 recorded below. The temporary server listened only on 127.0.0.1:55434 and installed no Windows service. Authorized elevated runtime access was used where needed. After verification, pg_ctl stopped the exact data-directory server and returned status 3 (no server running). The exact child folder and absence of reparse points were verified before its archive, binaries and synthetic database were removed. Normal, reverse, independent-suite and shutdown evidence remains outside the repository.
+
+No hosted SQL, Supabase project change or paid feature was used. The Supabase documentation search and changelog read were research only. Website login, JWT validation, auth.uid(), API exposure and request-level allow/deny tests remain a separate integration batch. Human learning trials and the hosted/Docker release checks remain open. This implementation did not stage, commit, push or change repository visibility; the preflight found the repository already public.
+
 ## Practical performance implementation — 2026-10-21
 
-Five new article/lab pairs add plan reading, measured index choices, deep pagination, statistics/maintenance and database work per request. The package contains 115 source files, twenty-three articles and twenty-two labs. All 132 topic IDs remain. No dependency or package file changed. The original seventeen reference suites are unchanged; the regular checker adds 31 assertions, for 301 on each engine.
+Five new article/lab pairs add plan reading, measured index choices, deep pagination, statistics/maintenance and database work per request. At that checkpoint the package contained 115 source files, twenty-three articles and twenty-two labs. All 132 topic IDs remained. No dependency or package file changed. The original seventeen reference suites were unchanged; the regular checker added 31 assertions, for 301 on each engine.
 
 | Suite | Observed behaviour checked | Not established |
 |---|---|---|

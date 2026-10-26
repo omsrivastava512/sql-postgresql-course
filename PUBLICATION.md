@@ -10,7 +10,7 @@ The source-study objectives are a minimum baseline, documented in the [author au
 
 ## Current package
 
-Twenty-three article drafts, twenty-two independent labs, and a curriculum of 132 topic groups with explicit evidence and gaps. The onramp, six mechanism-focused lessons, three foundation lessons, six query/reporting lessons, two concurrency/migration pilots and five practical performance lessons are drafted; further foundations and later routes remain unfinished. All remain drafts.
+Twenty-seven article drafts, twenty-six independent labs, and a curriculum of 132 topic groups with explicit evidence and gaps. The onramp, six mechanism-focused lessons, three foundation lessons, six query/reporting lessons, two concurrency/migration pilots, five practical performance lessons and four PostgreSQL access lessons are drafted; further foundations and later routes remain unfinished. All remain drafts.
 
 The [first route](COURSE_MAP.md#the-first-route) remains usable now. The [beginner route](COURSE_MAP.md#the-beginner-route) connects the available foundations and identifies the missing steps. Existing numbers and URLs stay stable.
 
@@ -66,16 +66,31 @@ The user selected this branch after the concurrency/migration pilots. It follows
 
 Embedded and native PostgreSQL passed 301 reference assertions. Native PostgreSQL 17.11 passed 107 further checks with measured plans, repeated observations, write/storage comparisons and actual snapshot/pool behaviour. Reverse suite order and the learner request command also passed. Results and limits belong in [verification](VERIFICATION.md); no fixed speedup is a mastery claim.
 
+## PostgreSQL access-control batch — 2026-10-26
+
+| Draft | Concrete outcome and changed setting |
+|---|---|
+| [Database roles](articles/23-database-roles.md) | Test schema/table/column/sequence grants separately from a profile label; transfer support permissions to dispatch. |
+| [Row policies](articles/24-row-policies.md) | Test allowed/forbidden CRUD, implicit checks and policy composition; transfer document ownership to messages. |
+| [Tenant membership](articles/25-tenant-membership.md) | Enforce member/read-only/nonmember rights, protect membership changes and reject cross-tenant references; transfer to clinic branches. |
+| [Privileged code](articles/26-privileged-code.md) | Compare owner/caller access, repair a broad view/function and temporary-name shadowing; transfer to a restricted delivery lookup. |
+
+The user authorized the next researched batch after performance. This completes a bounded PostgreSQL access foundation using the existing dependencies, ordinary reference cases and a separate actual-login checker. It does not complete the Supabase identity/API route. Administrative fixtures require a disposable local cluster; no hosted resource, dependency or framework was introduced.
+
+The [verification record](VERIFICATION.md) separates role-switched SQL from actual password-authenticated restricted connections, including rejected role switches and the membership snapshot limit. One AWS engineering reference supplies a narrow comparison; the labs remain original synthetic examples. Human learning trials are pending.
+
 ## Later branches
 
-The query, concurrency, bounded migration and performance drafts have execution evidence, but no human learning-time or comprehension evidence. Have the author attempt them and record effort, help and wrong predictions before publication. Use that evidence when choosing further batches; do not equate passing reference SQL with mastery. Continue broader implementation according to prerequisites:
+The query, concurrency, bounded migration, performance and access drafts have execution evidence, but no human learning-time or comprehension evidence. Have the author attempt them and record effort, help and wrong predictions before publication. Use that evidence when choosing further batches; do not equate passing reference SQL with mastery. Remaining work can be grouped as follows; these groups are scheduling units, not promises that one article covers each group:
 
-- A deployed request is slow: extend local plan/query-count diagnosis to actual deployment latency and workload measurements when an application harness warrants it.
-- Two workflows acquire several resources: deadlocks, lock ordering and optimistic version checks, building on the claim pilot.
-- A successful request loses its response: idempotency, payload comparison and concurrent duplicate requests.
-- A user logs in but cannot see a row: identity, privileges, RLS, then invoker/definer and full request tracing.
-- Yesterday's invoice changes with today's price: snapshots, exact money and time-dependent rules.
-- An application replaces an old representation: extend the additive pilot to staged compatibility, removal and a separate restore rehearsal.
+| Remaining group | Practical deliverable |
+|---|---|
+| Authenticated application access | Verified login/JWT identity, auth accounts versus profiles, Supabase auth.uid()/SQL-editor distinctions, Data API exposure, onboarding boundaries and complete allowed/denied request traces. Builds on labs 23–26. |
+| Reliable application operations | Multi-resource deadlocks/order, optimistic version checks, savepoints, bounded retries, idempotency keys/payload matching, simultaneous duplicates and lost-response replay. |
+| Modelling and historical meaning | Requirements-to-schema choices, functional dependencies/update anomalies, remaining relationship rules, type selection, exact amounts, calendars and intentional historical snapshots. Catalog research is evidence to evaluate, not an implemented lesson or private-company schema guarantee. |
+| Targeted SQL/rule depth | Remaining useful JSON/array, recursive-query, generated-value, function/trigger-event and lifecycle-rule objectives, each tied to a concrete feature rather than engine internals. |
+| Change and recovery | Inherited-schema/data repair, broader compatibility/removal changes, interruption/reconciliation and a backup restored into a fresh target with data/permission checks. |
+| Integration and release | Capstone checkpoints and changed-domain assessment, deployed workload diagnosis where needed, supported hosted/Docker verification and author/new-reader learning trials. Specialized extensions remain optional and demand-driven. |
 
 Use the [full inventory](TOPIC_INVENTORY.md) for less visible objectives; this queue is a writing priority, not a replacement syllabus.
 
@@ -83,12 +98,12 @@ Use the [full inventory](TOPIC_INVENTORY.md) for less visible objectives; this q
 
 - Check its stated prerequisites, scope labels, prediction feedback and changed-context answer.
 - Run setup twice, then solution and relevant failure cases from a fresh state. Record exact objectives tested.
-- Execute on local PostgreSQL and hosted Supabase; record engine, role, date and outcomes. Local native execution is now recorded. Supabase MCP is connected, but no dedicated course project was used; hosted verification remains open. Embedded tests do not satisfy these two gates.
+- Execute on local PostgreSQL and hosted Supabase; record engine, role, date and outcomes. Local native execution is recorded. Access labs currently require local administrative fixtures; their hosted adaptation must be designed and verified before meeting this existing release gate. Supabase MCP being connected is not a dedicated course test run. Embedded tests do not satisfy these two gates.
 - Check source attribution, dates, narrow company claims and local links.
 - Have the author do the lab and revise in their own voice; retain assistance/source attribution.
 - Ask a new reader to follow the material without private conversations and explain a changed example. Record confusion and revise the relevant passage.
 
-Publishing a site, selecting a license, or changing GitHub visibility requires a separate release decision. The course repository remains private. The original clinic application and private study records are not part of the public course export; review author provenance before any export.
+Publishing a site, selecting a license, or changing GitHub visibility requires a separate release decision. The 2026-10-26 preflight found this repository already public; this batch did not change its visibility. The original clinic application and private study records are not part of the course export; review author provenance before any further export. Repository visibility does not establish that the teaching-release checks above have passed.
 
 ## Learning feedback
 

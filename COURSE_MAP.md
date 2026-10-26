@@ -33,6 +33,8 @@ After transactions and [CTEs](articles/12-query-shapes.md), continue to [competi
 
 After query correctness, follow [execution plans](articles/18-query-plans.md) → [index decisions](articles/19-index-decisions.md) → [deep pages](articles/20-deep-pages.md). Branch to [statistics and maintenance](articles/21-statistics-maintenance.md) after transaction snapshots, or to [request work](articles/22-request-work.md) after joins. The request harness uses the existing Node/pg tooling; it adds no web framework.
 
+For access control, follow [database roles](articles/23-database-roles.md) → [row policies](articles/24-row-policies.md) → [tenant membership](articles/25-tenant-membership.md) → [privileged functions and views](articles/26-privileged-code.md). Membership lookups use EXISTS; the revocation exercise also needs transaction snapshots. The local labs compare restricted identities explicitly. Supabase login/JWT/Data API integration remains planned.
+
 ## The wider course
 
 Topic IDs refer to the [inventory](TOPIC_INVENTORY.md), which records the narrower objectives actually covered. A route below can contain several short articles and labs.
@@ -44,7 +46,7 @@ Topic IDs refer to the [inventory](TOPIC_INVENTORY.md), which records the narrow
 | Query meaning and reporting | Joins, grouping, subqueries, CTEs, windows, sets and pagination; Q | Values and basic SELECT; relationships for joins | Filtering, joins, grouping, subqueries/sets, CTEs, windows and reusable-report drafts; recursion and specialized query depth remain planned |
 | Rules and automation | Constraints, functions, trigger events, derived values, transitions; B | Writes, constraints; lookups for cross-table rules | Validation and derivation drafts; remaining coverage planned |
 | Transactions and concurrency | Atomic groups, deferral, counters, locking, isolation, retries; T, R11 | Writes and constraints; CTEs for the claim | Rollback, deferral and competing-claim drafts; deadlocks, optimistic checks and full request retries remain planned |
-| Identity and access | Authentication, privileges, RLS, function execution identity, tenants; A | Filtering, relationships; functions for definer work | Planned |
+| Identity and access | Authentication, privileges, RLS, function execution identity, tenants; A | Filtering, relationships/EXISTS; snapshots for revocation; functions/views for helper checks | Local grants, row-policy matrices, membership and privileged-code drafts; Supabase auth/JWT/Data API integration and onboarding remain planned |
 | Data over time | Generated values, views, snapshots, exact money, calendars and audits; D | Expressions; joins and grouping for reports | Historical price, exact-cent, period-boundary and view examples in the report draft; broader lifecycle/calendar rules planned |
 | Performance and recovery | Indexes, query plans, statistics, pooling, imports, backup restoration; O01–O06, O15–O19 | Queries; transactions for locks, cleanup and recovery | Plans, measured index choices, pagination, statistics/maintenance and request/pool work drafted; specialized indexes, deployment-scale tuning and backup restoration remain planned |
 | Evolution and integration | Versioned migrations, compatibility, APIs, safe parameters, useful errors; O07–O14, O20–O21 | Constraints, transactions and locks; access for API work | Additive migration with backfill and old/new SQL callers drafted; renames, removal, restore and full API workflow remain planned |
@@ -113,7 +115,10 @@ For the advanced branches, learn concurrency before implementing concurrent retr
 | Workspace: ascending event pages | Channel: descending messages with ties | Preserve the complete cursor and reverse the comparison correctly; available lab 20 transfer |
 | Tasks: forty open become twenty thousand | Mail: twenty queued become one thousand | Inspect estimates separately from actual rows and refresh statistics; available lab 21 transfer |
 | Customers: paid orders including empty collections | Projects: open-task counts including zero | Reduce per-parent calls without losing empty results; available lab 22 transfer |
-| Team: a user sees only their workspace | Clinic: a staff member has limited branch access | Trace identity through privileges and row policy; planned |
+| Support: read subjects and edit selected fields | Dispatch: read tracking/status and update status only | Separate schema, column and write privileges; available lab 23 transfer |
+| Documents: restrict an owner's rows | Messages: restrict the recipient's rows | Compare existing-row selection with proposed-row checks; available lab 24 transfer |
+| Team: members have different workspace rights | Clinic: staff have read/edit rights by branch | Protect membership facts and test same/cross-tenant operations; available lab 25 transfer |
+| Private status lookup | Delivery status lookup | Restrict function execution, owner privileges and name resolution; available lab 26 transfer |
 | Subscriptions: a retry repeats a charge request | Reservations: a confirmation response disappears | Separate rollback from deduplication; planned |
 
 Every planned route needs a worked example, a changed-setting task with feedback, and a later retrieval prompt. The table is the authoring contract for future lessons, not a claim those SQL labs already exist.
@@ -145,6 +150,10 @@ Every planned route needs a worked example, a changed-setting task with feedback
 | Deep pages | Continuation, ties and changing datasets | Tuple comparisons and measured cursor/offset plans | No API paging contract claimed |
 | Statistics and maintenance | Estimates versus live facts and cleanup | ANALYZE, VACUUM reports and retained snapshots | Privileged hosted maintenance untested |
 | Request work | Query count, response shape and bounded connection reuse | Parameterized pg calls and actual pool checkout wait | Direct Node pool only; Supabase pooling modes remain planned |
+| Database roles | Authentication boundary versus allowed operations | session_user/current_user, schema/column/sequence grants and restricted logins | Local administrative role fixtures only |
+| Row policies | Existing-row visibility versus proposed-row validity | USING/WITH CHECK, policy composition and privileged exceptions | No hosted policy deployment claimed |
+| Tenant membership | Membership and relationship integrity are different rules | Protected policy lookup, composite FK and snapshot revocation limit | JWT/context propagation remains planned |
+| Privileged code | Caller, owner and resolved object can differ | Invoker views/functions, definer ownership, FORCE RLS, EXECUTE grants and search_path | No Supabase RPC/Data API verification claimed |
 
 These labels do not certify cross-database portability. Future Supabase identity/Data API lessons will name the platform explicitly; PostgreSQL roles and RLS will first get their own explanation.
 

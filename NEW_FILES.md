@@ -2,15 +2,16 @@
 
 ## What the files are for
 
-The original package contained 42 files. It now contains 115 after adding the author-only curriculum audit, three foundation sets, six query/data-handoff sets with a CSV fixture, two concurrency/migration sets and five practical performance sets; this is a file count, not a lesson count.
+The original package contained 42 files. It now contains 138 after adding the author-only curriculum audit, three foundation sets, six query/data-handoff sets with a CSV fixture, two concurrency/migration sets, five practical performance sets, two separately committed research documents and four access-control sets; this is a file count, not a lesson count.
 
 | Files | Purpose | Intended audience |
 |---|---|---|
-| 23 article files | One SQL onramp, six mechanism-focused lessons, three foundation lessons, six query/data-handoff lessons, two concurrency/migration pilots and five practical performance lessons | Readers |
-| 73 lab files | Shared instructions plus twenty-two sets of tasks, setup SQL and solutions, with one CSV fixture, three migration phase files, a standalone vacuum command and a request module | Readers; authors verifying examples |
+| 27 article files | One SQL onramp, six mechanism-focused lessons, three foundation lessons, six query/data-handoff lessons, two concurrency/migration pilots, five practical performance lessons and four access-control lessons | Readers |
+| 89 lab files | Shared instructions plus twenty-six sets of tasks, setup SQL and solutions, with one CSV fixture, three migration phase files, a standalone vacuum command, a request module and four access-role cleanup files | Readers; authors verifying examples |
 | 11 top-level Markdown files | Navigation, review, sources, curriculum, authoring and verification records | Mixed; author records are labelled |
-| 8 tooling files | Git ignore rules, package files and five verification files | Maintainers |
-| 115 total | Current source package, excluding Git metadata and installed dependencies | Not 115 lessons |
+| 9 tooling files | Git ignore rules, package files and six verification files | Maintainers |
+| 2 research files | Previously committed catalog/billing report and its research log; unchanged in the access batch | Authors |
+| 138 total | Current source package, excluding Git metadata and installed dependencies | Not 138 lessons |
 
 Readers start at the [README](README.md), [course map](COURSE_MAP.md), articles, labs and [review prompts](REVIEW.md). Authors additionally use the [curriculum audit](CURRICULUM_AUDIT.md), teaching guide, publication queue, provenance and verification records. No reader needs the private source application.
 
@@ -216,3 +217,44 @@ The five lessons use generated fixtures, exact results, changed-setting tasks an
 | [labs/22-request-work/setup.sql](labs/22-request-work/setup.sql) | 1–13 (new file) |
 | [labs/22-request-work/solution.sql](labs/22-request-work/solution.sql) | 1–6 (new file) |
 | [tests/verify-performance.mjs](tests/verify-performance.mjs) | 1–317 (new file) |
+
+## PostgreSQL access-control delivery — 2026-10-26
+
+Four article/lab pairs and one separate actual-login checker add 21 files. Eleven existing files contain the reference cases and connected navigation, coverage, source and verification records. The following current line locations are relative to local HEAD 60da999b26326a083a5f75b13dd8d5fc549da4eb; unchanged historical delivery records above are retained.
+
+The read-only preflight found main one commit ahead of live upstream main (9fbadbedca2e2828d619d9d47b47a6f31baf0887), zero behind, with no PRs/issues or duplicate access work. The local-only commit contains the two research documents; neither was edited here. No Git mutation was performed. External approval and execution-evidence files are outside this source manifest.
+
+| File | Current changed lines |
+|---|---|
+| [COURSE_MAP.md](COURSE_MAP.md) | 36–37, 49, 118–121, 153–156 |
+| [CURRICULUM_AUDIT.md](CURRICULUM_AUDIT.md) | 109–118 |
+| [NEW_FILES.md](NEW_FILES.md) | 5, 9–10, 12–14, 220–260 |
+| [PUBLICATION.md](PUBLICATION.md) | 13, 69–81, 84, 86–93, 101, 106 |
+| [README.md](README.md) | 44–47, 49, 51, 63, 76 |
+| [REVIEW.md](REVIEW.md) | 44–53, 80 |
+| [SOURCES.md](SOURCES.md) | 18, 86–93 |
+| [TOPIC_INVENTORY.md](TOPIC_INVENTORY.md) | 14, 24, 131, 135–140, 181 |
+| [VERIFICATION.md](VERIFICATION.md) | 3, 7–8, 11, 14, 24–58, 61 |
+| [articles/23-database-roles.md](articles/23-database-roles.md) | 1–61 (new file) |
+| [articles/24-row-policies.md](articles/24-row-policies.md) | 1–63 (new file) |
+| [articles/25-tenant-membership.md](articles/25-tenant-membership.md) | 1–71 (new file) |
+| [articles/26-privileged-code.md](articles/26-privileged-code.md) | 1–58 (new file) |
+| [labs/23-database-roles/README.md](labs/23-database-roles/README.md) | 1–53 (new file) |
+| [labs/23-database-roles/cleanup.sql](labs/23-database-roles/cleanup.sql) | 1–3 (new file) |
+| [labs/23-database-roles/setup.sql](labs/23-database-roles/setup.sql) | 1–14 (new file) |
+| [labs/23-database-roles/solution.sql](labs/23-database-roles/solution.sql) | 1–7 (new file) |
+| [labs/24-row-policies/README.md](labs/24-row-policies/README.md) | 1–53 (new file) |
+| [labs/24-row-policies/cleanup.sql](labs/24-row-policies/cleanup.sql) | 1–3 (new file) |
+| [labs/24-row-policies/setup.sql](labs/24-row-policies/setup.sql) | 1–13 (new file) |
+| [labs/24-row-policies/solution.sql](labs/24-row-policies/solution.sql) | 1–7 (new file) |
+| [labs/25-tenant-membership/README.md](labs/25-tenant-membership/README.md) | 1–70 (new file) |
+| [labs/25-tenant-membership/cleanup.sql](labs/25-tenant-membership/cleanup.sql) | 1–3 (new file) |
+| [labs/25-tenant-membership/setup.sql](labs/25-tenant-membership/setup.sql) | 1–29 (new file) |
+| [labs/25-tenant-membership/solution.sql](labs/25-tenant-membership/solution.sql) | 1–12 (new file) |
+| [labs/26-privileged-code/README.md](labs/26-privileged-code/README.md) | 1–56 (new file) |
+| [labs/26-privileged-code/cleanup.sql](labs/26-privileged-code/cleanup.sql) | 1–3 (new file) |
+| [labs/26-privileged-code/setup.sql](labs/26-privileged-code/setup.sql) | 1–33 (new file) |
+| [labs/26-privileged-code/solution.sql](labs/26-privileged-code/solution.sql) | 1–9 (new file) |
+| [labs/README.md](labs/README.md) | 3, 47, 51, 75, 101–120 |
+| [tests/cases.json](tests/cases.json) | 4065–5003 |
+| [tests/verify-access.mjs](tests/verify-access.mjs) | 1–245 (new file) |

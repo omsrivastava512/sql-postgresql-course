@@ -106,6 +106,16 @@ The exact result suite passed 301 assertions on embedded and native PostgreSQL. 
 
 Coverage changes remain narrow: direct Node pooling does not establish Supabase pool modes, parameter probes are not a security audit, and local timing is not production capacity. Authorization, request idempotency, deadlocks/optimistic locking, broader temporal modelling, full migration/restore rehearsal and the integrated capstone remain unfinished. Human learning trials and hosted verification remain separate release gates.
 
+## PostgreSQL access-control implementation — 2026-10-26
+
+Four article/lab pairs add database-role privileges, per-command row policies, protected tenant membership and privileged function/view diagnosis. Every lesson includes a changed setting: dispatch fields, recipient messages, clinic branches or a delivery lookup. All 132 IDs remain; A01/A05–A10 and related sub-outcomes are updated only for the demonstrated local PostgreSQL behaviour.
+
+The reference suite passed 399 assertions across twenty-six labs on embedded PostgreSQL 18.6 and native PostgreSQL 17.11. A separate native checker uses actual restricted logins, wrong-password rejection and forbidden role-switch tests, rather than treating administrator SET ROLE as authentication proof. The [verification record](VERIFICATION.md) contains its final normal/reverse results, cleanup evidence and limits.
+
+These drafts do not complete A02–A04 or A11–A13: auth accounts/profiles, JWT validation, Supabase identity/editor differences, Data API access, onboarding and full request tracing remain planned. The custom-setting experiment explicitly rejects caller-controlled context as identity. Membership revocation is tested against an established snapshot rather than described as universally immediate. Hosted verification and human learning trials remain open.
+
+The [publication queue](PUBLICATION.md#later-branches) now groups the remaining work into authenticated application access, reliable operations, deeper modelling/history, targeted query/rule depth, change/recovery and integration/release. The separate catalog research remains research; this access batch does not modify or certify its proposed models.
+
 ## Coverage acceptance
 
 - Each source-study objective above has a course destination; unresolved product choices remain comparative exercises.
