@@ -1,18 +1,18 @@
 # Verification record
 
-Status: draft. Initial SQL execution dated 2026-10-17 (Asia/Kolkata); documentation audit added 2026-10-19; foundation and query/data-handoff execution added 2026-10-20; native concurrency, migration and practical performance execution added 2026-10-21; PostgreSQL access-control execution and focused editorial revisions added 2026-10-26.
+Status: draft. Initial SQL execution dated 2026-10-17 (Asia/Kolkata); documentation audit added 2026-10-19; foundation and query/data-handoff execution added 2026-10-20; native concurrency, migration and practical performance execution added 2026-10-21; PostgreSQL access-control execution and focused editorial revisions added 2026-10-26; collection-wide grounding revision added 2026-10-27.
 
 | Check | Result |
 |---|---|
-| Embedded PostgreSQL execution | PASS: 399 assertions across 26 labs on PostgreSQL 18.6 / PGlite 0.5.10 (2026-10-26) |
+| Embedded PostgreSQL execution | PASS: 399 assertions across 26 labs on PostgreSQL 18.6 / PGlite 0.5.10 (2026-10-27); 29 additional focused grounding checks passed |
 | Native local PostgreSQL 17.11 | PASS: 399 assertions across 26 labs, Windows x64, role course_author (2026-10-26) |
 | Independent concurrent sessions | PASS: 100 assertions across labs 16/17 using three distinct connections; also passed in reverse suite order on native PostgreSQL 17.11 (2026-10-21) |
 | Practical performance | PASS: 107 assertions across labs 18–22, normal and reverse suite order, native PostgreSQL 17.11; learner request command also passed (2026-10-21) |
 | Restricted database logins | PASS: 157 assertions across labs 23–26 with 11 actual restricted logins, normal and reverse suite order; each suite and its cleanup also passed independently (2026-10-26) |
 | Local Docker PostgreSQL 17.11 | Not run; Docker is not installed on this host |
 | Hosted Supabase | MCP connected and project inventory read; no SQL run or project changed. No dedicated course project used; hosted verification remains open. |
-| Local Markdown links, current package | PASS: 822 local links across 67 Markdown files, including heading targets (2026-10-26, focused revision) |
-| Editorial review | Retrospective inspection of 27 articles/26 lab guides completed; approved focused revisions reviewed separately below (2026-10-26). Other findings remain outside this revision set. |
+| Local Markdown links, current package | PASS: 864 local links across 67 Markdown files, including heading targets (2026-10-27) |
+| Editorial review | All 27 lessons assessed for grounding; 25 lessons revised, with source types and limits recorded in SOURCES.md (2026-10-27). Human comprehension remains untested. |
 | Actual human learner trials | Pending; automated execution of documented steps is not a human trial. |
 | Public publication | Not performed |
 
@@ -21,6 +21,25 @@ The embedded runtime tests SQL behavior only. It cannot establish Docker setup, 
 The six initial labs cover foreign-key failures, role validation and its update gap, derived values and stale copies, delete actions, deferred-check timing, and invoice failure rollback. The test cases also run every successful solution after a fresh setup and exercise setup reset twice.
 
 No test in this package claims to verify HTTP requests, API retries, production authorization, or a deployed clinic schema. Live SQL sessions are tested separately from application requests. Earlier sections below preserve dated checkpoints; this opening table and the latest section describe the current package.
+
+## Collection-wide grounding revision — 2026-10-27
+
+This revision changes 25 lessons, the lab 26 catalog-reading instructions, AUTHORING.md, SOURCES.md and this record. The captured plan and developed Shopify case remain unchanged. The prior lab 17/25 session repairs and lesson 03 ownership trace are preserved. No setup/solution SQL file, dependency, course checker or request implementation changed.
+
+The final readability pass leads source introductions with the teaching problem and leaves routine author/date details in SOURCES.md. It retains material limits such as synthetic benchmarks, database differences and unimplemented guarantees. README.md now describes the current sources instead of the removed Notion/GitHub comparisons. Reference execution (399 assertions), the task-local grounding checks (29 assertions) and local navigation (864 links) were rerun successfully after these edits on 2026-10-27. The separate landing-page prototype's source summary was updated outside this repository.
+
+| Check | Evidence and limit |
+|---|---|
+| Existing reference suite | node tests/verify.mjs --embedded: 399 assertions across 26 labs passed on PostgreSQL 18.6 / PGlite 0.5.10, Node 24.15.0. |
+| New documented SQL | A task-local verifier extracted the new lesson 12 UNION ALL, lesson 14 CREATE VIEW and lab 26 catalog blocks directly from Markdown. It checked complete rows, equivalent join output and catalog settings before/after repair. |
+| Intermediate reasoning | The same verifier checked the three-event LAG trace; import normalization, key versions, occurrences, both conflict scenarios and forgotten-identity replay; and identical request responses with 31/2/1 calls and six empty order arrays. Total: 29 focused assertions passed. |
+| Test correction | The first focused attempt expected a JavaScript number for SUM(bigint); the driver returns that numeric result as text. The task-local expectation was corrected to '2500'; the SQL and documented amount required no repair. |
+| Navigation | node tests/check-links.mjs passed 864 local links across 67 Markdown files. This checks local destinations and headings, not remote-source accuracy. |
+| Source inspection | Original passages were opened and checked for fit, attribution, date and limits. The [coverage table](SOURCES.md#lesson-by-lesson-grounding-coverage) separates firsthand accounts, practitioner demonstrations, advisory context and fictional exercises. |
+| Native/hosted limits | No new native server or Supabase execution in this pass. Prior native results below remain dated evidence. The new single-session examples were executed in the embedded engine and checked against PostgreSQL 17 documentation; that is not a new native-17 run. |
+| Human evidence | Author read-through and new-learner attempts remain pending. Neither SQL assertions nor source research establishes voice, comprehension or mastery. |
+
+The verifier and its JSON observations are retained in the task's external review artifacts, rather than adding another course tool. The sequence/commit-order schedule in lesson 09 is explicitly a reasoning illustration; it was not executed as a concurrent lab in this pass. No company benchmark, incident or architecture is claimed to have been reproduced.
 
 ## Focused editorial revisions — 2026-10-26
 

@@ -63,6 +63,8 @@ The first page is 105, 107. With the same ordering and OFFSET 2, the next page i
 
 An offset counts positions. If a new row arrives at the front between requests, the positions move. The lab reproduces that with a single explicit insert. It also introduces a cursor that asks for rows after the last date/ID pair. That preserves the boundary in this example; it does not freeze a changing dataset or solve every paging policy.
 
+Keep the two-page ID lists from this experiment. [The later Shopify case](20-deep-pages.md#why-shopify-changed-the-pagination-contract) asks why traversing a catalog becomes expensive and what clients give up when navigation changes. Here, establish the smaller prerequisite first: what makes the next page follow the previous one, including ties and a new row?
+
 ## Read and write with the same selection rule
 
 Suppose order 102 is now confirmed paid. Preview the exact intended row:

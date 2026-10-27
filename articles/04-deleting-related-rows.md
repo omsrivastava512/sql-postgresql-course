@@ -57,9 +57,18 @@ For a practice variation, replace patients and visits with teams and memberships
 
 An UPDATE that fills `deleted_at` leaves the row physically present. An ordinary FK can still find it.
 
-Brandur Leach's [2022 essay on soft deletion](https://brandur.org/soft-deletion) discusses the resulting burden on queries and relationships. Treat his preference as an engineer's argued tradeoff, not a universal ban on soft deletion.
+A deletion marker also gives every reader another condition to remember. [Brandur Leach's soft-deletion essay](https://brandur.org/soft-deletion) examines that cost in ordinary queries, including direct operational queries that bypass an ORM, and the difficulty of eventually pruning related data. His alternative keeps deleted data outside the live tables. Either design still needs a plan for restoration.
 
-For our course, this gives a new question: should a visit refer to a row that exists but is marked inactive? That is another example of existence differing from suitability.
+Apply that trade-off to our fictional rows before choosing a deletion action:
+
+| Desired outcome | Question the designer must answer |
+|---|---|
+| Keep Riya's past visits, prevent new visits | How does a new visit check active status, beyond the FK? |
+| Hide Riya from ordinary lists | Which readers apply that policy, including direct reports? |
+| Remove Riya and visits together | Is losing those facts actually intended before choosing CASCADE? |
+| Retain removed facts elsewhere | Who may read them, and how would a restore handle changed relationships? |
+
+Do not implement all four. Choose one brief and predict whether patient 10 and visit 100 remain, whether the reference is NULL, and whether a new visit should be accepted. The lab verifies FK actions; this decision exercise exposes what those actions do not settle. It supplies no medical retention policy.
 
 ## Return note
 

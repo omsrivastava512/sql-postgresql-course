@@ -18,6 +18,8 @@ In our ordinary fresh connection, both identify the login role. An authorized SE
 
 The separate native checker therefore also logs in as each restricted role. It requires a wrong password to fail and verifies that the reader cannot switch to the writer or administrator. [SET ROLE reference](https://www.postgresql.org/docs/17/sql-set-role.html)
 
+Keep the two identity values with each allowed/denied result. [The next lesson's Nile account](24-row-policies.md) shows why using the wrong connection role can invalidate an otherwise convincing access test. Our admin-labelled profile is a fictional counterexample; no application label establishes which SQL permissions were exercised.
+
 ## A profile is data
 
 [Lab 23](../labs/23-database-roles/README.md) contains:

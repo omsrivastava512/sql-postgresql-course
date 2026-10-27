@@ -2,7 +2,9 @@
 
 Yesterday only forty tasks were open. Today twenty thousand are. The query text has not changed, but the distribution it searches has.
 
-By the end, distinguish planner statistics from row cleanup, observe estimates before and after ANALYZE, and show why an old transaction can delay cleanup.
+That suggests a statistics problem, but a slow query can have another cause. In [Brandur Leach's 2015 queue investigation](https://brandur.org/postgres-queues), a growing job backlog recovered after an old analytics transaction ended. He then reproduced the problem with a producer, worker and long-lived transaction. The account concerns an older PostgreSQL workload; use the snapshot mechanism to form a diagnosis rather than treating it as an instruction to cancel analytics.
+
+Our lab separates two possible explanations: the planner's description of the data is stale, or old row versions remain needed by a snapshot. Measure each independently before choosing ANALYZE, VACUUM, an index or a change to transaction lifetime.
 
 **Scope:** PostgreSQL statistics and ordinary VACUUM in a disposable fixture. This is not a database administration or autovacuum tuning course.
 
@@ -33,6 +35,8 @@ Reset the fixture. Session A begins a Repeatable Read transaction and reads all 
 A still sees its 40,000-row snapshot; a new transaction sees 10,000. Run VACUUM VERBOSE from an observer and retain its report. Those old versions cannot all disappear while A still needs them.
 
 End A, run VACUUM again, and compare the reports. Both new reads still return 10,000. The maintenance difference did not require changing the application's query or adding an index.
+
+This is the bounded part of the queue investigation we adapt: hold a snapshot, change data elsewhere, observe cleanup before and after the snapshot ends. We do not reproduce replication, job throughput or the incident's recovery time. If ANALYZE improves the estimate while vacuum still reports versions it cannot remove, the observations can both be true. Explain why repeating ANALYZE would not end A's need for those versions.
 
 Statistics views are observations with their own update timing and estimates. Use their dead-row counts alongside the vacuum report and transaction state; do not treat one sampled counter as exact physical inspection. Do not kill unrelated production transactions to reproduce this exercise.
 

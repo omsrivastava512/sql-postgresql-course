@@ -71,11 +71,11 @@ Try changing the setting: an order refers to a customer. Does a customer FK also
 
 No. Existence and eligibility remain separate.
 
-## A connection to real engineering
+## Check the guarantee at the write boundary
 
-In [Notion's 2021 sharding account](https://www.notion.com/blog/sharding-postgres-at-notion), Garrett Fidalgo describes keeping related data together partly because transactions do not automatically span independent databases. The useful connection here is that relationships affect operations, not just diagrams.
+Imagine that the same visit can arrive from a receptionist's screen or a CSV import. A screen may offer only existing patients; the import may contain 999. The FK checks the stored reference in either path. A helpful dropdown is not evidence that every writer supplies a valid ID.
 
-Our two-table lab is a teaching example. It does not reproduce Notion's schema or argue that a small application needs sharding.
+Our fictional two-table example keeps that guarantee visible. Before leaving the lab, explain why the import's nonexistent ID is rejected but Dev's existing profile can still be accepted as an owner. These are two different missing-data problems, with different rules.
 
 ## Return note
 

@@ -2,7 +2,7 @@
 
 A customer needs their five latest orders. Operations needs the oldest open orders across all customers. Those are two different access patterns, even though both read the same table.
 
-By the end, propose indexes for named queries, test a partial uniqueness rule, and compare read benefits with storage and write work.
+If signup events are rare, should every event pay for an index used only to find signups? [Dan Robinson's Heap walkthrough](https://www.heap.io/blog/speeding-up-postgresql-queries-with-partial-indexes) compares full indexes with an index limited to that subset, considering storage and writes as well as reads. Its measurements use synthetic data. Our order workload explores the same choice; measure its costs locally rather than borrowing the published numbers.
 
 **Scope:** PostgreSQL B-tree, composite, partial and covering indexes on a supplied workload. Specialist search indexes and production index deployment are later work.
 
@@ -41,6 +41,8 @@ WHERE status = 'open';
 ```
 
 The query must imply the index predicate. This index cannot answer the entire closed-order queue. The lab compares it with a full index of the same keys and measures their actual sizes.
+
+Record which requirement buys this smaller index: “oldest open orders,” not “every status someone might request.” If operations changes the queue to include closed orders, the predicate no longer covers the request. Updates that move an order into or out of the indexed subset also require maintenance. A small index has a narrower contract; it is not free. Use that changed requirement to defend retaining, replacing or rejecting the candidate after measurement.
 
 A partial index can also enforce a scoped rule:
 

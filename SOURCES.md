@@ -1,14 +1,14 @@
 # Source notebook
 
-Checked 2026-10-17. Sources are selected for a specific teaching purpose. "Read" means the relevant page was opened and its relevant passage inspected; it does not mean every code claim has been independently reproduced.
+Initial notebook checked 2026-10-17; collection-wide grounding revision checked 2026-10-27. Sources are selected for a specific teaching purpose. "Read" means the original page was opened and its relevant passage inspected; it does not mean every code claim has been independently reproduced. The dated sections retain earlier research decisions; the coverage table below records current use.
 
 ## Firsthand engineering accounts
 
 | Source | Attribution and date | Use in this course | What not to infer |
 |---|---|---|---|
 | [Designing robust and predictable APIs with idempotency](https://stripe.com/blog/idempotency) | Brandur Leach, Stripe, 2017-02-22; read | Article 06: a lost response can leave the caller uncertain after a successful operation. | A database transaction alone cannot deduplicate arbitrary retries; this historical article is not the current API specification. |
-| [Herding elephants: Lessons learned from sharding Postgres at Notion](https://www.notion.com/blog/sharding-postgres-at-notion) | Garrett Fidalgo, Notion, 2021-10-06; read | Article 01: related data placement matters when operations must be coordinated. | Our clinic needs sharding, or its relationships reproduce Notion's schema. |
-| [Partitioning GitHub's relational databases to handle scale](https://github.blog/engineering/infrastructure/partitioning-githubs-relational-databases-scale/) | GitHub Engineering, 2021; read | Article 02: application and database boundaries depend on architecture. | MySQL behavior is interchangeable with PostgreSQL, or GitHub's scale is a beginner requirement. |
+| [Herding elephants: Lessons learned from sharding Postgres at Notion](https://www.notion.com/blog/sharding-postgres-at-notion) | Garrett Fidalgo, Notion, 2021-10-06; read | Removed from lesson 01 in this revision: too distant from the basic FK guarantee. Retained here as a research record. | Our clinic needs sharding, or its relationships reproduce Notion's schema. |
+| [Partitioning GitHub's relational databases to handle scale](https://github.blog/engineering/infrastructure/partitioning-githubs-relational-databases-scale/) | GitHub Engineering, 2021; read | Removed from lesson 02: a database-boundary account did not explain the trigger's missing write paths. | MySQL behavior is interchangeable with PostgreSQL, or GitHub's scale is a beginner requirement. |
 | [Soft Deletion Probably Isn't Worth It](https://brandur.org/soft-deletion) | Brandur Leach, personal engineering account, 2022-07-19; read | Article 04: retaining a deleted marker changes the work required of queries and relationships. | Soft deletion is always wrong, or a medical retention policy follows from this essay. |
 | [Easy, alternative soft deletion: deleted_record_insert](https://brandur.org/fragments/deleted-record-insert) | Brandur Leach, 2022-12-28; read | Article 03: a concrete reported use of AFTER DELETE triggers. | The author uses our owner-derivation trigger, or our sample is production-ready security code. |
 | [Zero-downtime Postgres migrations — the hard parts](https://gocardless.com/blog/zero-downtime-postgres-migrations-the-hard-parts/) | Chris Sinjakli, GoCardless; page says last edited June 2024, account discusses older PostgreSQL versions; read | Future migration lab: a quick DDL change can still wait on locks and disrupt requests. | Historical lock modes or table-rewrite advice describe current PostgreSQL unchanged. Recheck the target version. |
@@ -17,7 +17,66 @@ Checked 2026-10-17. Sources are selected for a specific teaching purpose. "Read"
 | [Paginating requests in APIs using relative cursors](https://shopify.engineering/pagination-relative-cursors) | Drew Martin, Shopify, 2019-08-12; reread 2026-10-26 | Article 20: catalog traversal, connection pressure, cursor navigation trade-offs and the external-client transition. | The account predates full adoption. Our PostgreSQL measurements do not establish Shopify's production outcome or a general speedup. |
 | [Multi-tenant data isolation with PostgreSQL Row Level Security](https://aws.amazon.com/blogs/database/multi-tenant-data-isolation-with-postgresql-row-level-security/) | Michael Beardsley, AWS Database Blog, 2020-05-18; read 2026-10-26 | Article 25: centralized tenant checks and the danger of testing through an owner connection. | This is an engineering demonstration, not a production incident report. A caller-writable session setting is not proof of authenticated identity; our membership fixture is not AWS's implementation. |
 
-Each source contributes a short connection, not a retelling of the whole article. Keep source-derived text across the course brief and avoid copying snippets from a company merely to look authentic.
+Use the space needed to explain the relevant problem, choice, trade-off and consequence, within source-use limits. A developed case must affect the reasoning or work the learner performs; a brief connection must be labelled as such in the coverage record. Do not retell an entire source or copy company code for appearance. The [authoring guide](AUTHORING.md#investigate-the-engineering-problem) requires investigation while allowing a clearly fictional example when it teaches better.
+
+## Additional originals inspected — 2026-10-27
+
+These entries identify the inspected passage and its use, not independent validation of a company's outcome. All course datasets remain synthetic. Source categories deliberately separate firsthand operational accounts from constructed demonstrations and advisories.
+
+| Original source | Author/date and evidence type | Inspected focus and boundary |
+|---|---|---|
+| [Trigger constraints](https://www.cybertec-postgresql.com/en/triggers-to-enforce-constraints/) | Laurenz Albe, CYBERTEC, April 2019; practitioner demonstration | Concurrent check failure; lesson 02 uses the question, not a complete concurrency repair. |
+| [Deferring constraints](https://hashrocket.com/blog/posts/deferring-database-constraints) | Joshua Davey, Hashrocket, 2013-08-22; practitioner walkthrough | Reordering and explicit deferral; our FK experiment uses a different constraint. |
+| [Sequences and commit order](https://blog.sequinstream.com/postgres-sequences-can-commit-out-of-order/) | Anthony Accomazzo, Sequin, 2024-07-23; firsthand investigation | Allocation versus visibility; synthetic schedule, no streaming implementation. |
+| [Join duplicates and misses](https://alexpetralia.com/2017/07/19/more-dangerous-subtleties-of-joins-in-sql/) | Alex Petralia, 2017-07-19; practitioner examples | Missing and multiplied amounts; no named production incident claimed. |
+| [LEFT JOIN versus UNION ALL](https://www.crunchydata.com/blog/postgres-query-optimization-left-join-vs-union-all) | David Christensen, Crunchy Data, 2022-05-20; client optimization account | Matched/unmatched branches; local adaptation verifies semantics, not a performance gain. |
+| [Finding user sessions](https://mode.com/blog/finding-user-sessions-sql/) | Benn Stancil, Mode, 2015-03-20; practitioner analysis | Previous-event comparison; invented three-event trace, historical portability remarks excluded. |
+| [Metric consistency at Airbnb](https://medium.com/airbnb-engineering/how-airbnb-achieved-metric-consistency-at-scale-f23cc53dea70) | Amit Pahwa, Robert Chang and colleagues, 2021-04-30; company account | Conflicting definitions and shared consumption; no Minerva architecture reproduced. |
+| [Exactly-once delivery](https://segment.com/blog/exactly-once-delivery/) | Amir Abu Shareb, Segment, 2017-06-29; company account, now hosted by Twilio | Duplicate delivery identity; bounded source guarantee, single-session CSV adaptation. |
+| [Race conditions](https://engineering.kraken.tech/news/2025/01/20/mysql-race-conditions.html) | Kraken Engineering, 2025-01-20; operational context and constructed example | Concurrent interval checks; MySQL remedies are not evidence for our PostgreSQL claim. |
+| [Partial indexes](https://www.heap.io/blog/speeding-up-postgresql-queries-with-partial-indexes) | Dan Robinson, Heap, 2014-12-10; synthetic benchmark walkthrough | Rare-event predicate and index costs; no copied performance numbers or production claim. |
+| [Job queues and MVCC](https://brandur.org/postgres-queues) | Brandur Leach, 2015-05-18; production account plus controlled reproduction | Long transaction and cleanup investigation; local lab omits replication and throughput claims. |
+| [Two-phase load and render](https://brandur.org/two-phase-render) | Brandur Leach, 2024-05-28; firsthand implementation essay | Collection loading versus rendering; our existing JavaScript response stays unchanged. |
+| [Shipping RLS at Nile](https://www.thenile.dev/blog/multi-tenant-rls) | Miki Pokryvailo, 2022-07-26; company implementation account | Wrong connection role and stale request context; not evidence that our fixture authenticates website users. |
+| [CVE-2018-1058 guide](https://wiki.postgresql.org/wiki/A_Guide_to_CVE-2018-1058:_Protect_Your_Search_Path) and [advisory](https://www.postgresql.org/support/security/CVE-2018-1058/) | PostgreSQL project; security release 2018-03-01 | Historical name-resolution risk; not a breach report or current-default claim. |
+
+Also inspected [Feature Casualties of Large Databases](https://brandur.org/large-database-casualties) (Brandur Leach, 2020-12-01). Its broad scaling trade-offs did not improve the beginner FK lesson, so no new excerpt was inserted. Searches around missing values and simple filtering found demonstrations and broader analytical problems rather than a close firsthand account of our exact fixtures. Those lessons retain small counterexamples and connect forward to developed cases. This is a research limitation, not a claim that no relevant account exists.
+
+## Lesson-by-lesson grounding coverage
+
+**Developed account** means a firsthand source informs the problem and subsequent decision, trace or exercise. **Worked demonstration** develops a practitioner's constructed example or experiment without calling it a production case. **Brief connection** links a source to one relevant boundary. **Fictional exercise** has no claimed external provenance. **Advisory connection** is official security context, not incident experience. Every category can contain original synthetic practice; these labels describe grounding, not mastery or publication readiness.
+
+| Lesson | Grounding and source or limitation | Substantive revision or reason to preserve |
+|---|---|---|
+| [00 Reading examples](articles/00-reading-the-examples.md) | Fictional exercise; no company case needed for basic syntax | Distinguishes beginner and relationship routes; makes fictional provenance explicit. |
+| [01 Foreign keys](articles/01-foreign-keys.md) | Fictional exercise; Notion and the scaling essay were too distant | Replaces the brand aside with screen/import writer comparison and existence-versus-eligibility prediction. |
+| [02 Business rules](articles/02-business-rules.md) | Brief connection: CYBERTEC demonstration | Replaces GitHub aside with an operation inventory; separates unobserved events from concurrent decisions. |
+| [03 Derived values](articles/03-derived-values.md) | Brief connection: Leach's deletion-trigger account | Uses OLD/NEW and event choice to test attachment reasoning; preserves the repaired ownership trace. |
+| [04 Deletion](articles/04-deleting-related-rows.md) | Developed account: Leach on soft deletion | Compares desired outcomes, readers and cleanup duties before choosing a policy; no retention-law claim. |
+| [05 Deferred checks](articles/05-deferred-checks.md) | Worked demonstration: Hashrocket | Explains a reason for temporary invalidity and compares parent-first loading with deferred validation. |
+| [06 Transactions](articles/06-transaction-boundaries.md) | Developed account: Stripe idempotency | Adds an observation/knowledge table and a lost-response decision prompt; no API implementation claim. |
+| [07 Stored values](articles/07-stored-values.md) | Fictional exercise; no close firsthand inventory account selected | Adds a reorder decision distinguishing quantity from whether it is known; preserves the physical-count repair. |
+| [08 Selection](articles/08-selecting-rows.md) | Brief connection forward to Shopify in 20 | Carries the two-page prediction into the later navigation trade-off without importing API prerequisites. |
+| [09 Identity](articles/09-row-identity.md) | Developed account: Sequin | Adds a four-step synthetic commit-order counterexample and explains why uniqueness does not fix a reader's cursor. |
+| [10 Joins](articles/10-joins.md) | Brief connection: Petralia demonstration | Makes unmatched-row inspection a prerequisite to interpreting a summed amount. |
+| [11 Aggregate grain](articles/11-aggregate-grain.md) | Brief connection: Petralia demonstration | Opens with independently established control totals; preserves the equal-amount DISTINCT counterexample. |
+| [12 Query shapes](articles/12-query-shapes.md) | Developed account: Crunchy Data client optimization | Adds a runnable branch-equivalence example, multiplicity check and ordering boundary; clarifies highest-ID address policy. |
+| [13 Windows](articles/13-window-questions.md) | Worked demonstration: Mode | Traces previous events and gap-policy decisions before returning to meter readings; no sessionization subsystem added. |
+| [14 Reports](articles/14-reusable-reports.md) | Developed account: Airbnb | Connects shared definitions to handoff interpretation; adds the missing complete CREATE VIEW bridge. |
+| [15 Data handoff](articles/15-data-handoff.md) | Developed account: Segment | Connects delivery identity to L1/L2, traces normalization/versions/occurrence/decision, and separates two conflict scenarios. |
+| [16 Competing claims](articles/16-competing-claims.md) | Brief connection: Kraken's operational example | Distinguishes a shared stock row from a multirow interval rule; rejects the inference that one statement alone prevents races. |
+| [17 Compatible change](articles/17-compatible-change.md) | Developed account: Stripe migration | Moves staging into the opening and adds evidence gates before each transition; preserves all repaired session instructions. |
+| [18 Query plans](articles/18-query-plans.md) | Measured fictional exercise; no firsthand production case substituted | Unchanged: the captured, annotated native plan already supplies concrete evidence. Source-backed rewriting decisions in 12 lead here. |
+| [19 Index choices](articles/19-index-decisions.md) | Worked demonstration: Heap | Frames subset indexing as a workload/cost choice and changes the queue requirement to test the candidate's limits. |
+| [20 Deep pages](articles/20-deep-pages.md) | Developed account: Shopify | Unchanged: prior revision already connects the operational problem, navigation trade-off, rollout and measured synthetic fixture. |
+| [21 Maintenance](articles/21-statistics-maintenance.md) | Developed account: Leach's queue investigation | Contrasts two diagnoses and maps the snapshot experiment to a bounded part of the reported problem. |
+| [22 Request work](articles/22-request-work.md) | Developed account: Leach's implementation essay | Traces 31/2/1 calls, empty arrays and the load/assembly boundary; names the actual JavaScript prerequisite. |
+| [23 Roles](articles/23-database-roles.md) | Fictional exercise with brief forward connection to Nile | Carries identity evidence into later policy tests; no company provenance assigned to the admin-labelled profile. |
+| [24 Row policies](articles/24-row-policies.md) | Developed account: Nile | Makes connection identity and allowed/denied comparisons part of the policy-validation reasoning. |
+| [25 Membership](articles/25-tenant-membership.md) | Brief connections: Nile; AWS demonstration | Separates request-context reuse from membership correctness; preserves the repaired snapshot workflow. |
+| [26 Privileged code](articles/26-privileged-code.md) | Advisory connection: PostgreSQL security guide | Adds historical motivation and bounded catalog queries; repairs function-reading prerequisites. No breach reproduction claim. |
+
+Remaining human evidence: the author must attempt the decision prompts without solutions, record where narration is still needed, and choose any wording that should reflect their own voice. A new learner must try the beginner route, the import trace and the request-code transition. Record misunderstandings and help used, then revise from those observations. Automated SQL/link checks and this editorial assessment do not establish comprehension. Hosted execution remains separately recorded in VERIFICATION.md; adding sources does not satisfy that publication gate.
 
 ## Technical authorities
 

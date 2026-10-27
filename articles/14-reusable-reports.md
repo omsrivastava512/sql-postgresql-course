@@ -2,7 +2,7 @@
 
 October's sales report changes when someone updates today's catalog price. A refund appears in a different month from its order. The SQL can run correctly while the number means something nobody agreed to.
 
-By the end, write a metric contract, preserve historical amounts, rerun a report for another period and distinguish a live view from a stored snapshot.
+Teams at Airbnb were getting different answers to basic booking questions because their definitions and tables differed. Their [Minerva account](https://medium.com/airbnb-engineering/how-airbnb-achieved-metric-consistency-at-scale-f23cc53dea70) explains how shared metric definitions and consistent consumption addressed that problem. Our smaller shop report starts with the same question: what must everyone agree on before using this number? We will express that contract in PostgreSQL, without building a metric platform.
 
 **Scope:** SQL reporting, PostgreSQL views and exact arithmetic. This fictional management report is not a prescribed accounting policy.
 
@@ -39,6 +39,22 @@ The discount is a total for the line, not a per-unit discount. The current produ
 
 A one-row-per-order view can name this calculation and include the order's date and status. CREATE VIEW stores the query definition. Reading an ordinary view reads its underlying data; it does not freeze this month's totals.
 
+Here is that first reusable step in full, after fresh setup:
+
+```sql
+CREATE VIEW course_report.order_amounts AS
+SELECT o.id, o.placed_at, o.status, SUM(l.quantity) AS units,
+       SUM(l.quantity::bigint * l.unit_cents - l.discount_cents) AS sale_cents
+FROM course_report.orders o
+JOIN course_report.lines l ON l.order_id = o.id
+GROUP BY o.id, o.placed_at, o.status;
+
+SELECT id, units, sale_cents FROM course_report.order_amounts
+WHERE id = 101;
+```
+
+The read returns 101, 4, 2500. Grouping by the order's identifying fields keeps one row per order with lines; including status and placed_at lets the next step apply the report contract. The lab's solution creates this same view, so reset the fixture before running that complete solution.
+
 ## Keep sales and refunds at the same grain
 
 Summarize eligible orders per period, summarize refund events per period independently, then join the two period summaries. The [lab's solution](../labs/14-reusable-reports/solution.sql) uses two named steps and preserves periods with no events.
@@ -72,6 +88,8 @@ For top orders, November has two orders tied at 2000 cents. A report promising a
 The [lab](../labs/14-reusable-reports/README.md) asks you to explain the October and November figures, add an empty or refund-only period, and independently report usage per active subscription account, including accounts with no events.
 
 A suitable interpretation is: under the stated live policy, November has 3700 net cents after refund events, including a refund for an older order. This alone says nothing about profit, cash settlement or why sales changed.
+
+Now have two readers use the same view, but let one describe refunds by order month and the other by refund month. They still disagree about the metric even if they copied identical SQL. In the handoff, state the date basis, eligibility rule and refresh behavior alongside the number. A reusable query reduces duplicated logic; agreement on the contract makes that reuse meaningful.
 
 **Requires:** [aggregate grain](11-aggregate-grain.md), [CTEs](12-query-shapes.md) and [windows](13-window-questions.md).
 **Next:** [Can this imported data be trusted?](15-data-handoff.md).

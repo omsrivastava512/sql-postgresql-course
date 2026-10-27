@@ -16,6 +16,18 @@ Do not manufacture conversations, war stories, personal experience, or quotes. A
 
 Do not imitate an engineer's distinctive prose. Summarize a narrow lesson in our own words, cite it, and send readers to the original. A relevant source beats three decorative brand names.
 
+## Investigate the engineering problem
+
+For each lesson, investigate relevant firsthand experience before settling on the example: an engineering account, incident, migration, operational decision or practitioner essay. Search for the actual failure or decision being taught. Open the original and inspect the relevant passage; a search snippet, aggregator summary or impressive company name is insufficient. Record the author, date, source type, useful passage and limits in SOURCES.md.
+
+Let a useful account change the teaching: the opening problem, a constraint, an alternative, a failure prediction, a measured comparison or the learner's decision. Develop enough of the problem, choice, trade-off and consequence to explain why it matters. A short paragraph added to an otherwise unrelated lesson is a brief connection, not a developed case. There is no company-reference quota or mandatory case-study layout.
+
+Separate three things explicitly: what the source reports, our interpretation, and our synthetic adaptation. A practitioner's constructed benchmark or tutorial is not a production incident. An advisory is not evidence that a company suffered a breach. Official documentation establishes behaviour; it does not supply firsthand experience. Date historical claims and verify technical mechanisms against the course's target PostgreSQL version.
+
+Keep a small fictional example when it makes the mechanism clearer. Explain the source-to-exercise boundary without implying that invented rows, schemas, SQL, measurements or outcomes came from a company. When research finds no close account, record that limitation and the choice in the lesson coverage table; do not manufacture provenance. Do not import a distributed architecture, low-level implementation or new prerequisite merely to fit a source.
+
+Before adding another case, ask what new decision it helps the reader make. Prefer one developed, relevant account to several brand references. Paraphrase only the relevant material, respect source-use limits across the collection, and link to the original for the full account. Preserve strong existing explanations instead of replacing them with a repeated template.
+
 ## Article contract
 
 Each article contains:

@@ -71,9 +71,17 @@ A transaction cannot make a network response arrive.
 
 In [Stripe's 2017 article](https://stripe.com/blog/idempotency), Brandur Leach discusses this uncertainty and explains how a client-supplied idempotency key can let retries refer to the same operation. The key must remain the same for that retry; generating a new one describes a different operation.
 
-Our lab shows the database boundary, not a Stripe implementation. It doesn't implement an idempotency store, request matching, or response replay. Those need their own article and tests.
+Compare what the caller actually knows:
 
-If the UI reports a timeout, you cannot conclude that the transaction rolled back. You need a reliable way to establish the operation's result or retry it safely.
+| Observation | What it establishes | What it does not establish |
+|---|---|---|
+| A CHECK failure inside our transaction, followed by rollback | Its ordinary table changes were undone | That an earlier transaction was undone |
+| Connection lost while awaiting the result | The caller has no confirmed outcome | Whether the server committed or rolled back |
+| A confirmed successful commit | The database accepted this transaction | That repeating a new request cannot create another operation |
+
+In the lost-response case, a blind retry can repeat a successful business action. Stripe's reported key mechanism gives the retry a stable operation identity; a rollback mechanism cannot supply that identity. Our synthetic invoice lab proves only the database boundary. It does not implement request matching or response replay.
+
+After the failed-invoice experiment, explain how your next action would differ if you had received no server result at all. Do not infer rollback from a UI timeout, and do not send another payment to test the uncertainty. A real integration must establish the result or use its documented retry contract.
 
 ## Return note
 

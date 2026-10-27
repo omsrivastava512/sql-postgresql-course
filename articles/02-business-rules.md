@@ -66,9 +66,15 @@ The lab deliberately lets you observe this. The patient-write validator alone do
 
 Before adding more functions, decide whether demotion should be blocked, ownership transferred, or historical ownership allowed. Then cover every operation that can break that chosen rule.
 
-## A real-world comparison
+For the stronger “always an admin” rule, start this operation inventory:
 
-GitHub's [2021 account of partitioning relational databases](https://github.blog/engineering/infrastructure/partitioning-githubs-relational-databases-scale/) describes changing how application code accesses data across database boundaries. It is a useful counterweight to universal rules about where logic must live. Their system uses MySQL; it is not evidence for the exact PostgreSQL trigger above.
+| Change | Does this patient trigger inspect it? | What remains to decide? |
+|---|---|---|
+| Assign or reassign a patient | Yes | Whether the selected profile is eligible at this write |
+| Demote the existing owner | No | Reject demotion, transfer patients, or permit historical ownership |
+| Assign a patient while another session demotes the owner | A lookup alone is insufficient evidence | How the competing decisions are coordinated |
+
+Two guards can each check that someone else remains on duty, then both leave. [Laurenz Albe's worked example](https://www.cybertec-postgresql.com/en/triggers-to-enforce-constraints/) makes that race concrete. Covering every table event and coordinating competing decisions are separate obligations. Our demotion example exposes the first gap; [competing claims](16-competing-claims.md) later makes the second observable.
 
 ## Return note
 

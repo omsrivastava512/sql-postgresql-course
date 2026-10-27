@@ -51,6 +51,8 @@ A ticket can have a creator and an assignee, both drawn from staff. Join staff t
 
 Saying “join to staff” is incomplete. Name the role and whether it is optional.
 
+Before aggregating, inspect the unmatched row itself. [Alex Petralia's worked example](https://alexpetralia.com/2017/07/19/more-dangerous-subtleties-of-joins-in-sql/) shows a missing cost lookup disappearing from a summed amount even though an outer join retained the sale. For our guest order and unassigned ticket, decide whether missingness is permitted by the brief or needs investigation before replacing it with a display value.
+
 ## Practise and return
 
 The [lab](../labs/10-joins/README.md) repairs a disappearing-customer query and independently lists clubs with active memberships. It also changes the brief to clubs with no active members.

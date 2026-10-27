@@ -4,7 +4,7 @@ There is one item left. Riya reads 1. Sam reads 1. Each application calculates 1
 
 The stored counter is nonnegative, yet two reservations promise the same item. A CHECK on the counter cannot compare it with the reservation history.
 
-By the end, reproduce that schedule, repair the claim, inspect an actual lock wait and retry a transaction after its earlier decision becomes invalid.
+Two requests can each find no overlapping device interval and both accept a booking. [Kraken Engineering's account](https://engineering.kraken.tech/news/2025/01/20/mysql-race-conditions.html) illustrates that failure in the context of an energy API. Its remedies concern MySQL/InnoDB. Our PostgreSQL fixture reduces the decision to stock on one existing row, where we can observe how competing writes are coordinated.
 
 **Scope:** PostgreSQL concurrent transactions on one database. The examples use supplied SQL callers, not an HTTP service, payment processor or idempotency store.
 
@@ -15,6 +15,8 @@ By the end, reproduce that schedule, repair the claim, inspect an actual lock wa
 All writers in the repaired exercise must use the claim operation. A writer with unrestricted table access can bypass it; this is not an authorization design. Cancellation and restocking are outside this first contract.
 
 The failing schedule preserves each transaction's atomicity. The problem is that each decision came from a read that another caller could make obsolete. Wrapping those same statements in BEGIN does not repair that decision.
+
+A calendar's “no overlapping intervals” rule spans a set of rows; our “enough stock” condition lives on one row. Do not assume that moving an arbitrary lookup into a single INSERT makes either rule safe. Identify the shared row or constraint that actually coordinates contenders. Here we compare a conditional update with explicitly locking that stock row, then test both commit and rollback outcomes.
 
 ## Put the condition in the write
 

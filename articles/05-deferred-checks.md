@@ -8,6 +8,8 @@ Can PostgreSQL check the result after all the steps?
 
 Sometimes, if that constraint was deliberately made deferrable.
 
+Why allow a temporarily invalid state at all? Drag a list item into an occupied position: the first update conflicts with uniqueness, even if the final ordering would be valid. [Joshua Davey's Hashrocket walkthrough](https://hashrocket.com/blog/posts/deferring-database-constraints) works through that example with explicit deferral. Our lab uses a foreign key instead, so you can investigate the same timing question with familiar rows.
+
 ## Watch two complete transactions
 
 The lab starts with the same patient and visit as before. Its foreign key says:
@@ -73,6 +75,8 @@ A CREATE TABLE ordering problem is different again. Adding an FK with ALTER TABL
 Suppose a bulk import contains invoices and their line items. Which relationships need to be valid after every statement, and which may be temporarily incomplete inside the import transaction?
 
 There is no benefit in postponing everything by default. Choose it only where the operation needs it, and test the failure at the end.
+
+For the import, compare two plans before choosing: load parents first, or defer an eligible FK until the whole batch is ready. The first keeps failures close to the offending statement; the second permits flexible ordering but requires handling a failure at the final check. In either plan, leaving out a required parent must reject the operation. Which plan actually needs deferral?
 
 ## Return note
 

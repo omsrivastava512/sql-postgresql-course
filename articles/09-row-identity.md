@@ -66,6 +66,21 @@ PostgreSQL identity generation uses a sequence. A transaction can obtain a numbe
 
 Do not use a row ID as proof of a gapless invoice numbering policy. The [transaction-boundary article](06-transaction-boundaries.md) intentionally uses an ordinary table counter, whose rollback behaviour differs. Neither example by itself proves a complete production numbering design.
 
+## A larger ID need not commit later
+
+A sequence value is allocated before its transaction commits. Another writer can obtain a larger value and commit first. [Anthony Accomazzo's Sequin investigation](https://blog.sequinstream.com/postgres-sequences-can-commit-out-of-order/) shows why that matters to readers advancing by ID. Serializing writers through a counter was one explored remedy, at a cost in throughput and lock duration.
+
+Trace a smaller hypothetical schedule; these are our IDs, not Sequin's production rows:
+
+| Step | Writer A | Writer B | Reader |
+|---|---|---|---|
+| 1 | Obtains ID 10, remains uncommitted | | Cannot yet see 10 |
+| 2 | Still open | Obtains 11 and commits | Can see 11 |
+| 3 | Still open | | Records 11 as its last processed ID |
+| 4 | Commits 10 | | A later query for IDs greater than 11 misses 10 |
+
+The key stays unique. Explain why sorting cannot recover a row excluded by the predicate. This reasoning exercise is not a concurrently executed part of lab 09. [Lesson 16](16-competing-claims.md) supplies lock and snapshot prerequisites; an ordinary identifier does not need serialization merely to look chronological.
+
 ## What changes with UUIDs?
 
 The lab's uuid_records table uses id uuid DEFAULT gen_random_uuid() PRIMARY KEY. UUID is the value type, gen_random_uuid generates a random version-4 value, and PRIMARY KEY enforces the stored uniqueness rule. Random generation does not make collision probability mathematically zero. The lab deliberately repeats a generated ID to test the constraint; a sample with no collisions would not prove collisions impossible.

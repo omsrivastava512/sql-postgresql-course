@@ -2,9 +2,11 @@
 
 Every order query is fast. The customer page is still slow because it issues one order query for each customer.
 
-By the end, count database calls for a complete operation, preserve empty collections while batching, and distinguish waiting for a connection from a query waiting inside PostgreSQL.
+Load related data for the whole collection, then assemble each response without making more database calls. [Brandur Leach describes using this boundary in Go](https://brandur.org/two-phase-render) to prevent a new response field from hiding another query inside a loop. It requires explicit loading and bookkeeping. Our JavaScript harness lets you trace that trade-off without learning Go.
 
 **Scope:** a supplied Node.js/pg read-operation harness with PostgreSQL. No HTTP server, frontend framework or new dependency is required.
+
+The lab assumes you can read a JavaScript function, an array and a for loop. Here, await waits for a query result; map builds an array, and Map associates an ID with its result object. You can begin by tracing the supplied functions and running their comparisons. Writing the independent loop requires those small language basics as well as SQL; it is not a SQL-only task.
 
 ## State the response before optimizing
 
@@ -19,6 +21,10 @@ The [supplied request module](../labs/22-request-work/request.mjs) compares thre
 | One LEFT JOIN, then group the returned rows | 1 | The same nested records |
 
 Fewer calls do not automatically mean fewer bytes. A joined result repeats customer fields for each order. Compare call count, returned rows, approximate serialized row bytes and end-to-end function duration.
+
+Trace readCustomers before changing it. Its local query helper increments queryCount for each completed database call. In loop mode, fetching thirty customers costs one call, then thirty loop iterations make thirty more. In batch mode, map collects the IDs, one order query fetches their paid orders, and a Map attaches them to arrays created for every customer. Those six empty arrays survive because their customers were initialized before orders were attached. In join mode, NULL order_id means “append no order,” not “append an order with a missing ID.”
+
+Now imagine adding a product label to each order. Mark where its data would be loaded and where the label would be assembled. A database call inside either assembly loop would reintroduce the same problem. Keep this as a design prediction; the lab's response contract remains customers and orders.
 
 ## Bind values without changing SQL structure
 

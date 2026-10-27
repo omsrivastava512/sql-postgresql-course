@@ -2,7 +2,7 @@
 
 Alice can read the documents table. Without a row policy, that grant also lets her read Bob's document. Omitting a WHERE clause should not turn a personal document list into everybody's list.
 
-By the end, distinguish row visibility from proposed-row checks and verify allowed and forbidden reads, inserts, updates and deletes.
+At Nile, repeated tenant filters became difficult to maintain, prompting a move to RLS. Their [implementation account](https://www.thenile.dev/blog/multi-tenant-rls) also describes a deployment that used the wrong database role: the connection bypassed the policies they meant to test. Our document fixture lets you check the policy and the connection identity separately before adding workspace membership.
 
 **Scope:** PostgreSQL 17 row-level security (RLS) using actual database roles. An owner or superuser query is not evidence of an ordinary user's access.
 
@@ -15,6 +15,8 @@ ALTER TABLE course_policy.documents ENABLE ROW LEVEL SECURITY;
 ```
 
 With no applicable policies, Alice now sees no rows. An attempted insert fails. This default deny is separate from the table grants: removing SELECT still prevents the query even if a row policy would allow it.
+
+For every test below, record current_user alongside the result and compare an allowed request with a denied one. “It returned my document” is incomplete evidence if the same connection also returns Bob's. This is the operational reason to keep the identity check from the previous lesson, even when the SQL appears unchanged.
 
 ## Separate the old row from its replacement
 

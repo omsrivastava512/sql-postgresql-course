@@ -80,7 +80,9 @@ In a persistent connection, if you have explicitly opened a transaction and a st
 
 CREATE defines a table. INSERT adds rows. SELECT reads rows. UPDATE changes matching rows. DELETE removes matching rows. A constraint is a rule the database checks.
 
-**Next:** [What a foreign key actually promises](01-foreign-keys.md) adds a relationship between the two tables.
+**Beginner route:** continue with [stored values](07-stored-values.md), then [selecting rows](08-selecting-rows.md), [foreign keys](01-foreign-keys.md) and [row identity](09-row-identity.md).
+
+**Relationship route:** if those basic reads and writes are already familiar, [What a foreign key actually promises](01-foreign-keys.md) starts the sequence about stored guarantees. The examples above are fictional practice data, not a company's schema.
 
 **Reference:** PostgreSQL's [SQL language tutorial](https://www.postgresql.org/docs/17/tutorial-sql.html).
 

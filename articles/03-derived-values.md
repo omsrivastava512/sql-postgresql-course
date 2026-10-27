@@ -78,11 +78,11 @@ Now test two possible meanings of “note owner”. If it means the patient's **
 
 We leave the trigger incomplete so those differences stay observable. Before choosing a repair, decide which business meaning is intended and list the writes that could break it. That question connects to the later topics of normalization, snapshots, and audit history.
 
-## An engineer's use of the same mechanism
+## Choose the event from the fact you need
 
-In [a December 2022 article](https://brandur.org/fragments/deleted-record-insert), Brandur Leach describes using AFTER DELETE triggers to record deleted rows in a separate table. It is a firsthand example of attaching behavior to a database event.
+Brandur Leach describes [retaining deleted rows with AFTER DELETE triggers](https://brandur.org/fragments/deleted-record-insert). That purpose needs the deleted row, OLD, rather than a proposed replacement, NEW. Keeping the row for investigation does not by itself provide a reliable undo operation.
 
-His event and purpose differ from ours. Our example changes NEW before an insert; his captures a deleted row. The common idea is the trigger attachment.
+Use that distinction to check our attachment: filling an incoming note needs BEFORE and NEW; recording removal would need the removed row; following a patient's reassignment would require observing a different table's change. A function with the right assignment still fails if the event that matters never calls it. Our ownership trace is synthetic and intentionally incomplete; it is not his archival implementation. Before changing the trigger, name the event and whether the fact should describe the past or the present.
 
 ## Return note
 

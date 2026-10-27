@@ -53,6 +53,8 @@ ORDER BY id;
 
 For row 20, note_missing is true, note_empty is NULL, and display_stock is 0. COALESCE chooses the first non-NULL expression for this result. It has not updated stock. A convenient display can conceal uncertainty: unknown inventory is not evidence that the shelf is empty.
 
+Before using that display for a reorder decision, answer two questions separately: “How many units are recorded?” and “Has anyone established the quantity?” The tea needs investigation even though the mug and tin have the same displayed zero. Keep this small fictional inventory distinction in mind when [joining missing data](10-joins.md) and [interpreting totals](11-aggregate-grain.md); a missing match can introduce another NULL without establishing a zero amount.
+
 ## A comparison can be unknown
 
 Predict these expressions for stock values 4, 0 and NULL:

@@ -54,6 +54,8 @@ Integrity checks can reveal information through errors even when a row is hidden
 
 Setting a custom course.actor value to Bob does not change Alice's current_user or the policy result. The native test also verifies that Alice cannot SET ROLE to Bob. A caller-writable setting would be an unsafe source of identity if the policy trusted it without a protected upstream boundary.
 
+[Nile's 2022 account](https://www.thenile.dev/blog/multi-tenant-rls) also reports testing requests that inherited a prior request's user ID through reused thread-local storage. That is a request-context lifecycle failure, distinct from a wrong membership predicate. Our direct database-role fixture avoids implementing that lifecycle. When evaluating an eventual pooled integration, require evidence for switching identities between requests as well as evidence for the membership matrix; the current lab does not establish that integration's safety.
+
 Deleting Alice's workspace membership removes access in a new statement snapshot. It cannot erase rows already returned. An already established Repeatable Read transaction can still see the earlier membership until that transaction ends; the native lab demonstrates this. Strict immediate revocation needs a wider session/request design, not just an assumption about DELETE.
 
 ## One engineering connection

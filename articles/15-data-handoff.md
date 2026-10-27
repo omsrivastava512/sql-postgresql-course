@@ -2,7 +2,7 @@
 
 A CSV contains two identical-looking purchases, a repeated source record, February 30, and a product name containing a comma. Loading it without an error is only the first step.
 
-By the end, retain raw input, apply an explicit repair/reject policy, preserve legitimate repeated facts and reconcile a repeatable import.
+A client that misses a response may resend an event that already arrived. [Segment's delivery account](https://segment.com/blog/exactly-once-delivery/) describes tracking message identities within a bounded window to recognize those retries. Comparing values alone cannot distinguish a repeated delivery from a second real event. Our CSV batch explores that identity problem in one session; it does not provide Segment's streaming or delivery guarantees.
 
 **Scope:** PostgreSQL CSV parsing, validation, exact conversions and conflict handling in a small single-session batch. This is not a concurrent ingestion service.
 
@@ -48,6 +48,18 @@ For dates, shape alone is insufficient. The solution combines the explicit forma
 
 The solution names normalization and assessment steps as views, then stores one decision per source record. Grouping versions of the complete normalized payload distinguishes a repeated delivery from a conflicting key. ROW_NUMBER selects the first equal occurrence using line_no, not an arbitrary row.
 
+Follow three records through those steps before reading the full CASE expression:
+
+| Source record | Normalized identity and amount | Distinct payload versions for this key | Occurrence within this key | Decision on the original input |
+|---|---|---:|---:|---|
+| Line 1 | L1, quantity 2, unit cents 1000 | 1 | 1 | Accept |
+| Line 2 | L2, quantity 2, unit cents 1000 | 1 | 1 | Accept |
+| Line 3 | L1, quantity 2, unit cents 1000 | 1 | 2 | Duplicate |
+
+The amount is only part of the payload: order, product, date and note also participate in comparison. Two equal L1 records still form one distinct payload version. L2 starts its own partition, so equal economic values do not make it a duplicate of L1. Line 9 adds another normalization example: ordinary spaces around quantity and price disappear before conversion to 1 and 550 cents; its note remains exactly check, shelf.
+
+The assessment checks field validity and the order lookup before payload conflicts, then checks an existing stored fact, then repeated occurrence. That order determines the reported reason. If line 3 changes to a valid price of 11.00 while line 1 remains 10.00, L1 has two versions and both candidates are rejected as conflicting source rows. It is not “first one wins.” If all L1 candidates instead agree on 11.00 after 10.00 has already been loaded, they conflict with the stored fact; the old fact remains. Reset before comparing these separate scenarios.
+
 Expected classification:
 
 | Decision | Source line numbers |
@@ -67,6 +79,8 @@ Ten source records reconcile as four accepted + one duplicate + five rejected. A
 A primary key protects facts.source_key. After comparing payloads, INSERT ... ON CONFLICT (source_key) DO NOTHING preserves already-loaded equal facts. The decision table uses ON CONFLICT (line_no) DO UPDATE to refresh its assessment for this retained batch.
 
 Run the same solution twice: raw records remain ten, facts remain four and their total remains 5250. The number of accepted source records is not the number of newly inserted facts on a replay. This decision table is the latest assessment, not an append-only audit history.
+
+The retained source key is also part of the repeatability contract. If an accepted fact and its key are removed, the next import no longer finds that stored identity and can insert it again. Our batch has no expiry policy; Segment's bounded deduplication window is a reminder to state how long an identity is remembered rather than promising duplicate suppression forever.
 
 A different payload under an existing source key must be reported as a conflict. Ignoring every conflict without comparing payloads could silently lose a correction. Competing import workers, interrupted multi-batch jobs and request retries need later concurrency/operations lessons; this exercise does not claim those guarantees.
 

@@ -32,6 +32,8 @@ A default view is not literally a security-definer function. For example, CURREN
 
 ## A narrow privileged lookup
 
+An unqualified name can resolve to an object supplied by someone else. The PostgreSQL project's [CVE-2018-1058 guide](https://wiki.postgresql.org/wiki/A_Guide_to_CVE-2018-1058:_Protect_Your_Search_Path) explains that historical security risk. Its old defaults should not be assumed for PostgreSQL 17. Our deliberately unsafe function demonstrates a related problem with temporary-table lookup; it is not a reproduction of that client vulnerability.
+
 The private labels table maps 1 to Queued and 2 to Sent. Callers may obtain a label through a function but do not receive direct table access. The function belongs to course_code_worker, which has SELECT on the lookup tables and no role-management powers.
 
 The intentionally unsafe label_for uses an unqualified labels name with search_path = course_code. Alice creates a temporary labels table containing Fake label, grants the worker SELECT on that temporary table, and calls the function. It returns the fake value: omitting pg_temp from the explicit path did not exclude it.
@@ -53,6 +55,6 @@ Revoking PUBLIC execution is separate from row policies and schema exposure. A h
 
 The [lab](../labs/26-privileged-code/README.md) asks you to expose a delivery status lookup: code 5 returns Collected, 6 returns Delivered, unknown codes return NULL. Protect its underlying table, execution grant and name resolution. Explain why that lookup does not need the owner's authority over documents.
 
-**Requires:** [roles](23-database-roles.md), [RLS](24-row-policies.md), [views](14-reusable-reports.md), and reading a supplied SQL/PL/pgSQL function from the [onramp](00-reading-the-examples.md).
+**Requires:** [roles](23-database-roles.md), [RLS](24-row-policies.md), [views](14-reusable-reports.md), and reading a supplied function body as introduced in [trigger functions](02-business-rules.md) and [value assignment](03-derived-values.md).
 **Revisited in:** [planned authenticated API work](../COURSE_MAP.md#the-wider-course).
 **Return:** why might a direct table test pass while a view or helper exposes more data?

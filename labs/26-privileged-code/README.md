@@ -6,6 +6,30 @@ Read [the article](../../articles/26-privileged-code.md), then run [setup.sql](s
 
 Record table/view owners in pg_class, function owners/prosecdef/proconfig in pg_proc, role attributes in pg_roles and execution grants. owner and worker are non-superuser NOLOGIN roles without BYPASSRLS; neither is granted to Alice or Bob.
 
+Start with these bounded catalog reads as the setup administrator:
+
+```sql
+SELECT c.relname, pg_get_userbyid(c.relowner) AS owner,
+       c.relrowsecurity, c.relforcerowsecurity, c.reloptions
+FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
+WHERE n.nspname = 'course_code' AND c.relkind IN ('r', 'v')
+ORDER BY c.relname;
+
+SELECT p.proname, pg_get_userbyid(p.proowner) AS owner,
+       p.prosecdef, p.proconfig,
+       has_function_privilege('course_code_outsider', p.oid, 'EXECUTE') AS outsider_can_execute
+FROM pg_proc p JOIN pg_namespace n ON n.oid = p.pronamespace
+WHERE n.nspname = 'course_code'
+ORDER BY p.proname;
+
+SELECT rolname, rolcanlogin, rolsuper, rolbypassrls
+FROM pg_roles
+WHERE rolname IN ('course_code_owner', 'course_code_worker')
+ORDER BY rolname;
+```
+
+relrowsecurity and relforcerowsecurity describe the table's RLS switches. reloptions contains view options. For functions, prosecdef true means SECURITY DEFINER, and proconfig shows per-function settings such as search_path. Initially all three functions allow outsider execution, document_count belongs to owner, and worker_count/label_for belong to worker. Re-run these reads after repair and connect each setting to the observed access result; catalog inspection alone does not replace the role tests. See the PostgreSQL 17 [relation catalog](https://www.postgresql.org/docs/17/catalog-pg-class.html), [function catalog](https://www.postgresql.org/docs/17/catalog-pg-proc.html) and [privilege inquiry functions](https://www.postgresql.org/docs/17/functions-info.html#FUNCTIONS-INFO-ACCESS-TABLE).
+
 As Alice, compare direct document IDs, document_list, document_count() and worker_count(). Expect [1], [1,2], 2 and 0. As Bob, the direct read gives [2]. Explain each owner/permission path before changing it.
 
 As outsider, call document_count(). It returns 2 through default PUBLIC function execution despite outsider lacking document SELECT. A function's EXECUTE grant and its internal table privileges are separate checks.

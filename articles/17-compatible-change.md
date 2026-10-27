@@ -4,7 +4,7 @@ A booking application adds reminder_minutes. New callers send a chosen delay. Ol
 
 Adding a required column immediately fails on existing rows. Changing every caller and every stored row in one step also makes it hard to tell what is safe to retry.
 
-By the end, expand the schema, preserve old inserts, backfill in bounded batches, reconcile existing facts and enforce the new requirement.
+Stripe moved subscriptions out of customer records while the service kept operating. [Jacqueline Xu's migration account](https://stripe.com/blog/online-migrations) describes introducing dual writes, populating older data, changing read paths, then retiring the old representation. When was each next step safe? Our reminder field uses that staged reasoning without replacing an existing representation, so it needs no dual-write bridge.
 
 **Scope:** an additive PostgreSQL migration on synthetic data, with SQL representing old and new callers. This is not a full deployment system, a zero-downtime guarantee or a backup/restore exercise.
 
@@ -35,6 +35,8 @@ The lab separates three operations:
 
 The versioned schema steps record completion in migration_history inside their own transactions. A failed step must not leave a successful version record. The batch is repeatable data work; it does not insert a new migration version each time.
 
+Give each transition an evidence gate. After expansion, can the old named-column caller still insert? During backfill, do new explicit preferences survive? Before enforcement, are all required values present and the original booking facts unchanged? A successful ALTER TABLE answers only one of those questions. Stop at the first failed gate instead of running all three files because a deployment clock says it is time.
+
 A CHECK with NOT VALID still checks new or updated rows. It postpones validation of existing rows. The range expression accepts NULL, which is why presence needs its own later check. The final step validates a presence CHECK before setting NOT NULL. This can avoid a redundant presence scan; it does not remove the schema lock. [ALTER TABLE reference](https://www.postgresql.org/docs/17/sql-altertable.html)
 
 ## A small interrupted example
@@ -56,12 +58,6 @@ A booking transaction can hold a lock needed by ALTER TABLE. The lab keeps that 
 Expect a server error, rollback, no new column and no completed migration record. After the blocker ends, retry the entire schema step. The timeout limits waiting for a lock; it is not a bound on the complete migration's running time. [Timeout reference](https://www.postgresql.org/docs/17/runtime-config-client.html)
 
 Short statements can still wait behind long transactions. Choose a quiet deployment window, inspect blocking work and measure the real table before claiming that a production change is harmless.
-
-## One engineering connection
-
-In [Online migrations at scale](https://stripe.com/blog/online-migrations), Jacqueline Xu described Stripe's subscription migration on 2 February 2017. Their transition separated writing both representations, backfilling, changing reads and eventually removing the old representation.
-
-Our additive-field exercise adapts the staged transition and reconciliation idea. It does not reproduce Stripe's architecture or scale, and it needs no dual-write bridge because no existing field is replaced. [GitLab's migration guidance](https://docs.gitlab.com/development/database/avoiding_downtime_in_migrations/) provides a useful related check: application compatibility must be considered before column removal or renaming. Those larger changes remain later work.
 
 ## Keep a usable fallback
 

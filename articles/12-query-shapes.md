@@ -16,7 +16,7 @@ SELECT (SELECT address FROM course_shape.contacts WHERE account_id = 2) AS addre
 
 The result is bo. With account 3 the result is NULL. With account 1 the scalar subquery fails with 21000 because it produces more than one row. Selecting two columns instead fails with 42601: the surrounding expression expects one column too.
 
-If the business asks for the most recently recorded address, this fixture defines recency by the highest contact ID:
+If the business asks for the address with the highest contact ID, give that selection rule explicitly:
 
 ```sql
 SELECT a.id,
@@ -27,7 +27,7 @@ FROM course_shape.accounts a
 ORDER BY a.id;
 ```
 
-Expected: 1/beta, 2/bo, 3/NULL. This is a stated fixture policy, not a claim that generated IDs always reveal real-world time. An unordered LIMIT 1 hides ambiguity.
+Expected: 1/beta, 2/bo, 3/NULL. The supplied alias newest_address is shorthand for this fixture's highest-ID policy, not evidence of arrival or commit time. [The sequence-order example](09-row-identity.md#a-larger-id-need-not-commit-later) explains why that distinction matters. An unordered LIMIT 1 hides ambiguity.
 
 ## Ask whether a match exists
 
@@ -62,6 +62,29 @@ The online source contains customer IDs 1,1,2; the store source contains 1,3.
 UNION ALL preserves source multiplicity. UNION removes equal output rows; it does not decide whether two purchases were actually the same event. INTERSECT finds common output rows, and EXCEPT keeps rows from the left result absent on the right. Both use distinct results by default here.
 
 Branches need the same number of output columns and compatible types. Apply a final ORDER BY when order is part of the requirement. Set operations combine outputs vertically; joins combine matching pairs horizontally.
+
+## Split a result only if its contract survives
+
+A query can combine matched counts with zeroes for rows that have no count. In [David Christensen's client optimization account](https://www.crunchydata.com/blog/postgres-query-optimization-left-join-vs-union-all), splitting those two groups enabled a different indexed plan. The improvement depended on that workload; UNION ALL is not generally faster than LEFT JOIN.
+
+Before considering speed, try a small equivalent-shape exercise on our existing fixture:
+
+```sql
+SELECT a.id AS account_id, o.id AS order_id
+FROM course_shape.accounts a
+JOIN course_shape.orders o ON o.account_id = a.id
+UNION ALL
+SELECT a.id, NULL::integer
+FROM course_shape.accounts a
+WHERE NOT EXISTS (
+  SELECT 1 FROM course_shape.orders o WHERE o.account_id = a.id
+)
+ORDER BY account_id, order_id;
+```
+
+The first branch returns (1,11), (1,12), (2,13); the second returns (3,NULL). Together they preserve the LEFT JOIN result, including the repeated account 1. Guest order 14 remains outside the account population. Compare full rows with the LEFT JOIN, not only their count. If you project just account_id, UNION would collapse the two appearances of 1 and change the contract.
+
+This is our semantic adaptation, not the client's schema or benchmark. Keep the final ordering explicit; branch order is not a general output-order guarantee. [Plan measurement](18-query-plans.md) comes after proving which rows a rewrite must preserve.
 
 ## Name a step without changing its meaning
 

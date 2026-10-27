@@ -60,7 +60,7 @@ Articles can be published as the author learns and verifies them. Planned lesson
 
 ## Real engineering, with attribution
 
-The [source notebook](SOURCES.md) connects specific questions to engineers' own accounts: retries and migrations at Stripe, pagination at Shopify, tenant isolation guidance from AWS, related data at Notion, database boundaries at GitHub, and deletion tradeoffs discussed by Brandur Leach. Fictional exercises do not reproduce those companies' systems.
+The [source notebook](SOURCES.md#lesson-by-lesson-grounding-coverage) connects the lessons to reported engineering decisions: retries and migrations at Stripe, pagination at Shopify, metric definitions at Airbnb, duplicate delivery at Segment, and access checks at Nile. It also identifies practitioner demonstrations and lessons that use fictional exercises. All course datasets are synthetic; the coverage table explains what each example borrows and where the comparison ends.
 
 This README was prepared with AI assistance. The course author should revise it after doing the labs; we do not invent personal experience or claim it was entirely human-written.
 

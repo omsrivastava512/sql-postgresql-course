@@ -2,7 +2,7 @@
 
 Order 101 has two separate lines worth 1,000 cents each and three payment events. Joining lines to payments creates six rows. Summing line amounts there reports 6,000 cents for a 2,000-cent order.
 
-By the end, state what one output row represents, distinguish row filters from group filters, and repair totals without deleting legitimate facts.
+Alex Petralia's [2017 join walkthrough](https://alexpetralia.com/2017/07/19/more-dangerous-subtleties-of-joins-in-sql/) illustrates the opposite danger to a missing lookup: multiple product matches inflate a revenue calculation. The query succeeds, so its syntax offers no warning. Our synthetic order makes that failure visible through two independent child collections. Establish their separate totals before joining; after the repair, those controls must still agree.
 
 **Scope:** general SQL grouping and aggregation; PostgreSQL aggregate FILTER. All amounts in this fixture are integer minor units of one fictional currency.
 

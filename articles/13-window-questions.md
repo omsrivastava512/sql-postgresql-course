@@ -59,6 +59,10 @@ Adding ID to the ranking order breaks the monetary tie. If the brief asks for ev
 
 LAG(cents) OVER (PARTITION BY account_id ORDER BY charged_on, id) returns the preceding row's amount. Subtract it to produce changes NULL,100,0,-250,NULL. The first row has no predecessor; a zero would assert a different baseline.
 
+Where does one user's session end and another begin? [Benn Stancil's Mode walkthrough](https://mode.com/blog/finding-user-sessions-sql/) uses LAG to compare successive event times against an inactivity gap. Choosing that gap is part of defining a session; SQL cannot choose the business meaning for you.
+
+Use the same reasoning on three hypothetical events for one user: 09:00, 09:05 and 09:45. LAG produces no previous time, then 09:00, then 09:05; the gaps are missing, five minutes and forty minutes. Under a stated rule that a gap greater than thirty minutes begins a new session, the first and third events start sessions. GROUP BY user would lose the per-event comparison. A gap of exactly thirty minutes needs a policy too. These invented events explain the mechanism; the runnable transfer remains the smaller meter-reading exercise below.
+
 The [lab](../labs/13-window-questions/README.md) transfers this to meter readings. A decrease might mean a reset or correction rather than negative consumption; data rules need a stated policy.
 
 **Requires:** [grouping](11-aggregate-grain.md), [CTEs and shape](12-query-shapes.md), [deterministic ordering](08-selecting-rows.md).
