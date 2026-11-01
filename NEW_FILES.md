@@ -2,16 +2,16 @@
 
 ## What the files are for
 
-The original package contained 42 files. It now contains 138 after adding the author-only curriculum audit, three foundation sets, six query/data-handoff sets with a CSV fixture, two concurrency/migration sets, five practical performance sets, two separately committed research documents and four access-control sets; this is a file count, not a lesson count.
+The original package contained 42 files. The current package contains 151, including three catalog lessons, their labs and the training-centre transfer solution.
 
 | Files | Purpose | Intended audience |
 |---|---|---|
-| 27 article files | One SQL onramp, six mechanism-focused lessons, three foundation lessons, six query/data-handoff lessons, two concurrency/migration pilots, five practical performance lessons and four access-control lessons | Readers |
-| 89 lab files | Shared instructions plus twenty-six sets of tasks, setup SQL and solutions, with one CSV fixture, three migration phase files, a standalone vacuum command, a request module and four access-role cleanup files | Readers; authors verifying examples |
+| 30 article files | One SQL onramp, six mechanism-focused lessons, three foundation lessons, six query/data-handoff lessons, two concurrency/migration pilots, five practical performance lessons, four access-control lessons and three catalog design lessons | Readers |
+| 99 lab files | Shared instructions plus twenty-nine sets of tasks, setup SQL and solutions, with one CSV fixture, three migration phase files, a standalone vacuum command, a request module, four access-role cleanup files and a separate workshop-booking solution | Readers; authors verifying examples |
 | 11 top-level Markdown files | Navigation, review, sources, curriculum, authoring and verification records | Mixed; author records are labelled |
 | 9 tooling files | Git ignore rules, package files and six verification files | Maintainers |
 | 2 research files | Previously committed catalog/billing report and its research log; unchanged in the access batch | Authors |
-| 138 total | Current source package, excluding Git metadata and installed dependencies | Not 138 lessons |
+| 151 total | Current source package, excluding Git metadata and installed dependencies | Readers and maintainers |
 
 Readers start at the [README](README.md), [course map](COURSE_MAP.md), articles, labs and [review prompts](REVIEW.md). Authors additionally use the [curriculum audit](CURRICULUM_AUDIT.md), teaching guide, publication queue, provenance and verification records. No reader needs the private source application.
 
@@ -258,3 +258,37 @@ The read-only preflight found main one commit ahead of live upstream main (9fbad
 | [labs/README.md](labs/README.md) | 3, 47, 51, 75, 101–120 |
 | [tests/cases.json](tests/cases.json) | 4065–5003 |
 | [tests/verify-access.mjs](tests/verify-access.mjs) | 1–245 (new file) |
+
+## Catalog design implementation — 2026-11-02
+
+The rows below identify every changed repository file and its current line ranges against c5ad1e6. The batch adds 13 files and updates 14. The full reference suites preserve the 399 earlier assertions and add 11 for lab 27, 11 for lab 28 and 19 for lab 29.
+
+| File | Changed lines |
+|---|---|
+| `COURSE_MAP.md` | 7, 38–39, 47, 52, 124–126, 162–164 |
+| `CURRICULUM_AUDIT.md` | 23, 43 |
+| `NEW_FILES.md` | 5, 9–10, 14, 261–294 |
+| `PUBLICATION.md` | 13, 82–85, 94 |
+| `README.md` | 48–50, 52, 54 |
+| `REVIEW.md` | 63–70 |
+| `SOURCES.md` | 20–26, 85–87 |
+| `TOPIC_INVENTORY.md` | 14, 49, 151–152, 161 |
+| `VERIFICATION.md` | 3, 7–8, 14–15, 25–38 |
+| `articles/09-row-identity.md` | 101–102 |
+| `articles/14-reusable-reports.md` | 97–98 |
+| `articles/27-product-variants.md` | 1–36 |
+| `articles/28-store-offers.md` | 1–35 |
+| `articles/29-order-snapshots.md` | 1–38 |
+| `labs/27-product-variants/README.md` | 1–40 |
+| `labs/27-product-variants/setup.sql` | 1–15 |
+| `labs/27-product-variants/solution.sql` | 1–40 |
+| `labs/28-store-offers/README.md` | 1–41 |
+| `labs/28-store-offers/setup.sql` | 1–34 |
+| `labs/28-store-offers/solution.sql` | 1–24 |
+| `labs/29-order-snapshots/README.md` | 1–78 |
+| `labs/29-order-snapshots/setup.sql` | 1–42 |
+| `labs/29-order-snapshots/solution.sql` | 1–55 |
+| `labs/29-order-snapshots/transfer.sql` | 1–37 |
+| `labs/README.md` | 3, 75, 87–90 |
+| `tests/cases.json` | 5004–5590 |
+| `tests/verify.mjs` | 38–42 |

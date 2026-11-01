@@ -35,6 +35,11 @@ try {
     for (const [index, step] of item.steps.entries()) {
       try {
         if (step.reset) { await exec(setup); continue; }
+        if (step.script) {
+          const path = new URL('../labs/' + item.lab + '/' + step.script, import.meta.url);
+          await exec(await readFile(path, 'utf8'));
+          continue;
+        }
         if (step.error) {
           let failure;
           try { await exec(step.sql); } catch (error) { failure = error; }

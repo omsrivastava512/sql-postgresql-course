@@ -1,18 +1,18 @@
 # Verification record
 
-Status: draft. Initial SQL execution dated 2026-10-17 (Asia/Kolkata); documentation audit added 2026-10-19; foundation and query/data-handoff execution added 2026-10-20; native concurrency, migration and practical performance execution added 2026-10-21; PostgreSQL access-control execution and focused editorial revisions added 2026-10-26; collection-wide grounding revision added 2026-10-27.
+Status: draft. Initial SQL execution dated 2026-10-17 (Asia/Kolkata); documentation audit added 2026-10-19; foundation and query/data-handoff execution added 2026-10-20; native concurrency, migration and practical performance execution added 2026-10-21; PostgreSQL access-control execution and focused editorial revisions added 2026-10-26; collection-wide grounding revision added 2026-10-27. Catalog design and booking-transfer checks added 2026-11-02.
 
 | Check | Result |
 |---|---|
-| Embedded PostgreSQL execution | PASS: 399 assertions across 26 labs on PostgreSQL 18.6 / PGlite 0.5.10 (2026-10-27); 29 additional focused grounding checks passed |
-| Native local PostgreSQL 17.11 | PASS: 399 assertions across 26 labs, Windows x64, role course_author (2026-10-26) |
+| Embedded PostgreSQL execution | PASS, 440 assertions across 29 labs on PostgreSQL 18.6 / PGlite 0.5.10 (2026-11-02) |
+| Native local PostgreSQL 17.11 | PASS, 440 assertions across 29 labs, Windows x64, role course_author (2026-11-02) |
 | Independent concurrent sessions | PASS: 100 assertions across labs 16/17 using three distinct connections; also passed in reverse suite order on native PostgreSQL 17.11 (2026-10-21) |
 | Practical performance | PASS: 107 assertions across labs 18–22, normal and reverse suite order, native PostgreSQL 17.11; learner request command also passed (2026-10-21) |
 | Restricted database logins | PASS: 157 assertions across labs 23–26 with 11 actual restricted logins, normal and reverse suite order; each suite and its cleanup also passed independently (2026-10-26) |
 | Local Docker PostgreSQL 17.11 | Not run; Docker is not installed on this host |
 | Hosted Supabase | MCP connected and project inventory read; no SQL run or project changed. No dedicated course project used; hosted verification remains open. |
-| Local Markdown links, current package | PASS: 864 local links across 67 Markdown files, including heading targets (2026-10-27) |
-| Editorial review | All 27 lessons assessed for grounding; 25 lessons revised, with source types and limits recorded in SOURCES.md (2026-10-27). Human comprehension remains untested. |
+| Local Markdown links, current package | PASS, 914 local links across 73 Markdown files including heading targets (2026-11-02) |
+| Editorial review | 27 lessons assessed on 2026-10-27 and grounding recorded for lessons 27–29 on 2026-11-02. Human comprehension remains untested. |
 | Actual human learner trials | Pending; automated execution of documented steps is not a human trial. |
 | Public publication | Not performed |
 
@@ -21,6 +21,20 @@ The embedded runtime tests SQL behavior only. It cannot establish Docker setup, 
 The six initial labs cover foreign-key failures, role validation and its update gap, derived values and stale copies, delete actions, deferred-check timing, and invoice failure rollback. The test cases also run every successful solution after a fresh setup and exercise setup reset twice.
 
 No test in this package claims to verify HTTP requests, API retries, production authorization, or a deployed clinic schema. Live SQL sessions are tested separately from application requests. Earlier sections below preserve dated checkpoints; this opening table and the latest section describe the current package.
+
+## Catalog design and accepted terms — 2026-11-02
+
+The full reference suite passed on embedded PostgreSQL 18.6 and a temporary loopback PostgreSQL 17.11 server. Each engine ran the original 399 assertions and 41 additions. Each lab setup ran twice and each solution also ran from a fresh setup. The verifier can replay a named lab script inside a test so rejected writes can target the shipped solution. The training-centre script also ran immediately after a clean lab 29 setup.
+
+| Lab | Observed outcome |
+|---|---|
+| 27 | The partial rename produced a conflict. The approved catalog matched in both directions including multiplicities. One product rename reached both packs. Rejected duplicate and unknown-product inserts preserved the catalog. |
+| 28 | North/17 and South/17 both survived. A North reprice preserved South's two prices. Both duplicate scopes and bad foreign keys failed. All six store/pack cells distinguished absence from zero stock. |
+| 29 | The receipts retained 6,000 and 6,600 paise and their accepted labels/SKUs after offer deletion. A missing offer and a rejected quantity left both table counts unchanged. East's accepted booking stayed at 80,000 paise while its listing moved to 85,000. |
+
+A separate embedded walkthrough ran the learner SQL excerpts and inspected the same North receipt before repricing, after the second sale and after removing its offer. It also compared the training-centre script's actual before-and-after results and executed both rejected writes from the guide. The stopped native cluster, extracted binaries and archive were removed after the native run.
+
+Human transfer evidence is pending. The [learner brief](labs/29-order-snapshots/README.md#independent-transfer) asks for the first unaided attempt and where assistance was needed.
 
 ## Collection-wide grounding revision — 2026-10-27
 

@@ -20,7 +20,7 @@ The table below maps every named concept, exercise and domain question in the te
 | 1 | Reject a conditional referral row, repair it, then insert successfully | F07, B13 | Negative amount CHECK practised in lab 06; conditional-row rule and repair exercise planned in an order/delivery setting. |
 | 1 | Represent money in integer minor units and examine alternatives | D05, D06 | Labs 14/15 use exact cents, NUMERIC conversion/division and a declared precision policy. Floating-point comparisons and broader rounding policies remain planned. |
 | 2 | Explain REFERENCES and deletion cascade | R01, R08, R09 | Practised in labs 01 and 04; retain existing lessons. |
-| 2 | Distinguish catalog records from growing transaction records and choose keys | R07, F08, F14 | Planned; avoid teaching text versus UUID as an intrinsic distinction. |
+| 2 | Distinguish catalog records from growing transaction records and choose keys | R07, F08, F14 | Labs 27–29 use stable variant codes, scoped offers and separate order/line keys. The key choice follows the business rule. |
 | 2 | Trace one event's patient, service/course and location relationships | R03, R04, R06, R14 | Lab 09 practises membership grain; labs 10/11 add role-specific joins and report grain. Independent multi-fact schema design remains planned. |
 | 2 | Reject an event without membership/access, create prerequisite membership, then accept | A10, B10, B14 | General role-guard gap practised in lab 02; membership workflow and auto-creation trace still planned. |
 | 3 | Derive a stored generated total and reject a direct write | D01, D05 | Planned; order amounts supply the independent example. |
@@ -40,7 +40,7 @@ The table below maps every named concept, exercise and domain question in the te
 | 8a | Verify branch isolation, cross-tenant rejection and admin visibility | A07, A10, A13, O14 | Planned identity matrix with explicit successful and rejected operations. Supabase run deferred. |
 | 8b | Evaluate whether a referring person should be free text or a separate table | R07, R13, D03, D12, D13 | Planned contact/catalog modelling comparison; course does not settle the clinic's product decision. |
 | 8b | Evaluate whether a visit's existence means completed and paid | B14, D12 | Planned order/reservation lifecycle exercise with draft, fulfilled and paid states. |
-| 8b | Evaluate catalog selection and its day-to-day workflow | R07, D04, D07, D12 | Lab 14 distinguishes current catalog prices from supplied historical amounts. Catalog workflow, snapshot creation and price precedence remain planned. |
+| 8b | Evaluate catalog selection and its day-to-day workflow | R07, D04, D07, D12 | Lab 14 reports from historical amounts. Labs 28–29 select a store offer and write accepted terms. Price precedence and the clinic workflow remain open. |
 | 8b | Evaluate shared identity across branches versus separate identities | F09, R04, A10, D12 | Planned tenant/member identity comparison; no mandatory clinic policy. |
 | 9 | Create versioned migration files and test locally/staging before production | O07, O21 | Lab 17 runs versioned steps on an existing-data fixture locally. Empty-application replay, staging and deployment tooling remain planned. |
 | 9 | Keep migration history reviewable and compare intended versus actual schema | O07, O08 | Lab 17 inspects schema/history after success and rollback. Drift detection and migration-tool integration remain planned. |

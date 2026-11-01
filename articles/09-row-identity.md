@@ -98,4 +98,6 @@ After a gap, explain why (workspace_id, member_id) and (workspace_id, handle) an
 **Next:** [Which rows survive a join?](10-joins.md) uses these relationships to select matching and unmatched facts.
 **Revisited in:** [aggregate grain](11-aggregate-grain.md), where row meaning determines totals. Deeper modelling remains in the [wider course](../COURSE_MAP.md#the-wider-course).
 
+Apply scoped keys to [a product with two packs](27-product-variants.md) and [a local SKU used by two stores](28-store-offers.md).
+
 **References:** PostgreSQL [constraints](https://www.postgresql.org/docs/17/ddl-constraints.html), [identity columns](https://www.postgresql.org/docs/17/ddl-identity-columns.html), [sequences](https://www.postgresql.org/docs/17/functions-sequence.html) and [UUID functions](https://www.postgresql.org/docs/17/functions-uuid.html).

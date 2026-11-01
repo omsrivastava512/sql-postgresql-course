@@ -1,6 +1,6 @@
 # Run the labs
 
-Labs 01–22 offer local PostgreSQL and dedicated Supabase learning-project routes, with verification limits recorded below. Access labs 23–26 require a disposable local cluster with administrator-controlled roles; their scripts are not a hosted Supabase setup. Lab schemas are not the clinic application's schema.
+Labs 01–22 offer local PostgreSQL and dedicated Supabase learning-project routes, with verification limits recorded below. Access labs 23–26 require a disposable local cluster with administrator-controlled roles; their scripts are not a hosted Supabase setup. Lab schemas are not the clinic application's schema. Catalog labs 27–29 use independent schemas on a disposable local database.
 
 **Current execution evidence is in [VERIFICATION.md](../VERIFICATION.md).** Instructions being present does not mean both environments have already been tested.
 
@@ -72,7 +72,7 @@ For a real database run, set COURSE_DATABASE_URL in your local environment to th
 npm run test:database
 ```
 
-The complete runner uses one administrator connection, resets twenty-six named course schemas and creates the access labs' fixture roles. Run it on a disposable local cluster; the complete suite is not a supported hosted-Supabase command. It prints server version and results, never the connection string. The earlier labs' individual hosted exercises require a direct or session-mode connection with appropriate SSL settings where persistent sessions are needed. Do not paste passwords into chats or commit them.
+The complete runner uses one administrator connection, resets twenty-nine named course schemas and creates the access labs' fixture roles. Run it on a disposable local cluster; the complete suite is not a supported hosted-Supabase command. It prints server version and results, never the connection string. The earlier labs' individual hosted exercises require a direct or session-mode connection with appropriate SSL settings where persistent sessions are needed. Do not paste passwords into chats or commit them.
 
 For the two concurrent-session labs, with the same disposable database variable set:
 
@@ -83,6 +83,10 @@ node tests/verify-sessions.mjs
 This separate checker uses the existing pg driver and three connections. It resets only course_race and course_change, observes blockers through pg_blocking_pids and checks stored results after waits, failures and retries. It uses 10-second statement and 60-second idle-transaction limits; manual exercises allow longer pauses. Use --lab=16 or --lab=17 for one suite, or --reverse to check the opposite order. Do not run reset scripts or another checker against those schemas concurrently. The embedded runner checks their single-session reference examples only.
 
 The runner checks failure categories and stored state, including rejected writes and commit-time failures. See [verification](../VERIFICATION.md).
+
+## Catalog labs
+
+Choose [repairing repeated names](27-product-variants/README.md), [scoping store offers](28-store-offers/README.md) or [writing accepted terms](29-order-snapshots/README.md). Each setup supplies all its prerequisites. The final lab also includes an independent training-centre design and a separate runnable reference.
 
 ## Performance labs
 

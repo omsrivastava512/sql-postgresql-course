@@ -10,7 +10,7 @@ The source-study objectives are a minimum baseline, documented in the [author au
 
 ## Current package
 
-The current collection contains twenty-seven lesson articles, twenty-six independent labs, and a curriculum of 132 topic groups with explicit evidence and gaps. It includes the onramp, six mechanism-focused lessons, three foundation lessons, six query/reporting lessons, two concurrency/migration pilots, five practical performance lessons and four PostgreSQL access lessons. Further foundations and later routes remain unwritten. The existing lessons are written, but the collection is still in editorial development: human learner trials, supported-environment checks and release work remain open.
+The current collection has 30 lessons, 29 independent labs and 132 topic groups with explicit evidence and gaps. The catalog route adds product and variant keys, store-scoped offers and the write that preserves a price on a receipt. Human learner trials, supported-environment checks and release work remain open.
 
 The [first route](COURSE_MAP.md#the-first-route) remains usable now. The [beginner route](COURSE_MAP.md#the-beginner-route) connects the available foundations and identifies the missing steps. Existing numbers and URLs stay stable.
 
@@ -79,6 +79,10 @@ The user authorized the next researched batch after performance. This completes 
 
 The [verification record](VERIFICATION.md) separates role-switched SQL from actual password-authenticated restricted connections, including rejected role switches and the membership snapshot limit. One AWS engineering reference supplies a narrow comparison; the labs remain original synthetic examples. Human learning trials are pending.
 
+## Catalog design batch — 2026-11-02
+
+Use the [three-lesson route](COURSE_MAP.md#the-first-route) and record an unaided attempt at the [training-centre brief](labs/29-order-snapshots/README.md#independent-transfer). Keep the learner's original schema, rejected writes and observed rows. Record the first point of assistance separately from the automated reference results.
+
 ## Later branches
 
 The query, concurrency, bounded migration, performance and access lessons have execution evidence, but no human learning-time or comprehension evidence. Have the author attempt them and record effort, help and wrong predictions before publication. Use that evidence when choosing further batches; do not equate passing reference SQL with mastery. Remaining work can be grouped as follows; these groups are scheduling units, not promises that one article covers each group:
@@ -87,7 +91,7 @@ The query, concurrency, bounded migration, performance and access lessons have e
 |---|---|
 | Authenticated application access | Verified login/JWT identity, auth accounts versus profiles, Supabase auth.uid()/SQL-editor distinctions, Data API exposure, onboarding boundaries and complete allowed/denied request traces. Builds on labs 23–26. |
 | Reliable application operations | Multi-resource deadlocks/order, optimistic version checks, savepoints, bounded retries, idempotency keys/payload matching, simultaneous duplicates and lost-response replay. |
-| Modelling and historical meaning | Requirements-to-schema choices, functional dependencies/update anomalies, remaining relationship rules, type selection, exact amounts, calendars and intentional historical snapshots. Catalog research is evidence to evaluate, not an implemented lesson or private-company schema guarantee. |
+| Modelling and historical meaning | Extend the catalog batch to remaining relationship rules, type selection, price precedence, calendars and protected history. Choose an example where the change affects an observable business result. |
 | Targeted SQL/rule depth | Remaining useful JSON/array, recursive-query, generated-value, function/trigger-event and lifecycle-rule objectives, each tied to a concrete feature rather than engine internals. |
 | Change and recovery | Inherited-schema/data repair, broader compatibility/removal changes, interruption/reconciliation and a backup restored into a fresh target with data/permission checks. |
 | Integration and release | Capstone checkpoints and changed-domain assessment, deployed workload diagnosis where needed, supported hosted/Docker verification and author/new-reader learning trials. Specialized extensions remain optional and demand-driven. |

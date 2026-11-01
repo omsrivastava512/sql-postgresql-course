@@ -60,6 +60,14 @@ Suggested times: next study session, roughly one week later, roughly one month l
 | A visit was committed yesterday. Today's invoice transaction fails. Does yesterday's visit disappear? | [Transactions](articles/06-transaction-boundaries.md): no, it lies outside today's transaction. |
 | The request times out after commit. Is a rollback guaranteed? | [Transactions](articles/06-transaction-boundaries.md): no; response delivery does not determine committed state. |
 
+## Revisit the catalog
+
+| When | Try from memory | Check your reasoning |
+|---|---|---|
+| Next session | Tea and biscuits both weigh 50 g. Which single-column key does that disprove, and what business promise makes the two-column key work? | [Lab 27](labs/27-product-variants/README.md#choose-the-keys-and-repair-the-rows) |
+| About a week later | Two stores use code 17 and only one has the tea. Draw the rows a report needs to distinguish a missing offer from zero stock. | [Lab 28](labs/28-store-offers/README.md#distinguish-no-stock-from-no-listing) |
+| About a month later | East raises its workshop fee after a booking. Design the write and the two reads that show which fee changed. Try it before looking at the hints. | [Independent brief](labs/29-order-snapshots/README.md#independent-transfer) |
+
 ## Another setting for the transaction boundary
 
 A booking transaction creates a reservation and reduces the available-seat count. A constraint then rejects the reservation. Assume both writes are ordinary table writes in that same transaction. Predict which changes remain after rollback, then compare with the [invoice example](articles/06-transaction-boundaries.md).

@@ -5001,6 +5001,593 @@
         ]
       }
     ]
+  },
+  {
+    "lab": "27-product-variants",
+    "steps": [
+      {
+        "sql": "UPDATE course_variants.flat_catalog SET product_name='Breakfast Tea' WHERE variant_code='T50'"
+      },
+      {
+        "query": "SELECT product_code FROM course_variants.flat_catalog GROUP BY product_code HAVING count(DISTINCT product_name)>1",
+        "rows": [
+          {
+            "product_code": "TEA"
+          }
+        ]
+      },
+      {
+        "reset": true
+      },
+      {
+        "script": "solution.sql"
+      },
+      {
+        "query": "WITH expected(variant_code,product_code,product_name,pack_g) AS (VALUES ('B50','BIS','Oat Biscuits',50), ('T50','TEA','Breakfast Tea',50), ('T100','TEA','Breakfast Tea',100)) SELECT * FROM (TABLE expected EXCEPT ALL TABLE course_variants.catalog) AS missing UNION ALL SELECT * FROM (TABLE course_variants.catalog EXCEPT ALL TABLE expected) AS extra",
+        "rows": []
+      },
+      {
+        "query": "SELECT variant_code, product_code, product_name, pack_g FROM course_variants.catalog ORDER BY variant_code",
+        "rows": [
+          {
+            "variant_code": "B50",
+            "product_code": "BIS",
+            "product_name": "Oat Biscuits",
+            "pack_g": 50
+          },
+          {
+            "variant_code": "T100",
+            "product_code": "TEA",
+            "product_name": "Breakfast Tea",
+            "pack_g": 100
+          },
+          {
+            "variant_code": "T50",
+            "product_code": "TEA",
+            "product_name": "Breakfast Tea",
+            "pack_g": 50
+          }
+        ]
+      },
+      {
+        "sql": "UPDATE course_variants.products SET product_name='Morning Tea' WHERE product_code='TEA'"
+      },
+      {
+        "query": "SELECT variant_code, product_code, product_name, pack_g FROM course_variants.catalog ORDER BY variant_code",
+        "rows": [
+          {
+            "variant_code": "B50",
+            "product_code": "BIS",
+            "product_name": "Oat Biscuits",
+            "pack_g": 50
+          },
+          {
+            "variant_code": "T100",
+            "product_code": "TEA",
+            "product_name": "Morning Tea",
+            "pack_g": 100
+          },
+          {
+            "variant_code": "T50",
+            "product_code": "TEA",
+            "product_name": "Morning Tea",
+            "pack_g": 50
+          }
+        ]
+      },
+      {
+        "sql": "INSERT INTO course_variants.variants VALUES ('X50','TEA',50)",
+        "error": "23505"
+      },
+      {
+        "sql": "INSERT INTO course_variants.variants VALUES ('X10','UNKNOWN',10)",
+        "error": "23503"
+      },
+      {
+        "sql": "INSERT INTO course_variants.variants VALUES ('T50','BIS',10)",
+        "error": "23505"
+      },
+      {
+        "sql": "INSERT INTO course_variants.variants VALUES ('X00','BIS',0)",
+        "error": "23514"
+      },
+      {
+        "query": "SELECT variant_code, product_code, product_name, pack_g FROM course_variants.catalog ORDER BY variant_code",
+        "rows": [
+          {
+            "variant_code": "B50",
+            "product_code": "BIS",
+            "product_name": "Oat Biscuits",
+            "pack_g": 50
+          },
+          {
+            "variant_code": "T100",
+            "product_code": "TEA",
+            "product_name": "Morning Tea",
+            "pack_g": 100
+          },
+          {
+            "variant_code": "T50",
+            "product_code": "TEA",
+            "product_name": "Morning Tea",
+            "pack_g": 50
+          }
+        ]
+      }
+    ],
+    "solution": [
+      {
+        "query": "SELECT variant_code, product_code, product_name, pack_g FROM course_variants.catalog ORDER BY variant_code",
+        "rows": [
+          {
+            "variant_code": "B50",
+            "product_code": "BIS",
+            "product_name": "Oat Biscuits",
+            "pack_g": 50
+          },
+          {
+            "variant_code": "T100",
+            "product_code": "TEA",
+            "product_name": "Breakfast Tea",
+            "pack_g": 100
+          },
+          {
+            "variant_code": "T50",
+            "product_code": "TEA",
+            "product_name": "Breakfast Tea",
+            "pack_g": 50
+          }
+        ]
+      },
+      {
+        "query": "WITH expected(variant_code,product_code,product_name,pack_g) AS (VALUES ('B50','BIS','Oat Biscuits',50), ('T50','TEA','Breakfast Tea',50), ('T100','TEA','Breakfast Tea',100)) SELECT * FROM (TABLE expected EXCEPT ALL TABLE course_variants.catalog) AS missing UNION ALL SELECT * FROM (TABLE course_variants.catalog EXCEPT ALL TABLE expected) AS extra",
+        "rows": []
+      }
+    ]
+  },
+  {
+    "lab": "28-store-offers",
+    "steps": [
+      {
+        "query": "SELECT store_id, variant_code, store_sku, unit_price_paise, stock_units FROM course_offers.offer_feed ORDER BY store_id,store_sku",
+        "rows": [
+          {
+            "store_id": "North",
+            "variant_code": "T50",
+            "store_sku": "17",
+            "unit_price_paise": 2000,
+            "stock_units": 12
+          },
+          {
+            "store_id": "South",
+            "variant_code": "B50",
+            "store_sku": "17",
+            "unit_price_paise": 1500,
+            "stock_units": 8
+          },
+          {
+            "store_id": "South",
+            "variant_code": "T50",
+            "store_sku": "81",
+            "unit_price_paise": 2300,
+            "stock_units": 0
+          }
+        ]
+      },
+      {
+        "script": "solution.sql"
+      },
+      {
+        "query": "SELECT store_id, variant_code, store_sku, unit_price_paise, stock_units FROM course_offers.offers ORDER BY store_id,store_sku",
+        "rows": [
+          {
+            "store_id": "North",
+            "variant_code": "T50",
+            "store_sku": "17",
+            "unit_price_paise": 2200,
+            "stock_units": 12
+          },
+          {
+            "store_id": "South",
+            "variant_code": "B50",
+            "store_sku": "17",
+            "unit_price_paise": 1500,
+            "stock_units": 8
+          },
+          {
+            "store_id": "South",
+            "variant_code": "T50",
+            "store_sku": "81",
+            "unit_price_paise": 2300,
+            "stock_units": 0
+          }
+        ]
+      },
+      {
+        "sql": "INSERT INTO course_offers.offers (store_id,store_sku,variant_code,unit_price_paise,stock_units) VALUES ('North','17','T100',100,1)",
+        "error": "23505"
+      },
+      {
+        "sql": "INSERT INTO course_offers.offers (store_id,store_sku,variant_code,unit_price_paise,stock_units) VALUES ('North','99','T50',100,1)",
+        "error": "23505"
+      },
+      {
+        "sql": "INSERT INTO course_offers.offers (store_id,store_sku,variant_code,unit_price_paise,stock_units) VALUES ('North','99','X',100,1)",
+        "error": "23503"
+      },
+      {
+        "sql": "INSERT INTO course_offers.offers (store_id,store_sku,variant_code,unit_price_paise,stock_units) VALUES ('East','99','T100',100,1)",
+        "error": "23503"
+      },
+      {
+        "sql": "INSERT INTO course_offers.offers (store_id,store_sku,variant_code,unit_price_paise,stock_units) VALUES ('North','99','T100',-1,1)",
+        "error": "23514"
+      },
+      {
+        "sql": "INSERT INTO course_offers.offers (store_id,store_sku,variant_code,unit_price_paise,stock_units) VALUES ('North','99','T100',100,-1)",
+        "error": "23514"
+      },
+      {
+        "sql": "INSERT INTO course_offers.offers (store_id,store_sku,variant_code,unit_price_paise,stock_units) VALUES ('North',NULL,'T100',100,1)",
+        "error": "23502"
+      },
+      {
+        "query": "SELECT store_id, variant_code, store_sku, unit_price_paise, stock_units FROM course_offers.offers ORDER BY store_id,store_sku",
+        "rows": [
+          {
+            "store_id": "North",
+            "variant_code": "T50",
+            "store_sku": "17",
+            "unit_price_paise": 2200,
+            "stock_units": 12
+          },
+          {
+            "store_id": "South",
+            "variant_code": "B50",
+            "store_sku": "17",
+            "unit_price_paise": 1500,
+            "stock_units": 8
+          },
+          {
+            "store_id": "South",
+            "variant_code": "T50",
+            "store_sku": "81",
+            "unit_price_paise": 2300,
+            "stock_units": 0
+          }
+        ]
+      }
+    ],
+    "solution": [
+      {
+        "query": "SELECT st.store_id, v.variant_code, o.store_sku, o.unit_price_paise, o.stock_units FROM course_offers.stores AS st CROSS JOIN course_offers.variants AS v LEFT JOIN course_offers.offers AS o ON o.store_id=st.store_id AND o.variant_code=v.variant_code ORDER BY st.store_id,v.variant_code",
+        "rows": [
+          {
+            "store_id": "North",
+            "variant_code": "B50",
+            "store_sku": null,
+            "unit_price_paise": null,
+            "stock_units": null
+          },
+          {
+            "store_id": "North",
+            "variant_code": "T100",
+            "store_sku": null,
+            "unit_price_paise": null,
+            "stock_units": null
+          },
+          {
+            "store_id": "North",
+            "variant_code": "T50",
+            "store_sku": "17",
+            "unit_price_paise": 2200,
+            "stock_units": 12
+          },
+          {
+            "store_id": "South",
+            "variant_code": "B50",
+            "store_sku": "17",
+            "unit_price_paise": 1500,
+            "stock_units": 8
+          },
+          {
+            "store_id": "South",
+            "variant_code": "T100",
+            "store_sku": null,
+            "unit_price_paise": null,
+            "stock_units": null
+          },
+          {
+            "store_id": "South",
+            "variant_code": "T50",
+            "store_sku": "81",
+            "unit_price_paise": 2300,
+            "stock_units": 0
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "lab": "29-order-snapshots",
+    "steps": [
+      {
+        "script": "solution.sql"
+      },
+      {
+        "query": "SELECT store_id, accepted_sku, accepted_description, quantity, unit_price_paise, total_paise::text, offer_id IS NOT NULL AS linked FROM course_receipt.receipts ORDER BY order_id,line_no",
+        "rows": [
+          {
+            "store_id": "North",
+            "accepted_sku": "17",
+            "accepted_description": "Breakfast Tea 50 g",
+            "quantity": 3,
+            "unit_price_paise": 2000,
+            "total_paise": "6000",
+            "linked": false
+          },
+          {
+            "store_id": "North",
+            "accepted_sku": "17A",
+            "accepted_description": "Morning Tea 50 g",
+            "quantity": 3,
+            "unit_price_paise": 2200,
+            "total_paise": "6600",
+            "linked": false
+          }
+        ]
+      },
+      {
+        "query": "SELECT * FROM course_receipt.accept_offer('North','missing',3)",
+        "rows": []
+      },
+      {
+        "query": "SELECT (SELECT count(*)::int FROM course_receipt.orders) AS headers,(SELECT count(*)::int FROM course_receipt.order_lines) AS lines",
+        "rows": [
+          {
+            "headers": 2,
+            "lines": 2
+          }
+        ]
+      },
+      {
+        "sql": "SELECT * FROM course_receipt.accept_offer('South','17',0)",
+        "error": "23514"
+      },
+      {
+        "query": "SELECT (SELECT count(*)::int FROM course_receipt.orders) AS headers,(SELECT count(*)::int FROM course_receipt.order_lines) AS lines",
+        "rows": [
+          {
+            "headers": 2,
+            "lines": 2
+          }
+        ]
+      },
+      {
+        "sql": "SELECT * FROM course_receipt.accept_offer('South','17',NULL)",
+        "error": "23502"
+      },
+      {
+        "query": "SELECT (SELECT count(*)::int FROM course_receipt.orders) AS headers,(SELECT count(*)::int FROM course_receipt.order_lines) AS lines",
+        "rows": [
+          {
+            "headers": 2,
+            "lines": 2
+          }
+        ]
+      },
+      {
+        "sql": "SELECT * FROM course_receipt.accept_offer('South','17',2)"
+      },
+      {
+        "query": "SELECT store_id, accepted_sku, accepted_description, quantity, unit_price_paise, total_paise::text, offer_id IS NOT NULL AS linked FROM course_receipt.receipts ORDER BY order_id,line_no",
+        "rows": [
+          {
+            "store_id": "North",
+            "accepted_sku": "17",
+            "accepted_description": "Breakfast Tea 50 g",
+            "quantity": 3,
+            "unit_price_paise": 2000,
+            "total_paise": "6000",
+            "linked": false
+          },
+          {
+            "store_id": "North",
+            "accepted_sku": "17A",
+            "accepted_description": "Morning Tea 50 g",
+            "quantity": 3,
+            "unit_price_paise": 2200,
+            "total_paise": "6600",
+            "linked": false
+          },
+          {
+            "store_id": "South",
+            "accepted_sku": "17",
+            "accepted_description": "Oat Biscuits 50 g",
+            "quantity": 2,
+            "unit_price_paise": 1500,
+            "total_paise": "3000",
+            "linked": true
+          }
+        ]
+      },
+      {
+        "query": "SELECT o.store_id,o.store_sku,o.variant_code FROM course_receipt.order_lines AS l JOIN course_receipt.offers AS o USING (offer_id)",
+        "rows": [
+          {
+            "store_id": "South",
+            "store_sku": "17",
+            "variant_code": "B50"
+          }
+        ]
+      },
+      {
+        "sql": "DELETE FROM course_receipt.offers WHERE store_id='South' AND store_sku='17'"
+      },
+      {
+        "query": "SELECT store_id, accepted_sku, accepted_description, quantity, unit_price_paise, total_paise::text, offer_id IS NOT NULL AS linked FROM course_receipt.receipts ORDER BY order_id,line_no",
+        "rows": [
+          {
+            "store_id": "North",
+            "accepted_sku": "17",
+            "accepted_description": "Breakfast Tea 50 g",
+            "quantity": 3,
+            "unit_price_paise": 2000,
+            "total_paise": "6000",
+            "linked": false
+          },
+          {
+            "store_id": "North",
+            "accepted_sku": "17A",
+            "accepted_description": "Morning Tea 50 g",
+            "quantity": 3,
+            "unit_price_paise": 2200,
+            "total_paise": "6600",
+            "linked": false
+          },
+          {
+            "store_id": "South",
+            "accepted_sku": "17",
+            "accepted_description": "Oat Biscuits 50 g",
+            "quantity": 2,
+            "unit_price_paise": 1500,
+            "total_paise": "3000",
+            "linked": false
+          }
+        ]
+      },
+      {
+        "reset": true
+      },
+      {
+        "script": "transfer.sql"
+      },
+      {
+        "query": "SELECT centre,local_code,workshop_code,fee_paise FROM course_receipt.listings ORDER BY centre,local_code",
+        "rows": [
+          {
+            "centre": "East",
+            "local_code": "7",
+            "workshop_code": "SQL",
+            "fee_paise": 85000
+          },
+          {
+            "centre": "West",
+            "local_code": "7",
+            "workshop_code": "MAP",
+            "fee_paise": 70000
+          },
+          {
+            "centre": "West",
+            "local_code": "9",
+            "workshop_code": "SQL",
+            "fee_paise": 90000
+          }
+        ]
+      },
+      {
+        "query": "SELECT centre,local_code,accepted_title,accepted_fee_paise FROM course_receipt.bookings ORDER BY booking_id",
+        "rows": [
+          {
+            "centre": "East",
+            "local_code": "7",
+            "accepted_title": "SQL basics",
+            "accepted_fee_paise": 80000
+          }
+        ]
+      },
+      {
+        "sql": "INSERT INTO course_receipt.listings VALUES ('East','7','MAP',70000)",
+        "error": "23505"
+      },
+      {
+        "sql": "INSERT INTO course_receipt.listings VALUES ('West','8','SQL',90000)",
+        "error": "23505"
+      },
+      {
+        "query": "SELECT centre,local_code,workshop_code,fee_paise FROM course_receipt.listings ORDER BY centre,local_code",
+        "rows": [
+          {
+            "centre": "East",
+            "local_code": "7",
+            "workshop_code": "SQL",
+            "fee_paise": 85000
+          },
+          {
+            "centre": "West",
+            "local_code": "7",
+            "workshop_code": "MAP",
+            "fee_paise": 70000
+          },
+          {
+            "centre": "West",
+            "local_code": "9",
+            "workshop_code": "SQL",
+            "fee_paise": 90000
+          }
+        ]
+      },
+      {
+        "query": "SELECT centre,local_code,accepted_title,accepted_fee_paise FROM course_receipt.bookings ORDER BY booking_id",
+        "rows": [
+          {
+            "centre": "East",
+            "local_code": "7",
+            "accepted_title": "SQL basics",
+            "accepted_fee_paise": 80000
+          }
+        ]
+      }
+    ],
+    "solution": [
+      {
+        "query": "SELECT store_id, accepted_sku, accepted_description, quantity, unit_price_paise, total_paise::text, offer_id IS NOT NULL AS linked FROM course_receipt.receipts ORDER BY order_id,line_no",
+        "rows": [
+          {
+            "store_id": "North",
+            "accepted_sku": "17",
+            "accepted_description": "Breakfast Tea 50 g",
+            "quantity": 3,
+            "unit_price_paise": 2000,
+            "total_paise": "6000",
+            "linked": false
+          },
+          {
+            "store_id": "North",
+            "accepted_sku": "17A",
+            "accepted_description": "Morning Tea 50 g",
+            "quantity": 3,
+            "unit_price_paise": 2200,
+            "total_paise": "6600",
+            "linked": false
+          }
+        ]
+      },
+      {
+        "query": "SELECT (SELECT count(*)::int FROM course_receipt.orders) AS headers,(SELECT count(*)::int FROM course_receipt.order_lines) AS lines",
+        "rows": [
+          {
+            "headers": 2,
+            "lines": 2
+          }
+        ]
+      },
+      {
+        "query": "SELECT store_id, store_sku, unit_price_paise FROM course_receipt.offers ORDER BY store_id,store_sku",
+        "rows": [
+          {
+            "store_id": "South",
+            "store_sku": "17",
+            "unit_price_paise": 1500
+          },
+          {
+            "store_id": "South",
+            "store_sku": "81",
+            "unit_price_paise": 2300
+          }
+        ]
+      }
+    ]
   }
 ]
 

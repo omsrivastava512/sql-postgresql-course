@@ -45,10 +45,13 @@ The examples use fictional applications. The first lessons use a clinic; the wid
 | [Which rows may this role change?](articles/24-row-policies.md) | Implement and test allowed/forbidden reads and writes with row policies. |
 | [Who belongs to this workspace?](articles/25-tenant-membership.md) | Protect memberships, enforce tenant write rights and preserve tenant-consistent references. |
 | [Whose permissions does this helper use?](articles/26-privileged-code.md) | Inspect view/function execution identity and repair excess access and unsafe name resolution. |
+| [Why did renaming one product give it two names?](articles/27-product-variants.md) | Repair a shared name and prove that every sellable pack survives. |
+| [Can two stores use SKU 17 for different things?](articles/28-store-offers.md) | Locate a store offer and distinguish zero stock from a missing listing. |
+| [What price did this customer accept?](articles/29-order-snapshots.md) | Write the accepted terms with the order and recover both receipts after the offer disappears. |
 
-There are **twenty-seven lesson articles and twenty-six labs**. The latest batch adds local PostgreSQL privileges, row policies, tenant membership and privileged-code checks. Deeper modelling, request retries, authenticated API integration, broader migrations, recovery and the integrated capstone still need substantial work. The [topic inventory](TOPIC_INVENTORY.md) records evidence and gaps; a topic being listed does not mean it has been taught.
+There are **30 lessons and 29 labs**. The catalog route starts with two packs of tea and ends with a receipt that survives a rename, a price change and the removal of the offer. Request retries, authenticated API integration, broader migrations, recovery and an integrated capstone remain open. The [topic inventory](TOPIC_INVENTORY.md) records the evidence for each objective.
 
-The lesson articles are written, but the collection is still in editorial development. Embedded and native reference checks passed on 2026-10-26, including separate restricted-login access checks; earlier session/performance results retain their original dates. Docker setup, hosted Supabase and reader trials remain unverified. Access labs require a disposable local cluster. See the [verification record](VERIFICATION.md) for dates and limits.
+The full embedded and native reference checks passed on 2026-11-02. The [verification record](VERIFICATION.md) gives separate dates for the session, performance and restricted-login checks. Docker setup, hosted Supabase and reader trials remain open.
 
 ## How the ideas connect
 

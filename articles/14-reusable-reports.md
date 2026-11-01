@@ -94,4 +94,6 @@ Now have two readers use the same view, but let one describe refunds by order mo
 **Requires:** [aggregate grain](11-aggregate-grain.md), [CTEs](12-query-shapes.md) and [windows](13-window-questions.md).
 **Next:** [Can this imported data be trusted?](15-data-handoff.md).
 **Return:** explain which source changes should alter an old report and which should not.
+To create the historical line prices used in a report like this, continue to [writing an accepted sale](29-order-snapshots.md).
+
 **References:** PostgreSQL [views](https://www.postgresql.org/docs/17/sql-createview.html), [materialized views](https://www.postgresql.org/docs/17/rules-materializedviews.html), [numeric types](https://www.postgresql.org/docs/17/datatype-numeric.html) and [date/time types](https://www.postgresql.org/docs/17/datatype-datetime.html).

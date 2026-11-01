@@ -17,6 +17,13 @@ Initial notebook checked 2026-10-17; collection-wide grounding revision checked 
 | [Paginating requests in APIs using relative cursors](https://shopify.engineering/pagination-relative-cursors) | Drew Martin, Shopify, 2019-08-12; reread 2026-10-26 | Article 20: catalog traversal, connection pressure, cursor navigation trade-offs and the external-client transition. | The account predates full adoption. Our PostgreSQL measurements do not establish Shopify's production outcome or a general speedup. |
 | [Multi-tenant data isolation with PostgreSQL Row Level Security](https://aws.amazon.com/blogs/database/multi-tenant-data-isolation-with-postgresql-row-level-security/) | Michael Beardsley, AWS Database Blog, 2020-05-18; read 2026-10-26 | Article 25: centralized tenant checks and the danger of testing through an owner connection. | This is an engineering demonstration, not a production incident report. A caller-writable session setting is not proof of authenticated identity; our membership fixture is not AWS's implementation. |
 
+### Catalog design evidence inspected for lessons 27–29
+
+| Primary source | Passage used | Teaching decision and limit |
+|---|---|---|
+| [Instacart, Catalog Localization](https://company.instacart.com/tech-innovation/catalog-localization-more-than-just-a-translation), company engineering account, 2022-01-11 | The catalog structure and localization sections distinguish product, retailer and store attributes and explain why price can be independent of language. | Lesson 28 asks who sets each value and tests a change confined to one store. Tea, weights, local SKUs and constraints are course fixtures. Lesson 27 uses a fictional rename to isolate the dependency. |
+| [Saleor project, OrderLine model](https://github.com/saleor/saleor/blob/5acd08ffe7389d7323344dd3e1398d8a46367919/saleor/order/models.py#L567), source code at revision 5acd08f, inspected 2026-11-02 | OrderLine combines names, SKU and monetary fields with a nullable variant foreign key using SET_NULL. | Lesson 29 tests an analogous separation with a store offer, integer paise and an explicit sale write. The code establishes field choices. The deletion scenario and its motivation are our exercise. |
+
 Use the space needed to explain the relevant problem, choice, trade-off and consequence, within source-use limits. A developed case must affect the reasoning or work the learner performs; a brief connection must be labelled as such in the coverage record. Do not retell an entire source or copy company code for appearance. The [authoring guide](AUTHORING.md#investigate-the-engineering-problem) requires investigation while allowing a clearly fictional example when it teaches better.
 
 ## Additional originals inspected — 2026-10-27
@@ -75,6 +82,9 @@ Also inspected [Feature Casualties of Large Databases](https://brandur.org/large
 | [24 Row policies](articles/24-row-policies.md) | Developed account: Nile | Makes connection identity and allowed/denied comparisons part of the policy-validation reasoning. |
 | [25 Membership](articles/25-tenant-membership.md) | Brief connections: Nile; AWS demonstration | Separates request-context reuse from membership correctness; preserves the repaired snapshot workflow. |
 | [26 Privileged code](articles/26-privileged-code.md) | Advisory connection: PostgreSQL security guide | Adds historical motivation and bounded catalog queries; repairs function-reading prerequisites. No breach reproduction claim. |
+| [27 Product variants](articles/27-product-variants.md) | Fictional repair | An approved name resolves the conflicting rows. Keys come from stated pack rules. |
+| [28 Store offers](articles/28-store-offers.md) | Developed account from Instacart | Local price and availability determine where the learner puts each fact and which rows a reprice changes. |
+| [29 Order snapshots](articles/29-order-snapshots.md) | Open-source implementation evidence from Saleor | Historical fields beside an optional reference motivate a rename, reprice and deletion experiment. |
 
 Remaining human evidence: the author must attempt the decision prompts without solutions, record where narration is still needed, and choose any wording that should reflect their own voice. A new learner must try the beginner route, the import trace and the request-code transition. Record misunderstandings and help used, then revise from those observations. Automated SQL/link checks and this editorial assessment do not establish comprehension. Hosted execution remains separately recorded in VERIFICATION.md; adding sources does not satisfy that publication gate.
 
