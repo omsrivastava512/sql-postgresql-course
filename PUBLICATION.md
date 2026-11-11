@@ -10,7 +10,7 @@ The source-study objectives are a minimum baseline, documented in the [author au
 
 ## Current package
 
-The current collection has 30 lessons, 29 independent labs and 132 topic groups with explicit evidence and gaps. The catalog route adds product and variant keys, store-scoped offers and the write that preserves a price on a receipt. Human learner trials, supported-environment checks and release work remain open.
+The current collection has 33 lessons, 32 independent labs and 132 topic groups. The reliable-writes route adds guarded edits, ordered transfers and replay of committed receipts. Human learner trials, supported-environment checks and release work remain open.
 
 The [first route](COURSE_MAP.md#the-first-route) remains usable now. The [beginner route](COURSE_MAP.md#the-beginner-route) connects the available foundations and identifies the missing steps. Existing numbers and URLs stay stable.
 
@@ -83,6 +83,10 @@ The [verification record](VERIFICATION.md) separates role-switched SQL from actu
 
 Use the [three-lesson route](COURSE_MAP.md#the-first-route) and record an unaided attempt at the [training-centre brief](labs/29-order-snapshots/README.md#independent-transfer). Keep the learner's original schema, rejected writes and observed rows. Record the first point of assistance separately from the automated reference results.
 
+## Reliable writes batch — 2026-11-02
+
+Ask a learner to recover from a stale edit, an aborted transfer and a missing receipt. Keep their predictions, observed rows, recovery choices and first use of a hint. Follow the [labs](labs/README.md#reliable-writes-labs) for setup and the [verification record](VERIFICATION.md) for the reference results.
+
 ## Later branches
 
 The query, concurrency, bounded migration, performance and access lessons have execution evidence, but no human learning-time or comprehension evidence. Have the author attempt them and record effort, help and wrong predictions before publication. Use that evidence when choosing further batches; do not equate passing reference SQL with mastery. Remaining work can be grouped as follows; these groups are scheduling units, not promises that one article covers each group:
@@ -90,7 +94,7 @@ The query, concurrency, bounded migration, performance and access lessons have e
 | Remaining group | Practical deliverable |
 |---|---|
 | Authenticated application access | Verified login/JWT identity, auth accounts versus profiles, Supabase auth.uid()/SQL-editor distinctions, Data API exposure, onboarding boundaries and complete allowed/denied request traces. Builds on labs 23–26. |
-| Reliable application operations | Multi-resource deadlocks/order, optimistic version checks, savepoints, bounded retries, idempotency keys/payload matching, simultaneous duplicates and lost-response replay. |
+| Reliable application operations | Savepoint recovery, coordination with external effects, request-key expiry and transport-level fault testing. Labs 30–32 cover database edits, lock ordering, and a local caller with response suppression. |
 | Modelling and historical meaning | Extend the catalog batch to remaining relationship rules, type selection, price precedence, calendars and protected history. Choose an example where the change affects an observable business result. |
 | Targeted SQL/rule depth | Remaining useful JSON/array, recursive-query, generated-value, function/trigger-event and lifecycle-rule objectives, each tied to a concrete feature rather than engine internals. |
 | Change and recovery | Inherited-schema/data repair, broader compatibility/removal changes, interruption/reconciliation and a backup restored into a fresh target with data/permission checks. |

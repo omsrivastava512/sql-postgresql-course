@@ -2,16 +2,16 @@
 
 ## What the files are for
 
-The original package contained 42 files. The current package contains 151, including three catalog lessons, their labs and the training-centre transfer solution.
+The original package contained 42 files. The reliable-writes batch adds 16 files to the 151-file catalog checkpoint at d7c95fb. The counts below describe that delivery.
 
 | Files | Purpose | Intended audience |
 |---|---|---|
-| 30 article files | One SQL onramp, six mechanism-focused lessons, three foundation lessons, six query/data-handoff lessons, two concurrency/migration pilots, five practical performance lessons, four access-control lessons and three catalog design lessons | Readers |
-| 99 lab files | Shared instructions plus twenty-nine sets of tasks, setup SQL and solutions, with one CSV fixture, three migration phase files, a standalone vacuum command, a request module, four access-role cleanup files and a separate workshop-booking solution | Readers; authors verifying examples |
+| 33 article files | One SQL onramp, six mechanism-focused lessons, three foundation lessons, six query/data-handoff lessons, two concurrency/migration pilots, five practical performance lessons, four access-control lessons, three catalog design lessons and three reliable-writes lessons | Readers |
+| 112 lab files | Shared instructions plus thirty-two sets of tasks, setup SQL and solutions, with one CSV fixture, three migration phase files, a standalone vacuum command, two request modules, four access-role cleanup files and four separate transfer solutions | Readers; authors verifying examples |
 | 11 top-level Markdown files | Navigation, review, sources, curriculum, authoring and verification records | Mixed; author records are labelled |
 | 9 tooling files | Git ignore rules, package files and six verification files | Maintainers |
 | 2 research files | Previously committed catalog/billing report and its research log; unchanged in the access batch | Authors |
-| 151 total | Current source package, excluding Git metadata and installed dependencies | Readers and maintainers |
+| 167 total | Reliable-writes source package, excluding Git metadata and installed dependencies | Readers and maintainers |
 
 Readers start at the [README](README.md), [course map](COURSE_MAP.md), articles, labs and [review prompts](REVIEW.md). Authors additionally use the [curriculum audit](CURRICULUM_AUDIT.md), teaching guide, publication queue, provenance and verification records. No reader needs the private source application.
 
@@ -292,3 +292,41 @@ The rows below identify every changed repository file and its current line range
 | `labs/README.md` | 3, 75, 87–90 |
 | `tests/cases.json` | 5004–5590 |
 | `tests/verify.mjs` | 38–42 |
+
+## Reliable writes implementation — 2026-11-02
+
+These current line ranges cover the batch against d7c95fb. There are 16 added files and 15 modified files.
+
+| File | Changed lines |
+|---|---|
+| `COURSE_MAP.md` | 40–41, 52, 129–131, 169–171 |
+| `CURRICULUM_AUDIT.md` | 119–122 |
+| `NEW_FILES.md` | 5, 9–10, 14, 295–332 |
+| `PUBLICATION.md` | 13, 86–89, 97 |
+| `README.md` | 51–53, 55 |
+| `REVIEW.md` | 71–78, 95 |
+| `SOURCES.md` | 88–90 |
+| `TOPIC_INVENTORY.md` | 14, 116, 119, 121–125 |
+| `VERIFICATION.md` | 3, 7–9, 14–15, 23–41 |
+| `articles/06-transaction-boundaries.md` | 92 |
+| `articles/16-competing-claims.md` | 62 |
+| `articles/29-order-snapshots.md` | 39–40 |
+| `articles/30-conflicting-edits.md` | 1–42 (new file) |
+| `articles/31-lock-order.md` | 1–29 (new file) |
+| `articles/32-request-replay.md` | 1–31 (new file) |
+| `labs/30-conflicting-edits/README.md` | 1–35 (new file) |
+| `labs/30-conflicting-edits/setup.sql` | 1–12 (new file) |
+| `labs/30-conflicting-edits/solution.sql` | 1–12 (new file) |
+| `labs/30-conflicting-edits/transfer.sql` | 1–23 (new file) |
+| `labs/31-lock-order/README.md` | 1–58 (new file) |
+| `labs/31-lock-order/setup.sql` | 1–9 (new file) |
+| `labs/31-lock-order/solution.sql` | 1–28 (new file) |
+| `labs/31-lock-order/transfer.sql` | 1–28 (new file) |
+| `labs/32-request-replay/README.md` | 1–81 (new file) |
+| `labs/32-request-replay/request.mjs` | 1–36 (new file) |
+| `labs/32-request-replay/setup.sql` | 1–36 (new file) |
+| `labs/32-request-replay/solution.sql` | 1–33 (new file) |
+| `labs/32-request-replay/transfer.sql` | 1–40 (new file) |
+| `labs/README.md` | 3, 31, 75, 77, 83, 87–90 |
+| `tests/cases.json` | 5591–6256 |
+| `tests/verify-sessions.mjs` | 5, 271–416, 427, 430 |

@@ -68,6 +68,14 @@ Suggested times: next study session, roughly one week later, roughly one month l
 | About a week later | Two stores use code 17 and only one has the tea. Draw the rows a report needs to distinguish a missing offer from zero stock. | [Lab 28](labs/28-store-offers/README.md#distinguish-no-stock-from-no-listing) |
 | About a month later | East raises its workshop fee after a booking. Design the write and the two reads that show which fee changed. Try it before looking at the hints. | [Independent brief](labs/29-order-snapshots/README.md#independent-transfer) |
 
+## Revisit reliable writes
+
+| When | Predict before reading the answer | Check |
+|---|---|---|
+| Next session | North's price went from ₹20 to ₹22 and back to ₹20. Should an editor still holding revision 1 be allowed to save? | [Check the revision](articles/30-conflicting-edits.md#what-did-the-editor-see) |
+| About a week later | If a reverse transfer locks bin 1 first, which bin should it debit? | [Separate lock order from movement](articles/31-lock-order.md#find-the-order-hidden-in-the-data) |
+| About a month later | Two calls have the same store, SKU and quantity. Which fact distinguishes a retry from a second purchase? | [Recover a booking](labs/32-request-replay/README.md#independent-transfer) |
+
 ## Another setting for the transaction boundary
 
 A booking transaction creates a reservation and reduces the available-seat count. A constraint then rejects the reservation. Assume both writes are ordinary table writes in that same transaction. Predict which changes remain after rollback, then compare with the [invoice example](articles/06-transaction-boundaries.md).
@@ -84,7 +92,7 @@ These become useful after their lessons are written. They are authoring commitme
 | Relationships and modelling | Model a club membership after studying shop customers. Can one membership row describe two members? | State row grain, cardinality and key choices; test counterexamples. |
 | Further query meaning | Traverse a category hierarchy that contains a cycle. | State termination and cycle policy; recursive CTEs remain planned. |
 | Rules and automation | Move an eligibility check from creation to every update in a lending example. | Name all operations that can invalidate the intended rule. |
-| Further transactions and concurrency | Two workflows lock the same pair of resources in opposite order. | Reproduce a deadlock, choose ordering and distinguish its retry from request replay. |
+| Further transactions and concurrency | An expected row error interrupts a batch in an explicit transaction. Which changes could survive recovery to a savepoint? | Identify the savepoint and trace only the writes after it. |
 | Authenticated application access | A browser and SQL editor return different rows for the same query. Which identities and access paths must be traced? | Verify the token/request boundary, execution role, grants, policies and any privileged helper; local database-role tests alone do not establish this integration. |
 | Deeper data history | Reconstruct which accounts were active at the end of an old month. | A current active flag is insufficient; historical state needs its own representation. |
 | Further performance and recovery | Production latency rises while local plans look similar, and an accidental deletion also occurs. Which evidence answers each problem? | Investigate deployed workload/connection timing; prove fresh-target restoration separately from rollback. |

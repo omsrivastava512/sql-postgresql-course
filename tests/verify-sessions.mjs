@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import { setTimeout } from 'node:timers/promises';
 import pg from 'pg';
+import { acceptOrder } from '../labs/32-request-replay/request.mjs';
 
 if (!process.env.COURSE_DATABASE_URL) throw new Error('Set COURSE_DATABASE_URL to a disposable database.');
 const clients = ['a', 'b', 'observer'].map(name => new pg.Client({
@@ -267,6 +268,152 @@ async function compatibleChange() {
   console.log('PASS ' + lab + ': interrupted backfill, old/new callers, validation rollback, overlapping update, DDL timeout and job transfer.');
 }
 
+async function conflictingEdits() {
+  const lab = '30-conflicting-edits';
+  const current = 'SELECT price_paise, version FROM course_edit.offers WHERE offer_id = 1';
+  const write = price => 'UPDATE course_edit.offers SET price_paise = ' + price + ' WHERE offer_id = 1';
+  await reset(lab);
+  for (const client of [a, b]) await rows(client, current, [{ price_paise: 2000, version: 1 }]);
+  await a.query(write(2200));
+  await b.query(write(1900));
+  await rows(observer, current, [{ price_paise: 1900, version: 1 }]);
+
+  await reset(lab);
+  await observer.query(await read(lab, 'solution.sql'));
+  await observer.query('UPDATE course_edit.offers SET price_paise = 2000, version = 1 WHERE offer_id = 1');
+  for (const client of [a, b]) {
+    await client.query('BEGIN ISOLATION LEVEL READ COMMITTED');
+    await rows(client, current, [{ price_paise: 2000, version: 1 }]);
+  }
+  await rows(a, 'SELECT * FROM course_edit.save_price(1,1,2200)', [{ price_paise: 2200, version: 2 }]);
+  const stale = pending(b, 'SELECT * FROM course_edit.save_price(1,1,1900)');
+  await blocked();
+  await a.query('COMMIT');
+  equal((await finish(stale)).rows, []);
+  await b.query('COMMIT');
+  await rows(observer, current, [{ price_paise: 2200, version: 2 }]);
+  await rows(b, 'SELECT * FROM course_edit.save_price(1,2,1900)', [{ price_paise: 1900, version: 3 }]);
+}
+
+async function lockOrder() {
+  const lab = '31-lock-order';
+  const balances = 'SELECT units FROM course_bins.bins ORDER BY bin_id';
+  const move = (from, to) => 'SELECT course_bins.move_stock(' + from + ',' + to + ',1)';
+  await reset(lab);
+  await observer.query(await read(lab, 'solution.sql'));
+  await a.query('BEGIN; UPDATE course_bins.bins SET units = units - 1 WHERE bin_id = 1');
+  await b.query('BEGIN; UPDATE course_bins.bins SET units = units - 1 WHERE bin_id = 2');
+  const bCredit = pending(b, 'UPDATE course_bins.bins SET units = units + 1 WHERE bin_id = 1');
+  await blocked();
+  await rows(observer, balances, [{ units: 5 }, { units: 5 }]);
+  const aCredit = pending(a, 'UPDATE course_bins.bins SET units = units + 1 WHERE bin_id = 2');
+  const results = await Promise.all([aCredit, bCredit]);
+  equal(results.filter(result => result.error).map(result => result.error.code), ['40P01']);
+  const aLost = Boolean(results[0].error);
+  const [loser, winner] = aLost ? [a, b] : [b, a];
+  await loser.query('ROLLBACK');
+  await winner.query('COMMIT');
+  await rows(observer, balances, aLost ? [{ units: 6 }, { units: 4 }] : [{ units: 4 }, { units: 6 }]);
+  await loser.query('BEGIN');
+  await loser.query(aLost ? move(1, 2) : move(2, 1));
+  await loser.query('COMMIT');
+  await rows(observer, balances, [{ units: 5 }, { units: 5 }]);
+
+  await a.query('BEGIN');
+  await a.query(move(1, 2));
+  await b.query('BEGIN');
+  const reverseMove = pending(b, move(2, 1));
+  await blocked();
+  await a.query('COMMIT');
+  await finish(reverseMove);
+  await b.query('COMMIT');
+  await rows(observer, balances, [{ units: 5 }, { units: 5 }]);
+
+  await observer.query(await read(lab, 'transfer.sql'));
+  await observer.query('UPDATE course_bins.resources SET booking = NULL');
+  await a.query("BEGIN; SELECT course_bins.reserve_pair(10,20,'Workshop A')");
+  await b.query('BEGIN');
+  const competingBooking = pending(b, "SELECT course_bins.reserve_pair(20,10,'Workshop B')");
+  await blocked();
+  await a.query('COMMIT');
+  equal((await competingBooking).error?.code, '23514');
+  await b.query('ROLLBACK');
+  await rows(observer, 'SELECT resource_id, booking FROM course_bins.resources ORDER BY resource_id', [
+    { resource_id: 5, booking: null }, { resource_id: 10, booking: 'Workshop A' }, { resource_id: 20, booking: 'Workshop A' }
+  ]);
+}
+
+async function requestReplay() {
+  const lab = '32-request-replay';
+  const count = 'SELECT (SELECT count(*)::int FROM course_replay.orders) AS headers, ' +
+    '(SELECT count(*)::int FROM course_replay.order_lines) AS lines, (SELECT count(*)::int FROM course_replay.requests) AS requests';
+  const order = quantity => "SELECT course_replay.accept_order('North','race','17'," + quantity + ') AS receipt';
+  for (const ending of ['COMMIT', 'ROLLBACK']) {
+    for (const quantity of [3, 4]) {
+      await reset(lab);
+      await observer.query(await read(lab, 'solution.sql'));
+      await a.query('BEGIN');
+      const original = (await a.query(order(3))).rows[0].receipt;
+      await b.query('BEGIN');
+      const duplicate = pending(b, order(quantity));
+      await blocked();
+      await rows(observer, count, [{ headers: 0, lines: 0, requests: 0 }]);
+      await a.query(ending);
+      const outcome = await duplicate;
+      let accepted = original;
+      if (ending === 'COMMIT' && quantity !== 3) {
+        equal(outcome.error?.code, '22023');
+        await b.query('ROLLBACK');
+      } else {
+        if (outcome.error) throw outcome.error;
+        accepted = outcome.result.rows[0].receipt;
+        if (ending === 'COMMIT') equal(accepted, original);
+        else {
+          equal(accepted.order_id !== original.order_id, true);
+          equal(accepted.quantity, quantity);
+          equal(accepted.total_paise, String(2000 * quantity));
+        }
+        await b.query('COMMIT');
+      }
+      await rows(observer, count, [{ headers: 1, lines: 1, requests: 1 }]);
+      await rows(observer, 'SELECT receipt FROM course_replay.requests', [{ receipt: accepted }]);
+      await rows(observer, 'SELECT order_id, quantity, unit_price_paise FROM course_replay.order_lines',
+        [{ order_id: accepted.order_id, quantity: accepted.quantity, unit_price_paise: 2000 }]);
+    }
+  }
+
+  for (const faults of [['40001', '40P01'], ['40P01', '40001', '40P01'], ['23514']]) {
+    await reset(lab);
+    await observer.query(await read(lab, 'solution.sql'));
+    let attempts = 0;
+    const caller = {
+      async query(sql, values) {
+        if (sql.startsWith('BEGIN')) attempts++;
+        if (sql === 'COMMIT' && attempts <= faults.length) {
+          await a.query("DO $$ BEGIN RAISE EXCEPTION 'Controlled pre-commit fault' USING ERRCODE = '" +
+            faults[attempts - 1] + "'; END $$");
+        }
+        return a.query(sql, values);
+      }
+    };
+    const operation = acceptOrder(caller, 'North', 'fault', '17', 3);
+    if (faults.length === 3) {
+      await assert.rejects(operation, error => error.message.includes('three attempts') && error.cause?.code === '40P01');
+      equal(attempts, 3);
+    } else if (faults[0] === '23514') {
+      await fails(operation, '23514');
+      equal(attempts, 1);
+    } else {
+      const receipt = await operation;
+      equal(attempts, 3);
+      equal(receipt.total_paise, '6000');
+      equal(await acceptOrder(b, 'North', 'fault', '17', 3), receipt);
+    }
+    const committed = faults.length === 2 ? 1 : 0;
+    await rows(observer, count, [{ headers: committed, lines: committed, requests: committed }]);
+  }
+}
+
 try {
   for (const client of clients) {
     await client.connect();
@@ -277,10 +424,10 @@ try {
   for (const client of clients) pids.push((await client.query('SELECT pg_backend_pid() AS pid')).rows[0].pid);
   equal(new Set(pids).size, 3);
   console.log((await observer.query('SELECT version() AS version')).rows[0].version);
-  const suites = [['16', competingClaims], ['17', compatibleChange]];
+  const suites = [['16', competingClaims], ['17', compatibleChange], ['30', conflictingEdits], ['31', lockOrder], ['32', requestReplay]];
   if (process.argv.includes('--reverse')) suites.reverse();
   const selected = process.argv.find(argument => argument.startsWith('--lab='));
-  if (selected && !['--lab=16', '--lab=17'].includes(selected)) throw new Error('Choose --lab=16 or --lab=17.');
+  if (selected && !suites.some(([number]) => selected === '--lab=' + number)) throw new Error('Choose lab 16, 17, 30, 31 or 32.');
   for (const [number, run] of suites) {
     if (!selected || selected === '--lab=' + number) await run();
   }

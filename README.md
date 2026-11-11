@@ -48,8 +48,11 @@ The examples use fictional applications. The first lessons use a clinic; the wid
 | [Why did renaming one product give it two names?](articles/27-product-variants.md) | Repair a shared name and prove that every sellable pack survives. |
 | [Can two stores use SKU 17 for different things?](articles/28-store-offers.md) | Locate a store offer and distinguish zero stock from a missing listing. |
 | [What price did this customer accept?](articles/29-order-snapshots.md) | Write the accepted terms with the order and recover both receipts after the offer disappears. |
+| [Why did my saved price disappear?](articles/30-conflicting-edits.md) | Catch a stale price edit and decide whether to submit a new one. |
+| [Why are both stock transfers waiting?](articles/31-lock-order.md) | Trace a deadlock and move stock safely in either direction. |
+| [Did the order fail, or did its response go missing?](articles/32-request-replay.md) | Recover an accepted receipt and reject a conflicting retry. |
 
-There are **30 lessons and 29 labs**. The catalog route starts with two packs of tea and ends with a receipt that survives a rename, a price change and the removal of the offer. Request retries, authenticated API integration, broader migrations, recovery and an integrated capstone remain open. The [topic inventory](TOPIC_INVENTORY.md) records the evidence for each objective.
+There are **33 lessons and 32 labs**. Once you can record an accepted sale, try two editors changing its offer, two workers moving stock, and a caller retrying after the receipt goes missing. Authenticated API integration, broader migrations, recovery and the capstone remain open. The [topic inventory](TOPIC_INVENTORY.md) records the evidence for each objective.
 
 The full embedded and native reference checks passed on 2026-11-02. The [verification record](VERIFICATION.md) gives separate dates for the session, performance and restricted-login checks. Docker setup, hosted Supabase and reader trials remain open.
 

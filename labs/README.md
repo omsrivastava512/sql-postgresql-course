@@ -1,6 +1,6 @@
 # Run the labs
 
-Labs 01–22 offer local PostgreSQL and dedicated Supabase learning-project routes, with verification limits recorded below. Access labs 23–26 require a disposable local cluster with administrator-controlled roles; their scripts are not a hosted Supabase setup. Lab schemas are not the clinic application's schema. Catalog labs 27–29 use independent schemas on a disposable local database.
+Labs 01–22 offer local PostgreSQL and dedicated Supabase learning-project routes, with verification limits recorded below. Access labs 23–26 require a disposable local cluster with administrator-controlled roles; their scripts are not a hosted Supabase setup. Lab schemas are not the clinic application's schema. Catalog labs 27–29 use independent schemas on a disposable local database. Reliable-writes labs 30–32 use a local PostgreSQL server and three persistent connections.
 
 **Current execution evidence is in [VERIFICATION.md](../VERIFICATION.md).** Instructions being present does not mean both environments have already been tested.
 
@@ -28,7 +28,7 @@ docker start clinic-course-postgres
 
 The fixed tag selects PostgreSQL 17.11. The [official image page](https://hub.docker.com/_/postgres) documents image variables. No host directory is mounted; the classroom password is for this loopback-only disposable container.
 
-If the name already exists, use docker start rather than recreating it. If port 55432 is occupied, change only the host port. Labs 16 and 17 use persistent A/B connections and a third observer connection against the same database; open three psql terminals. Confirm distinct SELECT pg_backend_pid(); results.
+If the name already exists, use docker start rather than recreating it. If port 55432 is occupied, change only the host port. Labs 16, 17 and 30–32 use persistent A/B connections and a third observer connection against the same database; open three psql terminals. Confirm distinct SELECT pg_backend_pid(); results.
 
 An existing native PostgreSQL 17 server also works. Use psql -h 127.0.0.1 -p YOUR_PORT -U YOUR_ROLE -d YOUR_DISPOSABLE_DATABASE. The author verification used a temporary native Windows server; it did not validate Docker startup.
 
@@ -72,17 +72,21 @@ For a real database run, set COURSE_DATABASE_URL in your local environment to th
 npm run test:database
 ```
 
-The complete runner uses one administrator connection, resets twenty-nine named course schemas and creates the access labs' fixture roles. Run it on a disposable local cluster; the complete suite is not a supported hosted-Supabase command. It prints server version and results, never the connection string. The earlier labs' individual hosted exercises require a direct or session-mode connection with appropriate SSL settings where persistent sessions are needed. Do not paste passwords into chats or commit them.
+The complete runner uses one administrator connection, resets thirty-two named course schemas and creates the access labs' fixture roles. Run it on a disposable local cluster; the complete suite is not a supported hosted-Supabase command. It prints server version and results, never the connection string. The earlier labs' individual hosted exercises require a direct or session-mode connection with appropriate SSL settings where persistent sessions are needed. Do not paste passwords into chats or commit them.
 
-For the two concurrent-session labs, with the same disposable database variable set:
+For the five concurrent-session labs, set the same disposable database variable and run
 
 ```sh
 node tests/verify-sessions.mjs
 ```
 
-This separate checker uses the existing pg driver and three connections. It resets only course_race and course_change, observes blockers through pg_blocking_pids and checks stored results after waits, failures and retries. It uses 10-second statement and 60-second idle-transaction limits; manual exercises allow longer pauses. Use --lab=16 or --lab=17 for one suite, or --reverse to check the opposite order. Do not run reset scripts or another checker against those schemas concurrently. The embedded runner checks their single-session reference examples only.
+The checker uses three connections and the existing pg driver. It resets course_race, course_change, course_edit, course_bins and course_replay. Observe blockers through pg_blocking_pids and inspect stored results after waits, failures and retries. Its statement limit is 10 seconds and idle transaction limit is 60 seconds. Use --lab=16, 17, 30, 31 or 32 (for example, --lab=31) to select one suite, or --reverse to reverse the order. Run the checker on its own while these schemas are in use.
 
 The runner checks failure categories and stored state, including rejected writes and commit-time failures. See [verification](../VERIFICATION.md).
+
+## Reliable writes labs
+
+Run [conflicting edits](30-conflicting-edits/README.md), [stock transfers](31-lock-order/README.md) or [receipt replay](32-request-replay/README.md) on disposable local PostgreSQL. Each guide gives an independent setup, a schedule, failure checks, and a transfer task. The receipt lab adds a Node caller using the existing pg dependency. Use the single-session runner for reference SQL and the native session checker for actual waits and deadlocks.
 
 ## Catalog labs
 

@@ -59,7 +59,7 @@ Now start both transactions at REPEATABLE READ and let both read the original st
 
 B must roll back and restart the whole transaction, including the read and decision. In the new transaction it finds no stock and creates no reservation. Retrying only a write calculated from the earlier value preserves the mistake.
 
-This exercise requires one deliberate retry. A real caller needs a bounded retry policy and a way to report exhaustion. External effects cannot simply be repeated with a database transaction. Request replay after a lost response is a separate, still-planned lesson. [Retry reference](https://www.postgresql.org/docs/17/mvcc-serialization-failure-handling.html)
+This exercise requires one deliberate retry. A real caller needs a bounded retry policy and a way to report exhaustion. External effects cannot simply be repeated with a database transaction. Continue to [multi-resource deadlocks](31-lock-order.md) and [bounded retry and request replay](32-request-replay.md). [Retry reference](https://www.postgresql.org/docs/17/mvcc-serialization-failure-handling.html)
 
 ## A timeout is a result to inspect
 

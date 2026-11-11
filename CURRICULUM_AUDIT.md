@@ -116,6 +116,10 @@ These lessons do not complete A02–A04 or A11–A13: auth accounts/profiles, JW
 
 The [publication queue](PUBLICATION.md#later-branches) now groups the remaining work into authenticated application access, reliable operations, deeper modelling/history, targeted query/rule depth, change/recovery and integration/release. The separate catalog research remains research; this access batch does not modify or certify its proposed models.
 
+## Reliable writes implementation — 2026-11-02
+
+Lessons 30–32 extend the catalog and transaction routes. A learner guards a stale edit, orders two resource locks, and replays a committed receipt under a scoped key. The [inventory](TOPIC_INVENTORY.md#transactions-and-concurrency) advances the demonstrated parts of T09 and T11–T15. Savepoints, external effects, production key expiry and real transport failures remain open. The [verification record](VERIFICATION.md) distinguishes native concurrency, simulated ambiguous delivery and reader evidence.
+
 ## Coverage acceptance
 
 - Each source-study objective above has a course destination; unresolved product choices remain comparative exercises.

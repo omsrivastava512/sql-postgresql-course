@@ -1,18 +1,18 @@
 # Verification record
 
-Status: draft. Initial SQL execution dated 2026-10-17 (Asia/Kolkata); documentation audit added 2026-10-19; foundation and query/data-handoff execution added 2026-10-20; native concurrency, migration and practical performance execution added 2026-10-21; PostgreSQL access-control execution and focused editorial revisions added 2026-10-26; collection-wide grounding revision added 2026-10-27. Catalog design and booking-transfer checks added 2026-11-02.
+Status: draft. Initial SQL execution dated 2026-10-17 (Asia/Kolkata); documentation audit added 2026-10-19; foundation and query/data-handoff execution added 2026-10-20; native concurrency, migration and practical performance execution added 2026-10-21; PostgreSQL access-control execution and focused editorial revisions added 2026-10-26; collection-wide grounding revision added 2026-10-27. Catalog design and booking-transfer checks added 2026-11-02. Reliable writes checked 2026-11-02.
 
 | Check | Result |
 |---|---|
-| Embedded PostgreSQL execution | PASS, 440 assertions across 29 labs on PostgreSQL 18.6 / PGlite 0.5.10 (2026-11-02) |
-| Native local PostgreSQL 17.11 | PASS, 440 assertions across 29 labs, Windows x64, role course_author (2026-11-02) |
-| Independent concurrent sessions | PASS: 100 assertions across labs 16/17 using three distinct connections; also passed in reverse suite order on native PostgreSQL 17.11 (2026-10-21) |
+| Embedded PostgreSQL execution | PASS, 496 assertions across 32 labs on PostgreSQL 18.6 / PGlite 0.5.10 (2026-11-02) |
+| Native local PostgreSQL 17.11 | PASS, 496 assertions across 32 labs, Windows x64, role course_author (2026-11-02) |
+| Independent concurrent sessions | PASS, 157 assertions in each suite order across labs 16, 17, 30, 31 and 32 on three connections to native PostgreSQL 17.11 (2026-11-02) |
 | Practical performance | PASS: 107 assertions across labs 18–22, normal and reverse suite order, native PostgreSQL 17.11; learner request command also passed (2026-10-21) |
 | Restricted database logins | PASS: 157 assertions across labs 23–26 with 11 actual restricted logins, normal and reverse suite order; each suite and its cleanup also passed independently (2026-10-26) |
 | Local Docker PostgreSQL 17.11 | Not run; Docker is not installed on this host |
 | Hosted Supabase | MCP connected and project inventory read; no SQL run or project changed. No dedicated course project used; hosted verification remains open. |
-| Local Markdown links, current package | PASS, 914 local links across 73 Markdown files including heading targets (2026-11-02) |
-| Editorial review | 27 lessons assessed on 2026-10-27 and grounding recorded for lessons 27–29 on 2026-11-02. Human comprehension remains untested. |
+| Local Markdown links, reliable-writes package | PASS, all 966 local references in the 79 Markdown files of this batch and its baseline. The workspace checker also scanned two unrelated research documents (2026-11-02). |
+| Editorial review | 27 lessons assessed on 2026-10-27 and grounding recorded for lessons 27–32 on 2026-11-02. Human comprehension remains untested. |
 | Actual human learner trials | Pending; automated execution of documented steps is not a human trial. |
 | Public publication | Not performed |
 
@@ -20,7 +20,25 @@ The embedded runtime tests SQL behavior only. It cannot establish Docker setup, 
 
 The six initial labs cover foreign-key failures, role validation and its update gap, derived values and stale copies, delete actions, deferred-check timing, and invoice failure rollback. The test cases also run every successful solution after a fresh setup and exercise setup reset twice.
 
-No test in this package claims to verify HTTP requests, API retries, production authorization, or a deployed clinic schema. Live SQL sessions are tested separately from application requests. Earlier sections below preserve dated checkpoints; this opening table and the latest section describe the current package.
+The Node caller in lab 32 exercises transaction retries and deliberately discards an acknowledged commit's result. HTTP transport, production authorization and deployments remain separate verification objectives. The table above gives current results and the dated sections preserve earlier runs.
+
+## Reliable writes — 2026-11-02
+
+The full reference suite passed 496 assertions across 32 labs on PGlite 0.5.10 (PostgreSQL 18.6) and native PostgreSQL 17.11. The original 440 checks and the 56 additions passed on each engine. Each setup ran twice, each solution ran from fresh setup, and the three independent transfer scripts exercised the changed settings.
+
+The expanded session checker passed 157 assertions in normal order and 157 in reverse order on three distinct native connections. It retains the earlier claims and compatible-change suites. It used blocker inspection before releasing the winning transaction.
+
+| Lab | What the execution showed |
+|---|---|
+| 30 | An unconditional second edit overwrote the price. The guarded writer waited, then returned zero rows after the first commit. A subsequent deliberate edit with the newer version succeeded. |
+| 31 | A real lock cycle returned 40P01 to one caller. The surviving move committed. Retrying the victim restored five units per bin. Both oppositely directed ordered moves committed, and competing room/projector bookings left one owner. Single-session probes checked invalid transfers and rollback of a partial resource reservation. |
+| 32 | Equal and different payloads waited under the same scoped key. The creator's commit led to replay or conflict. Its rollback allowed the waiter to make its own order. Receipt, header and line inspections established the committed winner. Separate probes covered catalog edits and deletion, different stores, invalid writes and booking-fee changes. |
+
+Controlled PostgreSQL faults before commit exercised both retryable SQLSTATEs, success on attempt three, exhaustion, and immediate propagation of a different code. The real deadlock in lab 31 supplies independent evidence of server detection.
+
+From a fresh fixture the documented Node command ran twice. Both returned order 1, Breakfast Tea 50 g, quantity 3, 2000 paise each and total text "6000". The database held one header, one line and one request. Running the trigger printed in the lab guide produced three attempts and zero rows in all three tables. Removing it allowed the same key to succeed with order ID 4. These were local caller executions with deliberate result suppression. HTTP delivery and human transfer trials remain open.
+
+The temporary Windows x64 PostgreSQL 17.11-5 bundle matched the earlier recorded SHA-256. The SCRAM-protected server listened on loopback. After the runs it was stopped, pg_ctl confirmed no server running, and the checked temporary runtime directory was removed.
 
 ## Catalog design and accepted terms — 2026-11-02
 

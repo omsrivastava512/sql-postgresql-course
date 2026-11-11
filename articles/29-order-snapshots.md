@@ -36,3 +36,5 @@ The data-modifying common table expression and the line insert share a PostgreSQ
 Predict what happens to those four columns if the offer is deleted. They keep their values. Only the separate offer reference becomes NULL. A report that inner joins to the live offer would hide both sales. Read the accepted values directly from the order lines. A role with write access can still edit these ordinary rows. Tamper-evident accounting requires additional controls.
 
 **Return after a gap.** A training centre raises its fee after a learner books. Which number belongs in today's listing and which in the booking confirmation? Try the [independent design brief](../labs/29-order-snapshots/README.md#independent-transfer) before opening its reference.
+
+Once you can recover the receipt from the database, try [returning it to a caller whose first response disappeared](32-request-replay.md).

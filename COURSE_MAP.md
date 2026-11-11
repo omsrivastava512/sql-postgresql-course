@@ -37,6 +37,8 @@ For access control, follow [database roles](articles/23-database-roles.md) → [
 
 For schema design, follow [product and variant keys](articles/27-product-variants.md) → [store offers](articles/28-store-offers.md) → [accepted order lines](articles/29-order-snapshots.md). Start with row identity and joins. Bring transaction boundaries and CTEs to the final write. Finish by [designing a training-centre booking](labs/29-order-snapshots/README.md#independent-transfer) from a brief.
 
+For reliable writes, start with [guarded edits](articles/30-conflicting-edits.md), trace [two transfers in opposite directions](articles/31-lock-order.md), then [recover a committed receipt](articles/32-request-replay.md). Bring the conditional updates and transaction boundaries from lab 16 and the accepted terms from lab 29. The final lab supplies a small Node caller.
+
 ## The wider course
 
 Topic IDs refer to the [inventory](TOPIC_INVENTORY.md), which records the narrower objectives actually covered. A route below can contain several short articles and labs.
@@ -47,7 +49,7 @@ Topic IDs refer to the [inventory](TOPIC_INVENTORY.md), which records the narrow
 | Relationships and modelling | Cardinality, junctions, optional references, deletion, normalization; R, D03, D13 | Keys and row meaning | Foreign keys, deletion, membership, candidate keys, update anomalies and store-scoped offers |
 | Query meaning and reporting | Joins, grouping, subqueries, CTEs, windows, sets and pagination; Q | Values and basic SELECT; relationships for joins | Lessons on filtering, joins, grouping, subqueries/sets, CTEs, windows and reusable reports; recursion and specialized query depth remain planned |
 | Rules and automation | Constraints, functions, trigger events, derived values, transitions; B | Writes, constraints; lookups for cross-table rules | Lessons on validation and derivation; remaining coverage planned |
-| Transactions and concurrency | Atomic groups, deferral, counters, locking, isolation, retries; T, R11 | Writes and constraints; CTEs for the claim | Lessons on rollback, deferral and competing claims; deadlocks, optimistic checks and full request retries remain planned |
+| Transactions and concurrency | Atomic groups, deferral, counters, locking, isolation, retries; T, R11 | Writes and constraints; CTEs for the claim | Rollback, deferral, competing claims, version checks, ordered transfers, bounded retries and database-only receipt replay. Savepoints and coordination with external services remain planned |
 | Identity and access | Authentication, privileges, RLS, function execution identity, tenants; A | Filtering, relationships/EXISTS; snapshots for revocation; functions/views for helper checks | Lessons on local grants, row-policy matrices, membership and privileged code; Supabase auth/JWT/Data API integration and onboarding remain planned |
 | Data over time | Generated values, views, snapshots, exact money, calendars and audits; D | Expressions; joins and grouping for reports | Historical price reporting and capture, exact minor units, period boundaries and views. Wider lifecycle and calendar rules remain planned. |
 | Performance and recovery | Indexes, query plans, statistics, pooling, imports, backup restoration; O01–O06, O15–O19 | Queries; transactions for locks, cleanup and recovery | Lessons on plans, measured index choices, pagination, statistics/maintenance and request/pool work; specialized indexes, deployment-scale tuning and backup restoration remain planned |
@@ -124,7 +126,9 @@ For the advanced branches, learn concurrency before implementing concurrent retr
 | Product name repeated across packs | Book title shared by editions | Identify the dependency and test whether a proposed key admits legitimate editions. Lab 27. |
 | North and South reuse local codes | Cinema screens and showings | Decide which dimensions a lookup needs when the offer changes. Lab 28. |
 | Stores reprice tea after an order | Training centres change workshop fees | Preserve the accepted fee and prove that only one listing changes. Lab 29. |
-| Subscriptions: a retry repeats a charge request | Reservations: a confirmation response disappears | Separate rollback from deduplication; planned |
+| An editor submits a stale price | Two centres share a workshop code | Choose the row identity and expected revision. Lab 30. |
+| Workers move stock in opposite directions | A workshop needs a room and a projector | Acquire both resources in order and inspect a partial attempt after failure. Lab 31. |
+| North loses an order response | A booking confirmation disappears before a fee increase | Recover the original receipt while allowing an intentional second booking. Lab 32. |
 
 Every planned route needs a worked example, a changed-setting task with feedback, and a later retrieval prompt. The table is the authoring contract for future lessons, not a claim those SQL labs already exist.
 
@@ -162,6 +166,9 @@ Every planned route needs a worked example, a changed-setting task with feedback
 | Product variants | Dependency, candidate keys and reconstructing rows | Compare both directions with EXCEPT ALL | None |
 | Store offers | Attribute ownership and scoped offer identity | Generated ID, two unique pairs and an outer join | None |
 | Order snapshots | Distinguish current terms from accepted terms | Data-modifying CTE, RETURNING and ON DELETE SET NULL | None |
+| Conflicting edits | Compare the version read with the current version | Conditional UPDATE RETURNING and Read Committed recheck | None |
+| Lock order | Coordinate access to two resources | Row locks, blocker inspection and 40P01 victim rollback | None |
+| Request replay | Identify one purchase across attempts | Unique pair, locking read, atomic receipt and bounded Node transaction retry | None |
 
 These labels do not certify cross-database portability. Future Supabase identity/Data API lessons will name the platform explicitly; PostgreSQL roles and RLS will first get their own explanation.
 
