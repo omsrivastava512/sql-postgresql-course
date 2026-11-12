@@ -2,6 +2,8 @@
 
 Research expanded and checked 2 Nov 2026. This document traces customer-specific commercial decisions from app request to redemption across retail, marketplaces, travel, subscriptions, loyalty, B2B and promotion engines. See the [research log](Research%20log.md) for the source register, coverage and verification. Illustrations below are synthetic unless explicitly attributed to a source.
 
+Teaching connections revised 11 Nov 2026. The SQL and its earlier execution evidence are unchanged. The checkout protocol below explains the work needed around the stored snapshots; it is not an additional tested checkout implementation.
+
 ## The question
 
 Two people open the same app and choose the same restaurant and basket. One sees a first-order coupon, another sees a membership delivery benefit, and a third sees an offer that requires a higher basket. How can that happen if the app calls the same API? What is the database storing, what decides the result, and what does checkout actually honor?
@@ -17,6 +19,8 @@ The earlier [catalog-and-billing report](../catalogs-and-billing/How%20commerce%
 ### What the comparison explains
 
 The evidence below supports several different mechanisms: customer/context-specific rate eligibility; ordered audience-to-package rules; personalized spend/reward selection; seller-defined basket thresholds; external rule engines; loyalty reservations; and negotiated B2B catalogs. Sections 6–12 give the individual code and documentation evidence, and section 13 connects the mechanisms. Swiggy is the motivating example, not the boundary of the investigation. The SQL in sections 5 and 13 is a separate teaching design, not a private company's recovered schema.
+
+Follow customer A through [the worked journey](#5-connected-database-and-api-walkthrough) first if the domain is new. The question to keep asking is: **has the system merely calculated a possible benefit, or has it accepted an obligation?** Sections 2–4 introduce that distinction; section 5 follows the ₹492 purchase through a lost response and cancellation. Return to the company comparisons when a design choice arises: Saleor for largest-benefit selection, RevenueCat for ordered selection, Voucherify for discovery versus redemption, and Square for reserving a balance. Travel, referral progress, learned targeting and B2B catalogs receive comparative coverage; their complete booking, training, settlement and authorization systems are not implemented here.
 
 ## 1. What the public evidence already establishes
 
@@ -151,6 +155,12 @@ A typical decision can combine: campaign candidates for restaurant 7; audience m
 
 The following PostgreSQL example is intentionally small and runnable in order. Amounts are integer paise, so ₹1 = 100. It records a campaign version, the subject's audience snapshot and assignment, a presentation decision, a quote, and A's accepted order with line and funding snapshots. It leaves authentication, catalog, payment, capacity enforcement, indexes for production workloads, and full event processing to surrounding systems. The `facts` and `terms` JSON make this example compact; their structure and constraints are not a recommendation to store every rule as unvalidated JSON.
 
+Before reading the DDL, separate three small mechanisms. A **foreign key** connects identities: quote 1001 came from decision 101. A **snapshot** retains a value: the order records 49200 even if a later quote differs. A **transition** authorizes a change: accepting an order must check current facts and claim capacity. The first two appear in this schema; the third is traced after the queries. A relationship between rows cannot stand in for that transition.
+
+For A, use customer ID 10 throughout. Campaign 1/version 1 defines `FIRST20`; audience `(10,1)` records the earlier first-order fact; decision 101 explains the selected message; quote 1001 records this calculation with an expiry of 10:06 UTC on 2 Nov. Order 5001 is the accepted outcome. The two line rows preserve how ₹80 was distributed, and the funding rows preserve who owes that discount. None of those rows means a payment succeeded.
+
+The columns answer different questions. `evaluated_at` lets support recognize old audience facts; `expires_at` bounds a proposal's lifetime. The quote arithmetic `CHECK` rejects inconsistent addition, but cannot establish that a customer is eligible. `UNIQUE(quote_id)` prevents two order rows for the same quote, but cannot stop the same customer using two different quotes. `campaign_version` helps explain the accepted terms, but needs immutable version storage to remain meaningful. These limits are why checkout needs more than a successful insert.
+
 ```sql
 CREATE TABLE research_campaign (
   id integer PRIMARY KEY,
@@ -233,7 +243,7 @@ INSERT INTO research_discount_funding VALUES
   (5001, 'platform', 4800), (5001, 'restaurant', 3200);
 ```
 
-Read the decision trail and check that the order's line and funder amounts reconcile:
+The inserts above are a photograph of the successful journey, including its accepted order. They deliberately skip the acceptance operation. Read the decision trail and check that the order's line and funder amounts reconcile; then use the following journey to reason about how that photograph could safely be produced:
 
 ```sql
 SELECT d.customer_id, c.code, d.outcome, d.reason, q.payable_paise
@@ -260,11 +270,51 @@ Suppose A returns the complete ₹300 meal and the business policy says the deli
 
 ### Checkout, limited uses and payment
 
-When A submits the quote, the server authenticates A, loads the current cart, checks quote expiry and ownership, and reevaluates the participating restaurant, first-order condition, campaign version, usage limits and capacity. If the amount changes, the application obtains the customer's agreement to the revised total rather than silently charging it. Only the server's recalculation is authoritative \[Inferred: example policy\].
+#### A sees a proposal, then asks to buy
 
-A workable design for one final redemption is to insert a reservation with a unique request key and atomically claim available capacity in the same database transaction. A guarded update such as `UPDATE campaign_budget SET used = used + 1 WHERE id = ? AND used < limit RETURNING used` lets a caller proceed only if one row was returned. The order and reservation records must be committed consistently with that claim; check every affected-row count. Per-customer limits need their own protected counter or unique constraint, and a global budget measured in money needs an amount-based condition. A simple read-then-increment without locking or a guarded write can allow two transactions to read the same remaining capacity.
+At 10:01, A sees `FIRST20` and adds one meal and one drink to the cart. The backend has produced decision 101 and quote 1001; it has not consumed a campaign use. The app may report a separately identified rendering event, but the decision row alone cannot prove A saw the card. A can close the app here without an order, payment or redemption being invented.
 
-For a retry, persist an idempotency key bound to the customer, endpoint and request fingerprint: the same key and same request returns the prior result, while a reused key with different input is rejected. A unique index plus transactional state changes protects concurrent attempts; merely returning a cached response without coordinating the write is insufficient. A real system must also define key expiry, in-progress recovery and database isolation. Stripe's [API-specific idempotency policy](https://docs.stripe.com/api/idempotent_requests) illustrates such a contract, but does not implement these merchant-side records.
+At 10:03, A presses Place order. The illustrative request identifies quote 1001, restaurant 7, the two item quantities, the agreed 49200 paise and request key `checkout-A-1`. The server derives customer 10 from validated credentials, resolves the authorized restaurant/cart, and reads current prices and order history. The amount in the request expresses consent; it does not set the price. The server must recompute the ₹80 cap, ₹42 tax and ₹30 delivery under the stated policy. If A changed the basket or a relevant term changed, return a new quote for agreement. Do not silently accept a different total because the old audience row still says `completed_orders=0`.
+
+For this journey, make the remaining policy explicit: campaign 1 has one use left globally, and each customer may consume it on at most one accepted order. Acceptance consumes the use even if payment later fails or the order is cancelled. Zero completed orders is an eligibility condition; it is not a concurrency guard, because two pending orders can both precede a first completed order. The retained per-customer use prevents that double acceptance. This non-restoration choice is consistent with the commercetools comparison in section 1; it is a choice for our merchant, not a rule for every platform.
+
+#### Claim capacity and record the acceptance together
+
+The snapshot schema above does not contain the next three records. They specify the **additional logical records required by this transaction protocol**, not tables that the SQL has already created:
+
+| Record | Before A's acceptance | After successful commit | Reason to keep it |
+| --- | --- | --- | --- |
+| Request receipt, scoped to customer 10 and checkout | No `checkout-A-1` | Key, normalized request fingerprint, order 5001 and original accepted response | Recover an answer after a lost response; reject changed input under the same key |
+| Campaign 1 capacity | `used=0, cap=1` in this last-use illustration | `used=1, cap=1` | Serialize customers competing for the remaining use |
+| Customer's campaign use | No `(campaign=1, customer=10)` | Unique `(1,10)` linked to order 5001 | Prevent two different requests/quotes from consuming a first-order benefit twice |
+
+A request fingerprint represents the meaningful inputs in a stable form: customer context, quote, restaurant, item identities/quantities and agreed amount. Cosmetic JSON spacing should not change it; changing quantity must. The key identifies an attempt to make one business purchase, while the fingerprint checks that the retry still means the same purchase.
+
+Within one short database transaction, the backend would do the following. This is a specified protocol to implement and test, not an executed function in this report.
+
+1. Claim the unique request identity, or wait for an existing claimant to finish. For a committed matching receipt, return its stored answer. A different fingerprint is a conflict. Check that the caller may still retrieve the order before returning private details.
+2. For a new request, check ownership, expiry, campaign/version, restaurant scope and authoritative customer/cart facts. Protect mutable facts needed for acceptance with their owning writer's transaction/version protocol; a fresh read alone does not freeze them. The audience snapshot is evidence of the earlier decision, not a substitute for this check.
+3. Claim the campaign capacity with a guarded write. The last-use test below shows why `used < cap` belongs in the write itself. Also insert the unique customer-use record; a conflict means this customer has already consumed the benefit. A money budget would need to claim 8000 paise, not increment a use count and assume that enforces spending.
+4. Write order 5001, its two line allocations, the two funding shares, and the request's accepted response. These are the order rows shown in the snapshot fixture. Every required claim/write must succeed; otherwise roll back the entire transaction, including any provisional capacity claim. Define a consistent lock order for all writers before implementing this across multiple campaigns or customer counters.
+5. Commit, then tell A “Order 5001 accepted, ₹492.” Before commit, another request must not treat the provisional order as accepted. After commit, a disconnected browser cannot undo it. Payment and fulfillment have their own results; this response is not a paid receipt.
+
+**Predict the failure:** capacity was incremented, but inserting the customer-use row discovers an earlier accepted use. Should the campaign lose another slot? No. Both writes belong to the same transaction, so rejection rolls the provisional increment back. If those writes were committed separately, a failed order could leak capacity. The historical single-counter experiment below proves neither this complete protocol nor coordination with an external customer-facts service.
+
+#### The answer disappears; A retries
+
+Suppose the transaction committed but A saw a timeout. At 10:07, A sends the same key and inputs. Although quote 1001 is now expired, a matching committed receipt returns the already-accepted order 5001; it does not try to accept that quote again. Expiry governs new acceptance, not whether history exists. This is why receipt recovery precedes fresh eligibility checks after authorization. The campaign remains at one use, and the order's two lines and funder amounts remain unchanged.
+
+If the first transaction instead rolled back, no accepted receipt or use survives. The retry is a new acceptance attempt and the expired quote must be replaced. If the first transaction is still open, the competing key claim waits or the API reports an in-progress result; a timeout is not permission to skip coordination. Reusing `checkout-A-1` with two meals is a conflict. Using a new key is not a safe recovery strategy: the service must still prevent a second use and must help A find the existing order.
+
+Stripe's [idempotency contract](https://docs.stripe.com/api/idempotent_requests) motivates storing a request identity and comparing inputs, but its provider-specific retention and replay rules do not implement this merchant protocol. The merchant must choose how long receipts remain recoverable and what durable order/use lookup remains after receipt expiry. Deleting a replay cache must not delete the evidence that customer 10 consumed campaign 1.
+
+#### Cancellation changes obligations, not the original calculation
+
+Continue from the committed order, as an alternative to the partial-return branch above. A requests cancellation of 5001. The service authorizes customer 10 against that order and checks its current fulfillment/payment state; the request supplies an order ID, not permission to cancel any order. Under this journey's policy, a successful cancellation retains the accepted ₹492 calculation, line allocations, funding history, request receipt and consumed campaign use. It records cancellation and any required reversals separately. Replaying checkout still identifies the original acceptance; a fresh order-status read tells A it is now cancelled.
+
+If payment was never attempted and fulfillment has not started, the merchant can cancel locally under its stated policy. If a payment request timed out, “unpaid” is not yet established: keep cancellation pending, reconcile that same provider operation, and refund a confirmed collection if required. If ₹492 was collected and the policy grants a full refund before fulfillment, record a ₹492 refund obligation; do not announce money returned until the provider confirms it. The original ₹48/₹32 funder obligations need their own reversal accounting, not another ₹80 customer payment. A duplicate cancellation or refund callback must return/apply the existing transition, not issue another refund.
+
+The SQL fixture implements none of those payment/cancellation transitions. Its retained snapshots explain the amounts they would use. The partial meal return earlier is a different branch from acceptance, with a ₹277.20 refund; do not add it to the full-cancellation branch as though both happened.
 
 #### The last use: an actual two-session test
 
@@ -286,7 +336,28 @@ RETURNING used;
 
 Both branches were executed, not just predicted. PostgreSQL's [Read Committed documentation](https://www.postgresql.org/docs/17/transaction-iso.html) explains waiting and re-evaluating the `WHERE` condition after a competing updater commits. This establishes the behavior of this single guarded counter under the tested conditions; it does **not** prove the surrounding checkout, per-customer limit, idempotency, payment, multiple-budget or refund design is concurrency-safe. Higher isolation can require retrying serialization failures, and other engines can behave differently.
 
-Payment is external to the merchant database. One possible policy is `reserved → payment_pending → redeemed` on confirmed payment, or `reserved → released` on expiry/failure. If a success arrives after expiry, do not blindly redeem a released slot: reconcile the provider payment and either obtain capacity again under a defined policy or compensate/refund and notify the customer. Store the provider event ID and make transitions idempotent; duplicate and out-of-order webhooks are possible according to [Stripe's webhook guidance](https://docs.stripe.com/webhooks) \[Confirmed for Stripe\]. Cancellation could release a reservation but not necessarily restore a completed use: commercetools documents non-restoration on order cancellation, while another business may choose differently. The exact transactional sequence and payment commitment are implementation choices, not universal platform behavior.
+Payment is external to the merchant database. **An alternative to A's acceptance-consumes-use policy** is `reserved → payment_pending → redeemed` on confirmed payment, or `reserved → released` on expiry/failure. If success arrives after expiry, do not blindly redeem a released slot: reconcile the provider payment and either obtain capacity again under a defined policy or compensate/refund and notify the customer. Store the provider event ID and make transitions idempotent; duplicate and out-of-order webhooks are possible according to [Stripe's webhook guidance](https://docs.stripe.com/webhooks) \[Confirmed for Stripe\]. This alternative changes when capacity becomes reusable; it cannot be introduced merely by renaming A's accepted use to “reservation.”
+
+#### Change the requirement: hold the benefit while payment is pending
+
+The merchant now wants to restore capacity if payment fails within five minutes. A's payment succeeds just after a timeout worker releases the hold, and another customer has taken the last slot. What records and decisions must change?
+
+**Hints:** distinguish a hold's expiry from quote expiry. Give the hold an identity linked to 5001 and the payment operation. Ask which transaction wins the hold's terminal transition, and whether a late payment proves the slot is still available. Square's issued/redeemed/deleted reward distinction in section 11 is useful here: a balance claim has a lifecycle independent of the displayed benefit.
+
+**Explained answer:** introduce an explicit reserved use with a deadline and guarded consume/release transitions. Commit release with the capacity adjustment, and retain the released record so retries cannot release twice. Retain or release the customer's eligibility claim according to the newly agreed policy. A late confirmed payment does not resurrect a released hold; the slot might now belong to someone else. Attempt a new capacity claim only if policy permits, otherwise reconcile/refund the collection and explain the outcome to A. This requires testing payment-versus-expiry, duplicate release and lost-response schedules, not just changing the counter predicate. The design exercise is reasoned, not implemented or concurrently observed here.
+
+#### Implementation decisions for the offer models
+
+| Decision | Choice here and consequence | Evidence needed before production |
+| --- | --- | --- |
+| Commercial assumptions | One restaurant, INR/paise, fixed illustrative tax, one mutually exclusive benefit; A consumes use on acceptance | Approved tax, rounding, cancellation, funding and first-order definitions; merchant and customer identity rules |
+| Trust and access | Credentials determine customer; server data determines prices and eligibility; service controls campaign writes | Authentication/authorization on quote, checkout, receipts and refunds; immutable campaign versions and protected customer facts |
+| Transaction boundary | Snapshot SQL stores a successful result; the proposed acceptance protocol commits receipt, capacity, customer use, order and allocations together | Implement that protocol, reconcile line/funder totals, and test all writers and separate-session conflicts; an external engine needs its own reconciliation boundary |
+| Retry and recovery | Same key/input recovers acceptance; current order status is separate; cancellation keeps consumed use in A's policy | Receipt retention, canonical inputs, in-progress recovery, provider idempotency and late-result handling |
+| Other worked models | Package rules use first match plus fallback and separate impressions; points issue/release changes a balance and reward together | Versioned targeting facts; authenticated impression deduplication; issuance idempotency and durable balance events for points |
+| Operations | Explain decision 101 → quote 1001 → order 5001; reconcile uses and funding against accepted/reversed obligations | Capacity contention, stale audience age, stuck holds/refunds, reconciliation drift, access/log retention and workload measurements |
+
+The snapshot and small balance examples support learning these boundaries. They do not supply a deployable promotion engine or establish that a learner can yet design one independently.
 
 ## 6. Company comparisons and implementation evidence
 

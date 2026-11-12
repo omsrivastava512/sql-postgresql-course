@@ -2,9 +2,11 @@
 
 Research completed 11 Nov 2026 after starting 10 Nov. **Native PostgreSQL verification: 103 assertions and 14 observed blocking schedules passed.** See the [research log](Research%20log.md) for sources, reproduction, coverage audit and evidence limits.
 
+Teaching connections revised later on 11 Nov. The SQL and reproduction harness are unchanged; the native results above belong to the earlier run, not a new execution during this writing pass.
+
 ## 1. Follow a purchase that cannot finish in one request
 
-[Inferred — connected teaching scenario] Alice requests equipment costing 120,000 illustrative currency units. Her manager must approve the need; Finance and Security must both approve their parts. The manager goes on leave, a delegate responds, Finance requests an amendment, and a new policy takes effect before approval finishes. Later, the vendor accepts the order but the API response disappears. Alice cancels while a retry is pending. The system must determine what actually happened and whether a cancellation or refund remains possible.
+[Inferred — connected teaching scenario] Alice requests equipment costing 120,000 illustrative currency units in purchase P42/revision 1. Her manager must approve the need; Finance and Security must both approve their parts. The manager goes on leave and Ops reassigns his task to Erin. After Erin and Finance approve, Alice amends the request to 180,000 in revision 2, requiring a fresh approval round. A newer policy exists, but this run remains on its original definition 7/policy 12. Later, the vendor accepts the order but the local completion is lost. Alice cancels while recovery is pending. The system must determine what actually happened and whether cancellation remains possible.
 
 This is one business story with several kinds of state. A single `status = 'pending'` cannot explain which decision is missing, what amount was approved, whether a timer is due, who can act, whether an external effect already happened, or which rules apply. Conversely, creating a workflow engine does not eliminate the business object's own lifecycle. An approved purchase can still be unfulfilled; an engine execution can be failed while the vendor has already accepted an order.
 
@@ -12,20 +14,22 @@ The investigation uses purchase approval as its main thread and compares expense
 
 | Identity or record | Illustrative value | Question it answers |
 | --- | --- | --- |
-| Business object | Purchase P42, revision 3 | What is being requested now? |
-| Reviewed snapshot | P42 revision 2, amount 120,000 | What exactly did the approver see and approve? |
+| Business object | Purchase P42, initially revision 1; later revision 2 | What is being requested now? |
+| Reviewed snapshot | Revision 1: 120,000; revision 2: 180,000 | What exactly did the approver see and approve? |
 | Process definition/version | Equipment purchase, version 7 | Which executable structure governs this run? |
 | Policy version/evaluation | Procurement policy 12, evaluated facts | Why were these steps and approvers selected? |
 | Process instance | Run W90 | Which particular execution is progressing? |
 | Step occurrence | Finance review, round 2 | Which visit to a step is this? A loop can visit it again. |
-| Human task | T304 assigned to Bob | Who has work to do, and what can they do? |
-| Decision | T304 approved by Bob at a recorded time | What decision was accepted, by whom and on whose behalf? |
+| Human task | T1/W90/round 1/manager, Bob then Erin | Who has work to do, and what can they do? |
+| Decision | Erin accepts that task under authority version 2 | What decision was accepted, by whom and under which authority? |
 | Timer/subscription | Escalation due; waiting for vendor result | What can wake the execution later? |
-| Attempt | Vendor submission attempt 2 | Which physical execution of the operation is this? |
-| External operation | Submit P42/r2 with stable key K88 | Which business effect should retries refer to? |
+| Attempt | Worker holding lease 2 for place:2 | Which execution currently has authority to record the result? |
+| External operation | Submit P42/r2 with stable key T1/W90/place:2 | Which business effect should retries refer to? |
 | Event/outbox/inbox | Accepted decision; queued action; received callback | What was recorded and what remains to be delivered or consumed? |
 
 These are conceptual distinctions, not a requirement that every product implement twelve SQL tables. Some engines serialize internal state; some business applications primarily attach rules to an existing document. The important question is where each responsibility resides and how its state survives failure.
+
+Follow [the worked purchase](#12-connected-database-walkthrough-and-experiments) for the concrete model, using sections 2–10 to compare the decisions it makes. Human task authority, reviewed revisions, the departmental join and uncertain vendor work receive executable treatment. Arbitrary process graphs, quorum voting, calendars, engine migration and other domains receive explanation and comparisons, not complete implementations. The same purchase identifiers recur below so a newer task, lease or definition cannot quietly become a different business request.
 
 ```mermaid
 flowchart LR
@@ -248,6 +252,18 @@ The functions run as invoker and accept trusted actor identifiers. Worker functi
 ### Stored model and transition procedures
 
 Run this block in a disposable PostgreSQL database. It creates the `wf_lab` schema and seeds one synthetic request. The reproduction harness in the log resets that schema between experiments.
+
+#### Learn the four mechanisms before combining them
+
+**A task is an opportunity to decide particular facts.** Initially P42/current revision and W90/reviewed revision are both 1. The manager task is ready; Finance and Security are blocked. The task's key includes tenant, run, round and gate, so a Finance response from round 1 cannot identify round 2's task. `authority_version` changes when assignment or accepted state changes. It solves a different stale-action problem from `reviewed_revision`: Erin may be the right person yet still be holding an old action, or the action may refer to an amount nobody is approving anymore. The original assignee is retained for explanation; it does not confer permanent authority. Flowable's delegation comparison is relevant here, but this model uses reassignment, not Flowable's delegate-then-resolve behavior.
+
+**A receipt remembers an accepted command.** Erin's illustrative decision request contains W90, round 1, manager, authority 2, reviewed revision 1, `approve` and key `story-manager-1`. Tenant T1 and actor Erin come from validated request context; an HTTP client must not choose an arbitrary `p_actor` merely because the SQL accepts that parameter. `decide` locks the run, checks current participation, and compares a stored fingerprint if the key already exists. A matching retry returns its original receipt. For a new command it checks current round/revision, ready state, assignee, authority and deadline. The UI can then show “your approval was recorded” without suggesting that the purchase is already fully approved.
+
+**A join asks whether the required work is complete.** Erin's acceptance makes the manager approved and the two departments ready. Finance's acceptance alone leaves W90 reviewing. Security's acceptance can release the join only in the same round. The SQL's count of three works because this fixed model creates exactly manager, finance and security, with one task per gate. It is not a generic algorithm for “any three approvals.” At final approval, the run state, immutable place-effect payload, outbox intent, decision receipt and audit event commit together. A crash before that commit leaves none of that final transition. A crash afterward leaves discoverable work even if no worker is currently running.
+
+**An effect is an obligation; a lease is temporary permission to work on it.** The effect `place:2` preserves P42/revision 2/180,000. Its outbox row lets a dispatcher find it. Claiming it advances a lease number and commits quickly; no database transaction stays open around the vendor call. Lease 2 can replace an expired lease 1, but both concern the same external key `T1/W90/place:2`. The local result check rejects an old lease. It cannot prevent the old worker from sending packets to the vendor: that needs the external operation contract. This is the distinction behind the Temporal Activity and AWS execution-boundary comparisons, rather than an “exactly once” property conferred by the table name.
+
+The schema's foreign keys preserve these relationships; they do not make arbitrary direct writes follow the protocol. The run lock is the common meeting point for competing decisions, amendments, authority changes and workers. Check state after acquiring it. The deadline uses the database's actual clock because time spent waiting for the lock must not let an already-expired decision through. These small mechanisms are what the following procedures combine.
 
 ```sql
 CREATE SCHEMA wf_lab;
@@ -578,6 +594,17 @@ The following is the second executable SQL block. Start with the seed above in a
 
 The `BEGIN`/`ROLLBACK` after simulated vendor acceptance deliberately loses the local completion while preserving the separately committed vendor record. Subsequent fixture updates expire a lease and authorize a repair without waiting a minute or involving a real operator console. Those updates take the same run lock as application transitions. Run this script with ordinary statement autocommit, as the harness does, rather than wrapping the entire story in one outer transaction.
 
+Read the calls as the following encounters with the same request:
+
+- **Cover Bob's absence.** Ops asks to reassign the ready manager task using expected authority 1. The transaction checks Ops's active administrator status and Erin's participation, stores Erin and authority 2, and retains Bob as original assignee. Bob's old form can remain visible but cannot now approve. Erin's successful decision increments authority to 3 and opens the departments. That version increment prevents a fresh-key duplicate from acting on the completed task.
+- **Amend what was reviewed.** Before `amend`, Erin and Carol have accepted 120,000; Dan has not answered. Alice supplies expected reviewed revision 1 and new amount 180,000. The transaction inserts revision 2, moves both current/reviewed pointers, withdraws unanswered old work and creates round 2. The two accepted round-1 tasks and receipts stay historical. `make_round` assigns Bob again, so Ops explicitly reassigns the new manager task to Erin; the earlier reassignment does not silently carry over. The person sees new review work, not an edited explanation of the old approvals.
+- **Accept the new obligation.** Three round-2 decisions approve 180,000. Only now does `place:2` exist, with that revision and amount copied into its payload. Definition 8 being present does nothing to W90's definition 7. The worker claims lease 1; W90 becomes ordering. Alice can be told approval is complete and vendor confirmation is pending, rather than that equipment has arrived.
+- **Lose the completion.** The separately committed vendor fixture contains V42. Rolling back `finish_effect` removes only the tentative local success/receipt, leaving W90 ordering and `place:2` running. There are now two truths to reconcile: the simulated vendor accepted the order, and the local database has no durable confirmation. A second purchase with a new key would worsen the uncertainty.
+- **Cancel while uncertain.** Alice's authorized cancellation changes W90 to `cancel_requested`, because the worker had already claimed the effect. Lease 2 recovers that same operation. The simulation finds/deduplicates V42, then records its success and creates `cancel:2` referring to V42. Alice sees cancellation pending while the reversal is attempted. The original successful purchase effect remains intact.
+- **Recover a failed reversal.** A definitive cancellation refusal leaves `cancel:2` failed and W90 in manual review. Only an audited Ops repair reopens that same cancellation effect; its next lease is 2. Confirmed cancellation finally makes W90 cancelled. Support can explain both the original obligation and the repair without erasing either.
+
+The worker's action after `cancel_requested` needs special care outside this simulation. Prefer lookup/reconciliation of the earlier operation. The duplicate insert below assumes V42 already exists; it is not a policy to submit a brand-new purchase after Alice cancels. If a real vendor proves no order exists and no earlier call can still complete, cancel without inventing a reversal. If it cannot establish that, retain uncertainty or manual review. Local lease fencing alone cannot prove the absence of an in-flight external effect.
+
 ```sql
 SET search_path=wf_lab,public;
 SELECT reassign_task('T1','W90','manager','ops',1,'erin',clock_timestamp()+interval '2 days');
@@ -656,6 +683,10 @@ Native execution produced these final records (selected columns; full queries ap
 | Purchase effect | place:2 | succeeded; lease 2; V42; payload P42/revision 2/180,000 |
 | Cancellation effect | cancel:2 | succeeded; lease 2; payload remote_ref V42 |
 
+**Predict a late click:** after the amendment, Erin repeats `story-manager-1` with identical inputs. If she is still eligible, she receives the old round-1 receipt; she does not approve round 2. A new key carrying the old revision fails the stale-review check. Thus the client must distinguish a replayed command result from a fresh read of W90's current progress. If Erin has been deactivated, even receipt replay is denied by the current-eligibility check. The historical approval remains recorded in either case.
+
+**Predict a failure at the join:** Security tentatively approves but the transaction rolls back before commit. W90 remains reviewing; no final receipt, `place:2` or outbox intent survives. A retry can accept the same decision once. If the transaction committed and only the HTTP response vanished, retry returns the receipt instead. These branches explain why the receipt and outbox must share the final approval's transaction; the log records historical rollback and duplicate-command checks.
+
 ```mermaid
 sequenceDiagram
     participant W as Worker
@@ -698,6 +729,27 @@ The harness opens three native PostgreSQL sessions: actors A and B plus an obser
 | Original decision rolls back | Tentatively accepting final approval | Retry that same request | Waiting caller commits the single durable result |
 
 These are controlled schedules, not an exhaustive concurrency proof. The deadline experiment changes the fixture's due instant while B waits; it does not measure a real multi-day deadline crossing. The lease tests expire stored instants without sleeping. Stronger isolation levels, arbitrary direct SQL, multi-run deadlocks, distributed clocks, server power loss and actual provider failures were not exercised.
+
+### Change the requirement: Security is conditional
+
+A new procurement policy requires Security only for network-connected equipment. Ordinary furniture still needs manager and Finance approval. Can the application just omit the Security task and keep the existing join?
+
+**Hints:** examine the fixed `count = 3`, the tasks created by `make_round`, and the distinction between a policy decision and a person's approval. Consider W90, whose old policy still requires all three, separately from a new run.
+
+**Explained answer:** omitting a task leaves the existing join unable to reach three. Faking an approved Security task invents a human decision. Instead, evaluate and retain the applicable policy/version, reviewed equipment facts and required gate set when opening the round. Advance when every required gate has an accepted decision, after any mandatory sequence rules, rather than comparing an unqualified count with three. Record why Security was not required. New runs can use the new policy; W90 stays on policy 12 unless an explicit migration/review decision changes its obligations. Camunda's migration discussion and Step Functions' original-definition redrive illustrate why deploying a policy is not the same as migrating existing work. This extension needs new implementation and tests; it is not supplied by the existing fixed procedures.
+
+### Implementation decisions for the purchase model
+
+| Concern | Choice and consequence | Evidence needed before production |
+| --- | --- | --- |
+| Reviewed facts | Immutable revision rows; material amendments reopen all three gates; W90 retains definition 7/policy 12 | Approved rules for material changes, distinct-person duties, conditional gates and migration |
+| Access | Tenant/actor are trusted inputs; current participant, task authority and requester restrictions are checked | Authenticated APIs, administrative/worker isolation, attachment permissions and authority changes across every writer |
+| Transactions | Run lock coordinates local mutations; final approval commits effect, outbox, receipt and audit together | Multi-run lock ordering, contention limits, event dispatch/acknowledgement and power-loss recovery |
+| Retry | Decision key binds its payload; result-message identity binds its effect/lease/outcome; a new lease preserves the external operation key | Real fingerprint normalization, receipt retention, vendor key scope/retention and authenticated callback contract |
+| Cancellation/recovery | Unclaimed work can stop locally; claimed work needs reconciliation; failed compensation remains manual review until audited repair | Vendor lookup/cancellation behavior, genuinely unknown results, safe operator permissions and real retry budgets |
+| Operations | Retain review history and effect payloads; inspect queue/lease age, overdue tasks and compensation backlog | Scheduler and worker deployment, old-version support, protected history retention and a restore/reconciliation drill |
+
+The model gives a reader specific records to inspect when “approved,” “ordering” and “cancelled” disagree. SQL checks validate selected transitions; independently explaining the conditional-gate exercise or an unfamiliar failed purchase still requires a learner attempt.
 
 ## 13. What changes in other business domains?
 

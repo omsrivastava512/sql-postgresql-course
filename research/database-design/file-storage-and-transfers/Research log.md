@@ -320,3 +320,25 @@ try {
   for (const c of clients) { if (c._connected && !c._ending) { try { await c.query('ROLLBACK'); } catch {} } await c.end().catch(()=>{}); }
 }
 ````
+
+## Connected teaching pass, 11 Nov 2026
+
+The user authorized a teaching pass across all four existing report/log pairs. Read the goal attachment, referenced chat and collection. Live GitHub repository/branch reads confirmed authoritative `omsrivastava512/sql-postgresql-course`, default `main`, at `9fbadbedca2e2828d619d9d47b47a6f31baf0887`. Local clean `main` at `25befd4` was exactly 10 ahead / 0 behind. All-state PR/issue searches found none; remote history and local file-research commit `0149291` establish that this is an explanation revision of completed research. No update or Git mutation was needed or performed.
+
+### Gap and repair
+
+The report had executable publication and rich comparisons, but initial upload was compressed into seed rows, several operations occupied one long SQL block, and physical reclamation was distant from Alice's concrete history. Added a reading route and a conceptual initial-upload bridge, then explained the existing columns and publication checks before combining them. The edit now follows S1/F42, U2/B2 and U3/B1 through admission, trusted verification, publication, retry, ownership/revocation, restore, copy and purge. It explains 8/18/26/34 MiB logical usage against 18 MiB unique bytes, and why F43 retains B1 after F42's 26 MiB history is purged.
+
+The prose also makes visible two existing fixture boundaries: zero-row admission can leave a staged blob without a session, and the trash/restore statements share one transaction rather than exposing a committed interval in trash. These are explanations of the existing code, not repairs to it. Added a prediction about U2's historical result after the head advances, an exercise changing quota to unique-blob accounting with hints/answer, and an implementation decision record.
+
+Existing sources remain useful at the decisions they explain: tus separates transfer offset from publication; S3 bounds delivery capabilities; Nextcloud illustrates metadata/object separation; Dropbox distinguishes reachability from physical reclamation. No new provider claim needed a new source. Source registers, dates, exceptions and unknowns are retained.
+
+### Learning and evidence boundary
+
+A reader should be able to trace an authorized read to a retained revision and exact blob; explain why completed bytes are not yet publication; recover a lost publication response; distinguish access revocation from recalling delivered content; and justify why restoring content, restoring visibility, purging history and deleting storage have different effects. The quota exercise tests transfer to a changed policy, but no learner attempt has been observed.
+
+All five SQL blocks and the embedded native harness are unchanged. Their evidence remains the 5 Nov PostgreSQL 17.11 run: 50 asserted outcomes and 10 observed blockers. The connected purge explanation matches that harness's synthetic row check; the continuation through object deletion and physical reclamation is reasoned, not a new integration test. No server was started, no bytes uploaded/deleted, and no provider or cryptography experiment was run in this pass. Full authorization, expiry/cancellation workers, retention-safe receipt archival and storage recovery remain production work.
+
+Final artifact checks on 11 Nov: 978 local links in 85 Markdown files passed. New reading-route anchors resolve. All eight documents passed fence/table checks, and comparison with pre-edit HEAD after newline normalization preserved every fenced block, both embedded harnesses and all external source targets. Rechecked 26 MiB = 27,262,976 bytes, 34 MiB = 35,651,584 bytes and 18 MiB = 18,874,368 bytes. Reviewed admission/publication/restore/purge prose against the unchanged SQL and harness; explicitly distinguished a missing physical object from a database marker saying ready. `git diff --check` passed and status contained exactly the eight authorized documents. This validates consistency and navigation, not byte durability, access security, physical deletion or a learner's independent understanding.
+
+Final review on 12 Nov: live upstream main remained at 9fbadbedca2e2828d619d9d47b47a6f31baf0887; the local branch remained 10 ahead / 0 behind. The same link and heading checks restricted to tracked Markdown passed 978 links in 85 files. Fence/table checks and unchanged-example/source comparisons passed again. The full recursive link checker now reports a thread-scheme link in the independently added, untracked learning/Full-Stack-Backend-Curriculum.md as a missing local file. That file and the checker were left untouched. The tracked diff remains confined to the eight authorized research documents; the earlier 11 Nov results remain dated observations.

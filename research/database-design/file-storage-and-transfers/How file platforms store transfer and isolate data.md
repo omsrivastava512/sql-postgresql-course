@@ -2,6 +2,8 @@
 
 Research dated 5 Nov 2026. For source inspection, verification and the coverage audit, see the [research log](Research%20log.md).
 
+Teaching connections revised 11 Nov 2026. SQL and reproduction code retain the 5 Nov execution evidence; no new provider or concurrent-session experiment is implied by this revision.
+
 ## Summary
 
 A file platform connects several kinds of state: a named item in a namespace, versions of its contents, stored bytes, permissions, transfer progress, and copies on devices. A folder tree describes organization; it need not describe the placement of bytes on disks. Completing a transfer, publishing a file, allowing a download, retaining a version and reclaiming storage are different operations.
@@ -22,6 +24,8 @@ The most useful distinctions to keep while reading:
 | Delete | Was a reference hidden, a revision purged, a blob made unreachable, or disk space actually reclaimed? |
 
 Read sections 1–3 for representation, 4–6 for transfer and access, 7–10 for sync and lifecycle, and 11–12 for the connected stored-record walkthrough and failure timelines.
+
+Keep Alice's `proposal.pdf` in mind through those comparisons: its name locates it for a person, its entry ID locates its history, and a revision points to exact bytes. [Alice's project](#11-connected-database-walkthrough-alices-project) works through that distinction in depth, including publication, access and retained references. Protocols, hardware placement, messaging, encryption and live collaboration explain surrounding choices; this report does not implement a complete client, storage cluster or collaborative editor. Use the comparisons to answer a particular question in Alice's journey rather than treating them as successive parts of one provider's architecture.
 
 ## 1. A file is several identities connected together
 
@@ -382,6 +386,10 @@ Monitor incomplete-session age, reserved-versus-published usage, metadata/object
 
 The setup rows represent the completed initial folder upload. A real folder import creates entries from a manifest and tracks each file's upload separately; it does not require one atomic multi-gigabyte request. Sizes are reduced for the readable example, while the same identity and failure questions apply to a larger project.
 
+To reach that starting point, Alice chooses Project and an 8 MiB PDF. The API derives Alice's identity from credentials, checks creation permission on P7, and reserves space. Before publication, a prospective F42 can have no head revision while its upload owns a staged blob B1; a folder listing must not present that as a readable completed file. A verifier checks the exact stored object, length and required integrity/scan results. Publication then associates F42/r1 with ready B1, turns the 8 MiB reservation into usage and commits a change event. Only then can Alice and an authorized reader open r1. If transfer succeeds but publication fails, bytes can remain staged without a visible revision. Resume publication or expire the upload under a cleanup policy; do not tell Alice the file is safely published merely because the progress bar reached 100%.
+
+That initial-upload sequence is conceptual. The setup deliberately seeds its final rows and omits its upload/event history; it does not execute an initial transfer. The next edit, U2, is where the SQL demonstrates reservation and publication. This distinction keeps “we have bytes” separate from “we have committed a readable version.”
+
 - Tenant identity is part of every file/blob relationship. One-level group membership is supported; nested groups and limited-access exceptions are discussed above but not implemented here.
 - Names are case-sensitive and unique among non-trashed siblings. The examples use ASCII names. A full cross-platform filename policy is not implemented.
 - Published versions are immutable references to immutable blobs. Upload size and storage verification are trusted inputs from a hypothetical storage verifier; the SQL does not upload or scan bytes.
@@ -413,6 +421,8 @@ The event row is an outbox record in the same database transaction as publicatio
 ### Setup and stored relationships
 
 Run the SQL blocks in order in a disposable PostgreSQL database. They create only the `file_research` schema. No real credentials, user files or storage objects are included.
+
+Three counters below have different jobs. `head` selects the file's current content revision; `metadata_version` detects stale operations on its name/location/state; `access_epoch` records a change to space access context. None is an upload offset. The composite keys keep references inside a space, while `expected_head` asks whether Alice is still editing the version she started from. `published_revision` preserves U2's result for retry even if F42 later advances again. `used_bytes` and `reserved_bytes` account for different obligations, so an upload does not disappear from quota simply because it has no published revision yet.
 
 ```sql
 CREATE SCHEMA file_research;
@@ -532,6 +542,12 @@ The prefix on an object key is organizational here. Isolation comes from trusted
 
 The access function climbs the parent chain, includes the actor's one-level group memberships, and denies access through a trashed ancestor. The owner or its group members can read/write; other actors need an unexpired ancestor or direct grant. The function supports only the two named actions.
 
+For Bob's initial read, the inputs are `(S1,F42,authenticated Bob,read)`. The lookup finds F42 → P7 → P0 and Bob's reader grant on P7. There is no grant copied onto each descendant and no second PDF made for Bob. The same traversal cannot authorize his write because `reader` is insufficient. Removing the grant changes the next decision, but does not automatically invalidate a previously issued storage capability. The S3 comparison in section 5 matters precisely at that second boundary.
+
+That grant represents Alice having chosen “share Project with Bob as reader.” A real sharing request supplies the destination principal and requested role; the backend resolves Bob's identity and checks authenticated Alice's authority to share P7 before writing the grant. The fixture starts after this action, with the grant already present. Its read/write function is not a sharing-authority implementation. A concurrent revoke must coordinate with later publication using the stated space lock; an earlier successful access check is not a permanent permission ticket.
+
+Read `publish_upload` as three checks followed by one commit: **who may publish, what base they edited, and whether the referenced content is ready**. The space lock makes these checks coordinate with cooperating access and quota writers. The session lookup binds U2 to its actor and F42; the entry lookup compares the expected head; the blob lookup verifies the ready marker and size. The final writes create the revision, move the head, transfer the quota charge, remember the result and emit the event together. A worker can process that event later without holding Alice's transaction open.
+
 ```sql
 CREATE FUNCTION can_access(p_space text, p_entry text, p_actor text, p_action text)
 RETURNS boolean LANGUAGE sql STABLE
@@ -618,6 +634,16 @@ The schema does not enforce immutability against arbitrary SQL users or maintain
 ### Publish an edit, transfer ownership, revoke and restore
 
 The two content objects in this example represent 8 MiB and 10 MiB. No multi-megabyte payload is inserted into PostgreSQL. `ready` represents successful external verification, which the test sets deliberately.
+
+Read the following block in these stages. A transaction's changes become durable/visible to subsequent reads when it commits; the transfer itself happens between short transactions.
+
+1. **Begin U2.** Alice submits S1/F42, expected head 1 and a 10 MiB edit. The service supplies authenticated `alice` and a scoped object locator for B2. Before admission, S1 has 8 MiB used, zero reserved and a 64 MiB limit. A successful guarded update and session insert leave 8 used, 10 reserved, U2 receiving, B2 staged, and head still 1. Bob still reads the old 8 MiB version. The caller must check that the session was inserted: on zero capacity rows this fixture can leave a staged blob row but no session. That is cleanup work, not a successful admission.
+2. **Verify B2.** A trusted storage verifier would inspect the exact immutable object and required checks. Here the two `UPDATE`s simulate its result: B2 ready, U2 verified. They do not upload, hash or scan bytes. Head remains 1, because verification is not publication. A client must not be allowed to set either marker merely by saying “done.”
+3. **Publish and retry.** `publish_upload` rechecks Alice's current access and head 1, then commits r2 → B2, head 2, 18 MiB used, zero reserved, and one publication event. The repeated call returns 2 without charging another 10 MiB. If this call rolls back, the separately verified object/session remain ready/verified, the reservation remains, and head stays 1; retry can complete publication. If another edit published first, expected head 1 is stale, so preserve Alice's candidate for explicit conflict resolution or expiry instead of overwriting the winner.
+4. **Change ownership and access.** The administrative transaction changes S1's owner from Alice to Studio and removes Bob's grant. Alice remains a Studio member. A fresh decision permits Alice and denies Bob; the key and bytes do not move. Actual transfer/share authority must be checked by an administrative API before these statements: the teaching access function only models read/write. `access_epoch` becomes 2, but this SQL does not implement a cache invalidation consumer or revoke external URLs.
+5. **Restore old contents.** Alice requests the retained r1 while head is 2. U3 references ready B1, expects head 2 and reserves another 8 MiB under the stated retained-revision policy. Publication creates r3 → B1 and leaves 26 MiB used, zero reserved. r2 remains in history. No new bytes need uploading, yet a new logical revision has been accepted. A deleted/deleting blob marker fails publication. If the physical object is missing while its marker still says ready, this SQL cannot discover that mismatch; storage verification and inventory reconciliation must detect and resolve it. An old revision number alone does not prove that its bytes remain available.
+
+**Predict before running:** after restore, a still-authorized retry of U2 returns 2, not the current head 3. It answers “what did this upload publish?” A fresh file read answers “what is current?” If Alice has lost access, the function denies even that retry because authorization is checked before the stored-result branch. Revocation does not reverse an earlier committed publication.
 
 ```sql
 SELECT can_access('S1', 'F42', 'bob', 'read') AS bob_reads,
@@ -728,6 +754,44 @@ COMMIT;
 ```
 
 B1 has three retained references and B2 has one. Trashing does not remove any reference or reduce the retained-revision quota in this model. Restoring visibility does not create a new content revision. Restoring old content with U3 did. The single-file trash example does not implement recursive purge, retention deadlines or restoring into a deleted parent.
+
+The trash and restore statements above occur in **one transaction**: its internal access query sees F42 hidden, but other sessions do not observe a committed interval in trash. Two separate user actions would require separate commits. This example checks the access rule; it does not simulate time spent in a trash screen.
+
+### Follow deletion all the way to reclamation
+
+After copying, the same story has 34 MiB of logical revision charges: F42's 8 + 10 + 8, plus F43's 8. Unique ready content is still B1's 8 plus B2's 10. Alice deleting F42 therefore does not imply that either number instantly becomes zero.
+
+| Transition | Records and action | What Alice can conclude |
+| --- | --- | --- |
+| Trash F42 | An authorized mutation sets its state and advances metadata version; retained revisions and usage remain | Normal reads hide F42; content/history are still retained |
+| Purge F42 after policy permits | Under the space lock, clear its head, retire the session references to its revisions, remove its three revisions and subtract their 26 MiB charge together | F43 still needs B1; logical usage is now 8 MiB |
+| Claim B2 for cleanup | Recheck both retained revisions and live upload references under the same coordination used by new references; change an unreferenced ready B2 to deleting | B2 is no longer eligible for publication; B1 must be kept for F43 |
+| Delete the storage object | Worker deletes the exact B2 object/version outside the database transaction, then records completion | A lost response requires checking/retrying that same deletion; it does not justify deleting another key |
+| Reclaim physical capacity | Storage backend performs its own deletion/compaction/replication work | Provider evidence is needed for when disk capacity or recovery copies are actually gone |
+
+The log's 5 Nov harness executes the synthetic F42 purge and checks the surviving B1 reference/8 MiB charge. Its GC races use separate reset fixtures; the remaining worker/deletion sequence above is reasoning, not an observed object-store deletion. Published session rows are retired in the purge fixture because their foreign keys otherwise retain references to the purged revisions. A real system needs a retention-safe archival policy for retry receipts and audit history as well as a purge policy for content.
+
+This is where the Dropbox reclamation comparison earns its place: finding an unreachable object and reclaiming disk space are different stages. If deletion succeeds but the worker crashes before recording completion, B2 stays `deleting`; a recovery worker reconciles that object rather than reopening it for reuse. If a new reference wins the coordination first, the collector must skip it. Neither a stale reference count nor an entry's absence from a folder listing authorizes physical deletion.
+
+### Change the requirement: charge shared content only once
+
+Suppose S1 should pay once for each unique stored blob, including retained history, instead of once per logical revision. What should happen when Alice restores B1 and copies F42 to F43?
+
+**Hints:** count B1 and B2 before counting entries. Distinguish adding a reference from allocating new bytes. Decide whether an unreachable blob stops counting when references disappear or only after deletion is confirmed.
+
+**Explained answer:** under unique-blob accounting, the edited state uses 18 MiB; restoring B1 and creating F43 add references without adding unique content, so both remain at 18 MiB. The existing SQL would charge 26 then 34 MiB and cannot be reused unchanged. Admission and publication must distinguish a new blob from an authorized reference to an existing one, coordinating with GC. Choose a release boundary explicitly: if this policy charges until confirmed storage deletion, purging F42 alone still leaves 18 MiB charged, and deleting B2 reduces it to 8. A guessed hash must not grant access to another space's bytes. The exercise changes accounting policy, not file ownership, revision history or the need to protect new references. It is not implemented here.
+
+### Implementation decisions for Alice's project
+
+| Concern | Choice here | Evidence needed before production |
+| --- | --- | --- |
+| Identity and policy | Space-scoped entries/revisions/blobs; case-sensitive names; charge every retained revision including trash | Product rules for names, retention, copying, ownership transfer and quota payer |
+| Trust | Actor comes from authentication; verifier controls ready markers; read/write grants are evaluated on current ancestry | Restricted mutation APIs/RLS as appropriate; sharing/admin authorization; secure object credentials and verifier provenance |
+| Transactions | All cooperating mutations lock the space first; publication commits head, revision, quota, session result and event together | Every writer follows the protocol; throughput and lock/deadlock behavior measured at real scale |
+| Retry and recovery | U2 identifies its publication; stale heads reject; SQL rollback leaves independent bytes; GC has a durable deleting state | Session creation fingerprints, expiry/cancellation workers, receipt retention, orphan cleanup and exact-object deletion recovery |
+| Operations | Track reservations, old sessions, events/derivatives, access changes, retained references and missing objects | Reconcile counters with records and storage inventory; test backups with readable content and keys; test delivery revocation separately |
+
+The native tests establish bounded database behavior. They do not establish a complete access perimeter, a successful byte transfer or physical erasure. A learner should now be able to explain why restore can add a revision without uploading bytes, and why deleting F42 must leave B1 alive for F43; that understanding still needs an actual learner attempt.
 
 ## 12. Competing transactions and failure recovery
 

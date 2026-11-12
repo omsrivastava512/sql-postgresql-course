@@ -4,9 +4,13 @@ Oct 21, 2026 · @Om Srivastava
 
 Research and database walkthrough updated 25 Oct 2026. The company observations retain their original dates. The connected model is followed by stored rows and SQL that demonstrate the selection-to-billing path.
 
+Teaching connections revised 11 Nov 2026; the executable examples and their dated verification remain unchanged.
+
 ## Summary
 
 Several designs recur in the sources: shared capabilities behind app shells, typed product records, independently identified sellable variants, component recipes for virtual bundles, explicit units, and historical amounts on order or invoice lines. These are alternatives with boundaries, rather than one universal schema. Most of Swiggy, Zomato, Blinkit, Amazon and Flipkart is not public, so for those I say so and name the closest documented analogue. Read [Connecting the pieces](#connecting-the-pieces) for the lifecycle and [Database walkthrough: selections, sellers and stored transactions](#database-walkthrough-selections-sellers-and-stored-transactions) for actual records, reads, writes and integrity rules.
+
+For a first reading, follow the shirt walkthrough from product 10 to invoice 301. Return to Tasks 1–3 when you need to compare a variant with a modifier, shared stock with a bundle, or an initial plan purchase with recurring billing. The shirt model works through selection, seller ownership, stock admission and historical amounts in depth. The earlier mixed basket explains weighted goods, kits, collection and renewal at a conceptual level; it is a separate purchase with different identifiers and totals. Shared app infrastructure and private company architecture remain supporting comparisons, not additional systems you must build to understand checkout.
 
 **How to read the tags.** \[Confirmed\] means stated in a primary source I opened (a company statement, official docs, or code at a pinned commit) and linked. \[Inferred\] means my reasoning from confirmed facts, with the reasoning stated; it also covers anything that rests only on press coverage. \[Unknown\] means I found no public evidence.
 
@@ -625,6 +629,8 @@ This is one synthetic PostgreSQL design \[Inferred\], not any company's schema. 
 
 The example sells an Everyday shirt in Size and Color options. Two independent sellers offer the same Blue/M variant at different prices. Seller 7 also sells a Video-only subscription. All amounts are tax-exclusive integer paise in INR; all quantities here are whole units. Shirt tax is an invented 12%, subscription tax an invented 18%. Weighted items and component kits retain the separate resource rules explained earlier; this shirt example maps a variant to one stock resource per seller and location.
 
+The customer's intention is “two Blue/M shirts from Seller A, plus this three-month plan.” Keep the chain of identities in view: product **10** supplies the choices; variant **101** is the actual Blue/M combination; offer **5001** is Seller A's promise to sell it; balance **(7,101,70)** is that seller's stock at location 70; purchase **201** records acceptance; invoice **301** bills it. Another seller can offer variant 101 without owning any of Seller A's stock. A later price change affects offer 5001 without changing what purchase 201 agreed to.
+
 ### First store the choices, then the combinations that actually exist
 
 A product is not every possible combination of its options. The rows below permit M and L, Blue and Red, but create only Blue/M, Blue/L and Red/M variants. Red/L is therefore unavailable even before stock is considered.
@@ -659,6 +665,8 @@ CREATE TABLE variant_choice (
 `variant_choice` is the many-to-many link made explicit: variant 101 chooses one Size value and one Color value. The composite foreign keys make those values belong to that variant's product. Its primary key permits only one value per option. The extra `product_id` repeats a relationship deliberately so the database can enforce agreement between both sides.
 
 One rule still spans several rows: every variant needs all its product's required options, and its `option_key` must describe exactly those choices. A unique key alone does not prove that description is truthful. This example uses a deferred check, below, and derives the key by sorting numeric option IDs. PostgreSQL documents [composite keys and the limits of row-local CHECK constraints](https://www.postgresql.org/docs/17/ddl-constraints.html), and [deferred constraint triggers](https://www.postgresql.org/docs/17/sql-createtrigger.html) \[Confirmed\]. The function and its policy are our illustration \[Inferred\].
+
+“Deferred” means the transaction may temporarily contain a variant whose choice rows have not all been inserted yet, but it cannot commit that incomplete state. The product lock addresses a different question: can two writers independently validate against changing choices? All cooperating option/variant writers take that same lock before editing. The final validation then checks their completed work. Neither uniqueness alone nor postponing a check alone supplies both guarantees.
 
 ```sql
 CREATE FUNCTION check_variant_choices() RETURNS TRIGGER LANGUAGE plpgsql AS $$
@@ -768,6 +776,8 @@ This example permits one offer per seller/variant and one price on that offer, w
 ### Resolve the selected values to the selected seller's offer
 
 The request contains product 10, values Size=M and Color=Blue as IDs, seller 7, location 70 and quantity 2. It does not supply the authoritative price. Numeric IDs avoid depending on the spelling or language of a displayed label.
+
+The backend obtains the buyer from validated authentication and resolves which seller/location is available to that buyer and delivery context. Those access/serviceability checks are outside this schema; a client-selected seller ID is not proof of permission. The lookup below answers a narrower question: do these choices resolve to an active offer and a balance at the requested location? Its five available units are a read at that time, not a hold. The customer sees a quote and can still lose stock to another purchase before accepting it.
 
 ```sql
 WITH requested (option_id, value_id) AS (VALUES (1, 11), (2, 21)),
@@ -895,6 +905,10 @@ The conditional update both claims stock and tests availability. It is not a sep
 
 The price snapshot need not equal tomorrow's offer price, which is why it is not a foreign key to a mutable amount. The FK preserves source identity; the copied fields preserve accepted commercial facts. The backend also needs to validate quote currency, tax treatment, customer authorization and period policy for its actual business; INR and the dates above are fixed example inputs. Receipt of an HTTP request alone is not authorization to write arbitrary seller records.
 
+Read this as a user-visible boundary. Before the transaction, the customer has a proposal, Seller A has `(5,0)`, and purchase 201 does not exist. The transaction briefly protects the selected combination and prices, changes the reservation to two, and writes the two accepted lines. After commit, the service can confirm purchase 201; it cannot yet claim payment, dispatch or access activation succeeded. If an insert fails after the stock update, rollback restores `(5,0)` and removes the new purchase. The invariant is that this acceptance leaves both the reservation and its accepted lines, or neither.
+
+**Predict a competing purchase:** suppose another transaction reserves four of Seller A's five units before this transaction reaches the stock write. Under the stated Read Committed protocol, this request cannot reserve two out of the one remaining unit. It rejects and rolls back; Seller B's seven units do not rescue a Seller A purchase automatically. Switching seller changes the commercial proposal and needs the customer's agreement. This schedule is reasoning from the documented mechanism, not newly observed separate-session evidence for this walkthrough.
+
 ### Create the invoice from accepted facts, not today's catalog
 
 ```sql
@@ -930,6 +944,8 @@ Result in paise: `(301, 139900, 19182, 159082)`: two shirts contribute Rs 1,000 
 
 If offer 5001 later rises to 60000, product 10 is renamed, or the plan's current price changes, the accepted order and invoice retain the copied values. The application must permit invoice finalization only from the accepted order version and protect finalized lines from later updates. This sample tests the snapshot boundary; it does not implement roles, an invoice state machine or an append-only accounting ledger. Its one-invoice-per-order simplification excludes split invoicing and later subscription renewals, whose lifecycles were explained above. A subscription agreement and payment/access records are separate from this initial plan-purchase line.
 
+The invoice is a second transaction because it records a different event. If creating its lines fails, invoice 301 rolls back, but the already-committed purchase 201 and two reserved shirts remain. The appropriate recovery is to resume billing for purchase 201, not reserve two more shirts. If the invoice committed and only its response disappeared, look up the invoice associated with that purchase before attempting another creation; the unique order reference detects a duplicate but does not itself return a friendly retry response. The UI can distinguish “order accepted; bill pending” from “invoice available.” A price update between these transactions is harmless to the example's amount because billing reads the accepted lines rather than the live offer.
+
 For this shirt, dispatch after successful collection would change Seller A's `(on_hand=5, reserved=2)` to `(3, 0)` in a guarded transaction linked to the reservation's source line. Abandonment would release the two reserved units without decrementing on-hand. Retain a durable reservation/fulfillment identity to prevent applying either transition twice; the aggregate balance and source location shown here do not implement a complete dispatch/release protocol. A virtual bundle would instead reserve all of its component resources together, using the recipe version or copied requirements attached to the accepted order. Its invoice price need not be the sum of current component prices.
 
 ### What rejects a bad write, and what needs a workflow?
@@ -948,6 +964,27 @@ For this shirt, dispatch after successful collection would change Seller A's `(o
 | Rewrite a finalized invoice or move a reservation twice | Requires controlled finalization and durable operation identities; copying amounts and checking a balance alone do not enforce these lifecycle rules |
 
 The table is deliberately explicit about the boundary: a database key proves related identities exist and agree; it does not prove that a business event occurred. A stored snapshot proves what was recorded, while finalization rules govern who may change it. We have closed the selection, seller-price and typed-line storage questions without claiming that this teaching slice implements an entire commerce backend.
+
+### Transfer exercise: one seller, two stock locations
+
+Seller A now has one Blue/M shirt at location 70 and one at a new location 71. The customer still buys two shirts as one commercial line at Rs 500 each. Should the backend copy the offer, reserve Seller B's stock, or change the invoice amount?
+
+**Hints:** offer 5001 already identifies the commercial terms. Ask which row currently restricts one order line to one location. Separate “what was bought” from “where its two units will come from.” The inventory-resource and fulfillment distinctions in [Connecting the pieces](#start-with-the-meaning-of-each-record) explain why those need not have the same granularity.
+
+**Explained answer:** preserve one offer and one two-unit commercial line, and represent two fulfillment/reservation allocations, one unit from each Seller A location. Their total must equal the allocated quantity without duplicating the bill. Claim both balances in a consistent order within the acceptance boundary; if either claim fails, roll back both claims and the acceptance. The current `order_line` has one `location_id`, so it cannot express that requirement unchanged. An allocation relation and durable reservation identities would be a deliberate model extension, not an extra location stuffed into the existing column. The price and tax stay Rs 1,000 and Rs 120 for the shirts under the unchanged commercial policy. This is an explained design exercise, not implemented SQL.
+
+### Implementation decisions for these worked models
+
+| Concern | Decision and consequence | Before production use |
+| --- | --- | --- |
+| Assumptions | Shirt example: one seller per purchase, one offer per seller/variant, one location per goods line, INR and whole units; the earlier chips and mixed-basket examples remain separate | Confirm issuer/currency, tax, quote, unit and fulfillment policies; do not merge the three fixtures' totals |
+| Access boundary | Backend derives buyer/context; composite FKs preserve seller ownership inside the records | Implement buyer, seller-admin and worker permissions; the fixture has no buyer ownership column or security perimeter |
+| Transactions | Product edits coordinate on the product row; checkout protects choices/prices and claims stock with accepted lines; invoice creation is a later transaction | Test every writer, native competing sessions, deadlock retry and realistic catalog size; define quote validity and invoice finalization |
+| Retry/recovery | A failed checkout rolls back its reservation; duplicate order/invoice keys detect repetition; recovery must retrieve the appropriate prior result | Durable request receipts and reservation/dispatch/release identities, so response loss does not duplicate stock movement or billing |
+| Operations | Retain accepted descriptions/options/prices/periods; reconcile reservations against open commitments and bills against accepted lines | Detect abandoned reservations and billing backlog; exercise payment/access reconciliation and backup recovery |
+| Wider lifecycle | Kits, weights, renewal, credits and refunds explain why resources and obligations differ | Separate implementations and integration evidence; the historic arithmetic and embedded shirt checks do not establish these full workflows |
+
+Being able to explain the two-location change without copying product identity or double-billing is a useful learner check. The document and SQL checks cannot establish that the reader has performed it successfully.
 
 ## What I couldn't find
 
