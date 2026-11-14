@@ -1,0 +1,15 @@
+{
+  "number": 1,
+  "job_id": "compat-schema",
+  "latency_ms": 327,
+  "finished_at": "2026-11-14T09:34:27.462Z",
+  "http_status": null,
+  "raw": null,
+  "envelope": null,
+  "request_id": null,
+  "transport_error": {
+    "name": "TypeError",
+    "code": "EACCES",
+    "message": "fetch failed"
+  }
+}

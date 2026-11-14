@@ -1,0 +1,18 @@
+{
+  "number": 2,
+  "job_id": "compat-text",
+  "phase": "compatibility",
+  "retry": true,
+  "started_at": "2026-11-14T09:19:38.308Z",
+  "body": {
+    "model": "gpt-6-astra",
+    "messages": [
+      {
+        "role": "user",
+        "content": "Reply with exactly: gateway ready"
+      }
+    ],
+    "max_completion_tokens": 2048,
+    "reasoning_effort": "low"
+  }
+}

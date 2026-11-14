@@ -1,0 +1,15 @@
+{
+  "run_id": "study-003",
+  "frozen_at": "2026-11-14T13:27:43.379Z",
+  "node": "v24.15.0",
+  "hashes": {
+    "cases.json": "6188bfc7abd36f8708182fbaa9af7a1b338993a39e2ece62309e28993159c632",
+    "prompts.json": "c0bc957fdfe4e6f89b8e76c2064361c5ba7adc68049a9cc804fdc4f2bc5bfee9",
+    "run.mjs": "12f6c1ec5db01827a578dacbe5edf9a437e95301606939e82d9c4f3ddd81d57b",
+    "validate.mjs": "43ea3469c84292bf27c24d0eea0b93e25bd19d05d79267d618cfbab538d5297a"
+  },
+  "expected_measured_requests": 108,
+  "maximum_requests": 120,
+  "maximum_compatibility_requests": 6,
+  "expectations": "Researcher-authored synthetic expectations, not independent human-expert ground truth."
+}

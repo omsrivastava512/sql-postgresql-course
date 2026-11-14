@@ -1,0 +1,12 @@
+{
+  "id": "compat-text",
+  "phase": "compatibility",
+  "kind": "simulate",
+  "request_number": 2,
+  "validation": {
+    "valid": false,
+    "errors": [
+      "transport_or_http_failure"
+    ]
+  }
+}

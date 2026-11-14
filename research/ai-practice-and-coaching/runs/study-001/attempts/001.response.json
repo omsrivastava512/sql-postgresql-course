@@ -1,0 +1,18 @@
+{
+  "number": 1,
+  "job_id": "compat-text",
+  "latency_ms": 1361,
+  "finished_at": "2026-11-14T09:19:36.795Z",
+  "http_status": 429,
+  "raw": "{\"error\":{\"message\":\"insufficient_credits: Your organization has no available platform credits (available after reservations: -0.54 credits). Pending holds are not settled spend. Review your balance and holds or add credits at https://platform.experientiallabs.ai/credits . Top-ups start at $5. Requests using your own provider keys (BYOK) are unaffected.\",\"type\":\"insufficient_quota\",\"param\":null,\"code\":\"insufficient_quota\"}}",
+  "envelope": {
+    "error": {
+      "message": "insufficient_credits: Your organization has no available platform credits (available after reservations: -0.54 credits). Pending holds are not settled spend. Review your balance and holds or add credits at https://platform.experientiallabs.ai/credits . Top-ups start at $5. Requests using your own provider keys (BYOK) are unaffected.",
+      "type": "insufficient_quota",
+      "param": null,
+      "code": "insufficient_quota"
+    }
+  },
+  "request_id": null,
+  "transport_error": null
+}

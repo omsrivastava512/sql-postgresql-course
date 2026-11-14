@@ -1,0 +1,27 @@
+{
+  "id": "compat-schema",
+  "phase": "compatibility",
+  "kind": "evaluate",
+  "transcript": [
+    {
+      "id": "m1",
+      "speaker": "customer",
+      "text": "My parcel is late. Will it arrive today?"
+    },
+    {
+      "id": "m2",
+      "speaker": "learner",
+      "text": "I'm sorry your parcel is late. I can check tracking, but I can't guarantee arrival today."
+    }
+  ],
+  "policy": "P1",
+  "complete": true,
+  "variant": "evidence",
+  "request_number": 1,
+  "validation": {
+    "valid": false,
+    "errors": [
+      "transport_or_http_failure"
+    ]
+  }
+}

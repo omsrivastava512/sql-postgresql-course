@@ -1,0 +1,81 @@
+{
+  "run_id": "study-002",
+  "requests": 2,
+  "retries": 1,
+  "phases": {
+    "compatibility": 2
+  },
+  "returned_models": [],
+  "usage": {
+    "prompt_tokens": 0,
+    "completion_tokens": 0,
+    "total_tokens": 0,
+    "reasoning_tokens": 0,
+    "cached_tokens": 0,
+    "responses_with_usage": 0,
+    "missing_usage": 2
+  },
+  "latency_ms": {
+    "min": 4,
+    "median": 165.5,
+    "p95": 327,
+    "max": 327
+  },
+  "transport_failures": [
+    {
+      "request": 1,
+      "error": "EACCES"
+    },
+    {
+      "request": 2,
+      "error": "EACCES"
+    }
+  ],
+  "invalid_outputs": [
+    {
+      "id": "compat-schema",
+      "errors": [
+        "transport_or_http_failure"
+      ]
+    }
+  ],
+  "coverage": {
+    "customer_turns": 0,
+    "complete_conversations": 0,
+    "fixed_evaluations": 0,
+    "connected_evaluations": 0,
+    "coaching_outputs": 0
+  },
+  "variants": {
+    "basic": {
+      "transcripts_requested": 0,
+      "valid_outputs": 0,
+      "expected_criterion_decisions": 0,
+      "comparable_decisions": 0,
+      "agreement": 0,
+      "false_passes": 0,
+      "false_failures": 0,
+      "missed_uncertainty": 0,
+      "invalid_outputs": [],
+      "disagreements": [],
+      "repeated_pairs": 0,
+      "repeated_decisions_changed": 0
+    },
+    "evidence": {
+      "transcripts_requested": 0,
+      "valid_outputs": 0,
+      "expected_criterion_decisions": 0,
+      "comparable_decisions": 0,
+      "agreement": 0,
+      "false_passes": 0,
+      "false_failures": 0,
+      "missed_uncertainty": 0,
+      "invalid_outputs": [],
+      "disagreements": [],
+      "repeated_pairs": 0,
+      "repeated_decisions_changed": 0
+    }
+  },
+  "connected": [],
+  "coaching_review_flags": []
+}
