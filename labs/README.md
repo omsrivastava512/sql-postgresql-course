@@ -1,6 +1,6 @@
 # Run the labs
 
-Labs 01–22 offer local PostgreSQL and dedicated Supabase learning-project routes, with verification limits recorded below. Access labs 23–26 require a disposable local cluster with administrator-controlled roles; their scripts are not a hosted Supabase setup. Lab schemas are not the clinic application's schema. Catalog labs 27–29 use independent schemas on a disposable local database. Reliable-writes labs 30–32 use a local PostgreSQL server and three persistent connections.
+Labs 01–22 offer local PostgreSQL and dedicated Supabase learning-project routes, with verification limits recorded below. Access labs 23–26 require a disposable local cluster with administrator-controlled roles; their scripts are not a hosted Supabase setup. Lab schemas are not the clinic application's schema. Catalog labs 27–29 use independent schemas on a disposable local database. Reliable-writes labs 30–32 use a local PostgreSQL server and three persistent connections. Authenticated-access drafts 33–35 supply a separate Supabase fixture and checker; live verification is pending.
 
 **Current execution evidence is in [VERIFICATION.md](../VERIFICATION.md).** Instructions being present does not mean both environments have already been tested.
 
@@ -44,7 +44,7 @@ Save the output in your own verification record. Paste one lab's setup.sql and r
 
 Run each BEGIN-to-COMMIT or BEGIN-to-ROLLBACK block in one execution. Do not assume two separate editor or MCP requests share a transaction. For experiments that pause between statements, including labs 16 and 17, use psql with a direct or session-mode connection. [Connection-mode documentation](https://supabase.com/docs/guides/database/connecting-to-postgres)
 
-Labs 01–22 do not use the Data API, authentication or RLS. They use custom course schemas and do not require exposing those schemas through the API. The new access labs use restricted local database identities; testing as the SQL Editor's privileged role is not a substitute. Their hosted adaptation and Supabase request identities remain separate future work.
+Labs 01–22 do not use the Data API, authentication or RLS. They use custom course schemas and do not require exposing those schemas through the API. Labs 23–26 use restricted local database identities; testing as the SQL Editor's privileged role is not a substitute. Labs 33–35 introduce Supabase request identities in separate fixtures, with their own pending live checks; they do not turn the earlier restricted-login suite into a hosted setup.
 
 ## Reset and expected errors
 
@@ -83,6 +83,20 @@ node tests/verify-sessions.mjs
 The checker uses three connections and the existing pg driver. It resets course_race, course_change, course_edit, course_bins and course_replay. Observe blockers through pg_blocking_pids and inspect stored results after waits, failures and retries. Its statement limit is 10 seconds and idle transaction limit is 60 seconds. Use --lab=16, 17, 30, 31 or 32 (for example, --lab=31) to select one suite, or --reverse to reverse the order. Run the checker on its own while these schemas are in use.
 
 The runner checks failure categories and stored state, including rejected writes and commit-time failures. See [verification](../VERIFICATION.md).
+
+## Authenticated-access drafts
+
+Follow [request identity](33-request-identity/README.md), [authorized table requests](34-authorized-requests/README.md) and [authorized receipt recovery](35-authorized-replay/README.md). Each has independent setup, solution and transfer files. The [environment guide](../supabase/README.md) supplies local configuration and hosted placeholders for later live runs.
+
+For repository-only verification with the existing dependencies:
+
+```powershell
+node tests/verify-authenticated-access-sql.mjs
+```
+
+This check creates synthetic `auth.users`, `auth.uid()` and request context inside PGlite. It verifies the supplied SQL under those assumptions and closes the in-memory database afterward. It requires no Docker, WSL, project or credentials. It does not validate a token or send an API request.
+
+For a later designated disposable project, `node --env-file=.env.auth-course tests/verify-authenticated-access.mjs` uses real Auth/Data API requests, administrator fixture observations and persistent concurrent SQL sessions. It resets the three lesson namespaces and exercises controlled failures. Do not run it as a read-only production diagnostic. Live execution, hosted repetition and reader attempts remain pending in [verification](../VERIFICATION.md#authenticated-access--2026-11-15).
 
 ## Reliable writes labs
 

@@ -1,10 +1,12 @@
 # Verification record
 
-Status: draft. Initial SQL execution dated 2026-10-17 (Asia/Kolkata); documentation audit added 2026-10-19; foundation and query/data-handoff execution added 2026-10-20; native concurrency, migration and practical performance execution added 2026-10-21; PostgreSQL access-control execution and focused editorial revisions added 2026-10-26; collection-wide grounding revision added 2026-10-27. Catalog design and booking-transfer checks added 2026-11-02. Reliable writes checked 2026-11-02.
+Status: draft. Initial SQL execution dated 2026-10-17 (Asia/Kolkata); documentation audit added 2026-10-19; foundation and query/data-handoff execution added 2026-10-20; native concurrency, migration and practical performance execution added 2026-10-21; PostgreSQL access-control execution and focused editorial revisions added 2026-10-26; collection-wide grounding revision added 2026-10-27. Catalog design and booking-transfer checks added 2026-11-02. Reliable writes checked 2026-11-02. Authenticated-access repository implementation and SQL-only checks added 2026-11-15; live verification remains pending.
 
 | Check | Result |
 |---|---|
-| Embedded PostgreSQL execution | PASS, 496 assertions across 32 labs on PostgreSQL 18.6 / PGlite 0.5.10 (2026-11-02) |
+| Embedded PostgreSQL execution, labs 01–32 | PASS, 496 assertions across 32 labs on PostgreSQL 18.6 / PGlite 0.5.10, repeated 2026-11-15 |
+| Authenticated-access SQL-only check, labs 33–35 | PASS, 71 assertions on PostgreSQL 18.6 / PGlite 0.5.10 with synthetic Auth tables/helper/claims (2026-11-15) |
+| Authenticated-access live integration | Pending: real Auth/JWT/API, independent sessions and HTTP-loss experiments have not run; hosted configuration contains placeholders |
 | Native local PostgreSQL 17.11 | PASS, 496 assertions across 32 labs, Windows x64, role course_author (2026-11-02) |
 | Independent concurrent sessions | PASS, 157 assertions in each suite order across labs 16, 17, 30, 31 and 32 on three connections to native PostgreSQL 17.11 (2026-11-02) |
 | Practical performance | PASS: 107 assertions across labs 18–22, normal and reverse suite order, native PostgreSQL 17.11; learner request command also passed (2026-10-21) |
@@ -12,15 +14,60 @@ Status: draft. Initial SQL execution dated 2026-10-17 (Asia/Kolkata); documentat
 | Local Docker PostgreSQL 17.11 | Not run; Docker is not installed on this host |
 | Hosted Supabase | MCP connected and project inventory read; no SQL run or project changed. No dedicated course project used; hosted verification remains open. |
 | Local Markdown links, reliable-writes package | PASS, all 966 local references in the 79 Markdown files of this batch and its baseline. The workspace checker also scanned two unrelated research documents (2026-11-02). |
+| Local Markdown links, current workspace excluding learning | PASS, 1,170 references in 103 Markdown files (2026-11-15). The unmodified full checker still rejects an existing thread:// link inside learning; that directory was left untouched. |
 | Editorial review | 27 lessons assessed on 2026-10-27 and grounding recorded for lessons 27–32 on 2026-11-02. Human comprehension remains untested. |
 | Actual human learner trials | Pending; automated execution of documented steps is not a human trial. |
 | Public publication | Not performed |
 
-The embedded runtime tests SQL behavior only. It cannot establish Docker setup, hosted permissions, or concurrent-session behavior. Native local execution now establishes the SQL and session results described below, but not Docker startup. A public release still requires hosted verification and an editorial learning trial.
+The embedded runtime tests SQL behavior only. It cannot establish Docker setup, hosted permissions, or concurrent-session behavior. The dated native local results below establish the earlier suites' SQL and session behavior; they do not cover the new authenticated-access fixtures. A public release still requires supported-environment verification and an editorial learning trial.
 
 The six initial labs cover foreign-key failures, role validation and its update gap, derived values and stale copies, delete actions, deferred-check timing, and invoice failure rollback. The test cases also run every successful solution after a fresh setup and exercise setup reset twice.
 
 The Node caller in lab 32 exercises transaction retries and deliberately discards an acknowledged commit's result. HTTP transport, production authorization and deployments remain separate verification objectives. The table above gives current results and the dated sections preserve earlier runs.
+
+## Authenticated-access — 2026-11-15
+
+The user selected repository files only, with live testing left pending and hosted project values represented by placeholders. The implementation includes three independent article/lab pairs, fixture and request modules, local Supabase configuration, a hosted template, a bounded SQL checker and a separate live integration checker. No npm dependency or earlier test-runner architecture changed. No commit or push was performed for this batch.
+
+### Executed repository checks
+
+```powershell
+node tests/verify-authenticated-access-sql.mjs
+npm run test:embedded
+```
+
+The new checker passed **71 assertions** on PGlite 0.5.10/PostgreSQL 18.6. It creates synthetic `auth.users`, `auth.uid()`, `anon` and `authenticated` roles inside an in-memory database. Administrator-selected claim settings supply test identities. That explicitly does not validate passwords, tokens, signatures, expiry or a real Supabase request. The fixtures were installed and reset twice, including deliberately broad ambient default grants to test their explicit revokes.
+
+| Fixture | Observed SQL behavior |
+|---|---|
+| 33 | Own profile/store visibility, anonymous and outsider empty results, protected membership/profile writes, profile deletion independent of membership, and the library transfer. |
+| 34 | Own-draft insert/update/delete, hidden cross-store writes affecting zero rows, rejected proposed store/actor, retained rows, read-only membership, revocation and the changed clinic-branch permission. |
+| 35 | Accepted receipt replay after repricing, payload/invalid-input/missing-offer errors, rollback after intermediate writes, placement downgrade versus receipt access, removal/rejoin, two actors using the same key, private mutation grants, read-only/STABLE negative controls and workshop receipt recovery. |
+
+The earlier embedded suite passed **496 assertions across labs 01–32**. Syntax checks passed for all six new JavaScript modules. A separate one-off probe passed 18 client assertions using an in-memory fetch substitute: equal payloads through bounded 40001/40P01 retries, retry exhaustion, immediate permission failure, unknown transport outcome, POST receipt lookup and configuration guards. It contacted no service and is not live API evidence. These results provide no new native PostgreSQL 17 execution or reader-comprehension evidence.
+
+The unmodified link command reports the pre-existing `thread://` reference in `learning/Full-Stack-Backend-Curriculum.md`. Running the same checker from memory with only `learning/` excluded passed 1,170 references across 103 Markdown files; the checker file itself was not changed. All 17 changed/new Markdown files passed table-shape checks, the seven new Markdown files had balanced code fences, and whitespace checks covered the tracked diff and all 25 new files. All four private learning files still match their baseline hashes. The 41 unrelated practice/coaching research files matched at the earlier check; five later changed independently during final review (prompts.json, README.md, Report.md, Research log.md and run.mjs). This batch did not edit or restore them. Nothing was staged and HEAD remained `21f28416dbd96eb0613cea6b2e78103496b5a813`.
+
+### Implemented live checks, not yet executed
+
+`node --env-file=.env.auth-course tests/verify-authenticated-access.mjs` requires a designated disposable Supabase project, privately provisioned synthetic accounts and a persistent administrator SQL connection. It resets the three fixture namespaces. It cannot be run meaningfully with the hosted placeholders.
+
+| Matrix | Intended observations still pending |
+|---|---|
+| I1–I6 | Real subject/role, wrong password, altered signature, genuine expiry, no-user-token request, administrator/helper comparison and missing profile/membership. I6 is a documentation exercise; anonymous sign-in is disabled. |
+| P1–P8 | Actual allowed/denied Data API CRUD, hidden writes versus proposed-row errors, schema/grant failures, sequential and concurrent identity separation, self-editable metadata and membership removal under the same valid token. |
+| O1–O11 | Atomic accepted facts, injected rollback, known-success response loss, early disconnect, payload conflicts, duplicate commit/rollback, actor scoping, removal, permission races, restricted private tables and rejoining with an old key. |
+| D1–D8 | Shared admission for different keys, duplicate arbitration after admission, placement downgrade/read recovery, removal, receipt/removal ordering, key-share negative control, method/volatility controls and own-actor receipt boundaries. |
+
+Additional live cases cover the three transfers and bounded retry exhaustion. The checker observes actual blocker PIDs before releasing fixture gates; final counts alone are insufficient wait-location evidence. D5/D6 and the STABLE negative control use administrator-controlled native SQL context; they establish SQL mechanics only. Real Auth/API cases are separate. The loopback relay represents two controlled response-loss schedules, not every possible transport failure. The final report is emitted only after the required case IDs are accounted for, with I6 explicitly labelled as documentation rather than a passed runtime test.
+
+Still required before publication: execute locally on the intended PostgreSQL 17 stack, record actual Auth/API/database versions and JWT/key settings, inspect all failure reports, repeat against a separate disposable hosted project, and retain an author/new-reader attempt with predictions and first assistance points. No tokens, passwords, administrative keys or full connection strings belong in the evidence record.
+
+### Local setup history and stopping point
+
+Before the repository-only decision, the standalone Supabase CLI 3.1.0 archive was downloaded, SHA-256 checked and its version command executed. The project configuration was initialized. WSL 3.0.5.0 was installed, and Windows Virtual Machine Platform was enabled with a reboot-required result. **No reboot was performed.** The Docker Desktop installer attempt failed before completion; Docker was not installed and the Supabase stack was never started.
+
+The CLI archive hash is recorded in the [environment guide](supabase/README.md). The WSL MSI SHA-256 was `2313efc5873e3f8552f42e77f950fabd913c0289078fa89d2100f3421a525eaa`; the Docker installer SHA-256 was `a5e299131c9c53d60f3f752b162078945eb5faf6eedcf0be20a214c6e6cea444`. Installer signatures were checked before their earlier execution. Downloads and setup logs remain in the temporary `sql-course-auth-tools` directory. No further installation, service startup, reboot or system cleanup was performed after the user chose repository-only work. That decision does not undo the earlier WSL/Windows feature changes.
 
 ## Reliable writes — 2026-11-02
 

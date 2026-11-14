@@ -51,10 +51,13 @@ The examples use fictional applications. The first lessons use a clinic; the wid
 | [Why did my saved price disappear?](articles/30-conflicting-edits.md) | Catch a stale price edit and decide whether to submit a new one. |
 | [Why are both stock transfers waiting?](articles/31-lock-order.md) | Trace a deadlock and move stock safely in either direction. |
 | [Did the order fail, or did its response go missing?](articles/32-request-replay.md) | Recover an accepted receipt and reject a conflicting retry. |
+| [Alice signed in. Why can she still see no store?](articles/33-request-identity.md) | Trace account identity separately from profile and membership. |
+| [The request knows Alice. Which rows may it change?](articles/34-authorized-requests.md) | Distinguish hidden rows, forbidden changes and missing API privileges. |
+| [The order was accepted. May Alice recover its receipt?](articles/35-authorized-replay.md) | Separate permission to place an order from permission to recover its accepted receipt. |
 
-There are **33 lessons and 32 labs**. Once you can record an accepted sale, try two editors changing its offer, two workers moving stock, and a caller retrying after the receipt goes missing. Authenticated API integration, broader migrations, recovery and the capstone remain open. The [topic inventory](TOPIC_INVENTORY.md) records the evidence for each objective.
+There are **36 lessons and 35 labs**. The newest three are authenticated-access drafts with SQL-only verification; real Auth/API and concurrent-session checks remain pending. Follow them after the local access-control and reliable-writes routes. Broader migrations, recovery and the capstone remain open. The [topic inventory](TOPIC_INVENTORY.md) records the evidence for each objective.
 
-The full embedded and native reference checks passed on 2026-11-02. The [verification record](VERIFICATION.md) gives separate dates for the session, performance and restricted-login checks. Docker setup, hosted Supabase and reader trials remain open.
+The earlier 32-lab embedded suite passed again on 2026-11-15; its native reference checks remain dated 2026-11-02. The new SQL-only checker passed 71 assertions. The [verification record](VERIFICATION.md) separates these results from pending live Supabase, concurrency and reader checks for lessons 33–35.
 
 ## How the ideas connect
 
@@ -79,4 +82,4 @@ Readers can skip these records:
 - [Repository evidence](REPOSITORY_EVIDENCE.md): historical provenance, not reader prerequisites.
 - [File guide](NEW_FILES.md): what the repository's supporting files are for.
 
-The SQL uses synthetic data in dedicated course schemas. Use a disposable learning database; setup scripts reset their named lab schema. Access labs additionally create dedicated cluster-wide roles and provide cleanup scripts.
+The SQL uses synthetic data in dedicated course schemas. Use a disposable learning database; setup scripts reset their named lab schemas. Labs 23–26 create dedicated cluster-wide roles and provide cleanup scripts. Drafts 33–35 create separate roles and provision recorded synthetic Auth accounts in a designated disposable project; see their [environment guide](supabase/README.md).

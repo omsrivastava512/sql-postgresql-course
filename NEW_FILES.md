@@ -2,7 +2,7 @@
 
 ## What the files are for
 
-The original package contained 42 files. The reliable-writes batch adds 16 files to the 151-file catalog checkpoint at d7c95fb. The counts below describe that delivery.
+The original package contained 42 files. The reliable-writes batch added 16 files to the 151-file catalog checkpoint at d7c95fb. The table below preserves that delivery's counts; the [authenticated-access delivery](#authenticated-access-implementation--2026-11-15) records the later additions without counting unrelated research or private learning material.
 
 | Files | Purpose | Intended audience |
 |---|---|---|
@@ -330,3 +330,49 @@ These current line ranges cover the batch against d7c95fb. There are 16 added fi
 | `labs/README.md` | 3, 31, 75, 77, 83, 87–90 |
 | `tests/cases.json` | 5591–6256 |
 | `tests/verify-sessions.mjs` | 5, 271–416, 427, 430 |
+
+## Authenticated-access implementation — 2026-11-15
+
+Three article/lab pairs add request identity, direct table authorization and authorized receipt recovery. Each lab has independent setup, solution, request and transfer files. Shared provisioning, separate SQL-only/live checkers, local configuration and hosted placeholders support the route. The existing npm dependencies and earlier test runners are unchanged.
+
+The SQL-only checker passed 71 assertions; the earlier embedded suite passed 496. Real Auth/API, concurrent-session, response-loss, hosted and reader checks remain pending. See [verification](VERIFICATION.md#authenticated-access--2026-11-15). No commit or push was performed.
+
+This delivery adds 25 files and updates 10 existing documentation files. The table records current delivery lines; later edits can shift them. `learning/` and unrelated research are outside this change.
+
+| File | Lines added or changed |
+|---|---|
+| [articles/33-request-identity.md](articles/33-request-identity.md) | 1–78 (new file) |
+| [articles/34-authorized-requests.md](articles/34-authorized-requests.md) | 1–74 (new file) |
+| [articles/35-authorized-replay.md](articles/35-authorized-replay.md) | 1–62 (new file) |
+| [labs/33-request-identity/README.md](labs/33-request-identity/README.md) | 1–71 (new file) |
+| [labs/33-request-identity/setup.sql](labs/33-request-identity/setup.sql) | 1–48 (new file) |
+| [labs/33-request-identity/solution.sql](labs/33-request-identity/solution.sql) | 1–24 (new file) |
+| [labs/33-request-identity/transfer.sql](labs/33-request-identity/transfer.sql) | 1–7 (new file) |
+| [labs/33-request-identity/request.mjs](labs/33-request-identity/request.mjs) | 1–74 (new file) |
+| [labs/34-authorized-requests/README.md](labs/34-authorized-requests/README.md) | 1–90 (new file) |
+| [labs/34-authorized-requests/setup.sql](labs/34-authorized-requests/setup.sql) | 1–47 (new file) |
+| [labs/34-authorized-requests/solution.sql](labs/34-authorized-requests/solution.sql) | 1–24 (new file) |
+| [labs/34-authorized-requests/transfer.sql](labs/34-authorized-requests/transfer.sql) | 1–3 (new file) |
+| [labs/34-authorized-requests/request.mjs](labs/34-authorized-requests/request.mjs) | 1–14 (new file) |
+| [labs/35-authorized-replay/README.md](labs/35-authorized-replay/README.md) | 1–92 (new file) |
+| [labs/35-authorized-replay/setup.sql](labs/35-authorized-replay/setup.sql) | 1–72 (new file) |
+| [labs/35-authorized-replay/solution.sql](labs/35-authorized-replay/solution.sql) | 1–69 (new file) |
+| [labs/35-authorized-replay/transfer.sql](labs/35-authorized-replay/transfer.sql) | 1–2 (new file) |
+| [labs/35-authorized-replay/request.mjs](labs/35-authorized-replay/request.mjs) | 1–49 (new file) |
+| [labs/auth-fixture.mjs](labs/auth-fixture.mjs) | 1–97 (new file) |
+| [supabase/.gitignore](supabase/.gitignore) | 1–5 (new file) |
+| [supabase/config.toml](supabase/config.toml) | 1–50 (new file) |
+| [supabase/README.md](supabase/README.md) | 1–61 (new file) |
+| [supabase/hosted.env.example](supabase/hosted.env.example) | 1–6 (new file) |
+| [tests/verify-authenticated-access-sql.mjs](tests/verify-authenticated-access-sql.mjs) | 1–180 (new file) |
+| [tests/verify-authenticated-access.mjs](tests/verify-authenticated-access.mjs) | 1–619 (new file) |
+| [COURSE_MAP.md](COURSE_MAP.md) | 36, 42–43, 55, 58, 134–136, 177–179, 181 |
+| [CURRICULUM_AUDIT.md](CURRICULUM_AUDIT.md) | 32, 34, 38, 123–128 |
+| [NEW_FILES.md](NEW_FILES.md) | 5, 333–378 |
+| [PUBLICATION.md](PUBLICATION.md) | 13, 90–103, 110–111 |
+| [README.md](README.md) | 54–56, 58, 60, 85 |
+| [REVIEW.md](REVIEW.md) | 79–88 |
+| [SOURCES.md](SOURCES.md) | 91–93, 171–180 |
+| [TOPIC_INVENTORY.md](TOPIC_INVENTORY.md) | 14, 122–123, 131–134, 138, 140–141, 143, 177, 179 |
+| [VERIFICATION.md](VERIFICATION.md) | 3, 7–9, 17, 22, 28–71 |
+| [labs/README.md](labs/README.md) | 3, 47, 87–100 |

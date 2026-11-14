@@ -1,0 +1,50 @@
+project_id = "sql-postgresql-auth-course"
+
+[api]
+enabled = true
+port = 54321
+schemas = ["course_auth33_api", "course_auth34_api", "course_auth35_api"]
+extra_search_path = ["extensions"]
+max_rows = 1000
+
+[db]
+port = 54322
+shadow_port = 54320
+major_version = 17
+
+[db.pooler]
+enabled = false
+
+[db.seed]
+enabled = false
+
+[realtime]
+enabled = false
+
+[studio]
+enabled = false
+
+[local_smtp]
+enabled = true
+port = 54324
+
+[storage]
+enabled = false
+
+[auth]
+enabled = true
+site_url = "http://127.0.0.1:3000"
+additional_redirect_urls = []
+jwt_expiry = 120
+enable_signup = false
+enable_anonymous_sign_ins = false
+
+[auth.email]
+enabled = true
+enable_confirmations = true
+
+[edge_runtime]
+enabled = false
+
+[analytics]
+enabled = false

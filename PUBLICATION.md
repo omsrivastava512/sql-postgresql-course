@@ -10,7 +10,7 @@ The source-study objectives are a minimum baseline, documented in the [author au
 
 ## Current package
 
-The current collection has 33 lessons, 32 independent labs and 132 topic groups. The reliable-writes route adds guarded edits, ordered transfers and replay of committed receipts. Human learner trials, supported-environment checks and release work remain open.
+The current collection has 36 lessons, 35 independent labs and 132 topic groups. The authenticated-access batch is a repository implementation with bounded SQL checks; its live Auth/API, session and hosted checks remain pending. Human learner trials, supported-environment checks and release work remain open.
 
 The [first route](COURSE_MAP.md#the-first-route) remains usable now. The [beginner route](COURSE_MAP.md#the-beginner-route) connects the available foundations and identifies the missing steps. Existing numbers and URLs stay stable.
 
@@ -87,14 +87,28 @@ Use the [three-lesson route](COURSE_MAP.md#the-first-route) and record an unaide
 
 Ask a learner to recover from a stale edit, an aborted transfer and a missing receipt. Keep their predictions, observed rows, recovery choices and first use of a hint. Follow the [labs](labs/README.md#reliable-writes-labs) for setup and the [verification record](VERIFICATION.md) for the reference results.
 
+## Authenticated-access drafts — 2026-11-15
+
+| Lesson | Concrete outcome and independent transfer |
+|---|---|
+| [Request identity](articles/33-request-identity.md) | Separate the verified subject, database role, profile and membership; transfer admissions to library branches. |
+| [Authorized requests](articles/34-authorized-requests.md) | Compare allowed CRUD, hidden-row writes, proposed-row rejection and missing privileges; change a clinic-branch reader's draft permission without removing ownership. |
+| [Authorized replay](articles/35-authorized-replay.md) | Make actor-owned order acceptance atomic, coordinate membership admission, and recover a receipt after placement permission is removed; transfer to repriced workshop bookings. |
+
+The implementation follows the [authenticated-access research](research/database-design/authenticated-access/Authenticated%20access%20-%20research%20and%20batch%20recommendation.md) and its lifecycle decisions. It uses Node fetch and the existing pg/PGlite dependencies. A separate checker implements the I1–I6, P1–P8, O1–O11 and D1–D8 matrix; I6 is a documentation exercise because anonymous sign-in is disabled. Implemented checks are not recorded execution results.
+
+The user selected repository files only and hosted placeholders. Consequently, this delivery stops at the files and checks available with existing tooling. Seventy-one bounded SQL assertions passed with synthetic identities; the earlier 496-assertion embedded suite also passed. Real Auth/JWT/API requests, independent-session schedules, response-loss experiments, hosted repetition and reader attempts are explicitly pending. No further Docker/WSL setup is part of this batch. The [verification record](VERIFICATION.md#authenticated-access--2026-11-15) records both the evidence and the earlier setup attempt.
+
+Before publication, run the integration matrix on a designated disposable project and record actual database/Auth/API versions, roles, key types, JWT validation settings and observed outcomes. Repeat in a separate hosted project; replace placeholders privately. Preserve predictions and assistance points from a real reader's transfer attempt. Keep these gates open until their own evidence exists.
+
 ## Later branches
 
 The query, concurrency, bounded migration, performance and access lessons have execution evidence, but no human learning-time or comprehension evidence. Have the author attempt them and record effort, help and wrong predictions before publication. Use that evidence when choosing further batches; do not equate passing reference SQL with mastery. Remaining work can be grouped as follows; these groups are scheduling units, not promises that one article covers each group:
 
 | Remaining group | Practical deliverable |
 |---|---|
-| Authenticated application access | Verified login/JWT identity, auth accounts versus profiles, Supabase auth.uid()/SQL-editor distinctions, Data API exposure, onboarding boundaries and complete allowed/denied request traces. Builds on labs 23–26. |
-| Reliable application operations | Savepoint recovery, coordination with external effects, request-key expiry and transport-level fault testing. Labs 30–32 cover database edits, lock ordering, and a local caller with response suppression. |
+| Authenticated application access | Execute and refine drafts 33–35 on real Auth/API and hosted environments, then address account provisioning, email delivery and incomplete onboarding. The current fixture administratively confirms synthetic users. |
+| Reliable application operations | Savepoint recovery, coordination with external effects and request-key expiry. Labs 30–32 have database/caller evidence; lab 35 adds actor-scoped recovery and a transport-fault checker whose live execution remains pending. |
 | Modelling and historical meaning | Extend the catalog batch to remaining relationship rules, type selection, price precedence, calendars and protected history. Choose an example where the change affects an observable business result. |
 | Targeted SQL/rule depth | Remaining useful JSON/array, recursive-query, generated-value, function/trigger-event and lifecycle-rule objectives, each tied to a concrete feature rather than engine internals. |
 | Change and recovery | Inherited-schema/data repair, broader compatibility/removal changes, interruption/reconciliation and a backup restored into a fresh target with data/permission checks. |

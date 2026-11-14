@@ -76,6 +76,16 @@ Suggested times: next study session, roughly one week later, roughly one month l
 | About a week later | If a reverse transfer locks bin 1 first, which bin should it debit? | [Separate lock order from movement](articles/31-lock-order.md#find-the-order-hidden-in-the-data) |
 | About a month later | Two calls have the same store, SKU and quantity. Which fact distinguishes a retry from a second purchase? | [Recover a booking](labs/32-request-replay/README.md#independent-transfer) |
 
+## Revisit authenticated access
+
+| When | Predict before reading the answer | Check |
+|---|---|---|
+| Next session | Alice's sign-in works but her profile is missing. Which existing fact could still let her see North? | [Three independent facts](articles/33-request-identity.md#three-records-three-independent-facts) |
+| About a week later | A PATCH returns an empty array. What distinguishes a hidden target from a rejected new row, and how would you check stored state? | [Write boundary](labs/34-authorized-requests/README.md#predict-the-write-boundary) |
+| About a month later | A booking was accepted before placement permission was removed. Which operation can recover it, and why does another person's same-text key not help? | [Workshop transfer](labs/35-authorized-replay/README.md#independent-transfer) |
+
+These are draft learning tasks. Their SQL mechanisms have bounded execution evidence; live requests and unaided reader attempts remain pending.
+
 ## Another setting for the transaction boundary
 
 A booking transaction creates a reservation and reduces the available-seat count. A constraint then rejects the reservation. Assume both writes are ordinary table writes in that same transaction. Predict which changes remain after rollback, then compare with the [invoice example](articles/06-transaction-boundaries.md).

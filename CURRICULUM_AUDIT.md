@@ -29,13 +29,13 @@ The table below maps every named concept, exercise and domain question in the te
 | 4 | Distinguish NEW and OLD | B04 | NEW explained; OLD and TG_OP lab planned. |
 | 4 | Update a row and inspect an automatic timestamp | B15, D08 | Planned; separate updated_at from an audit history. |
 | 4 | Insert conflicting owner input and inspect trigger-derived ownership | B06 | Practised in lab 03, including omitted input and stale copies. |
-| 5 | Explain API exposure, privileges and why row policies matter | A05, A06, A07, A11 | Planned; use documented exposure configuration, not a blanket claim that all tables are publicly exposed. |
+| 5 | Explain API exposure, privileges and why row policies matter | A05, A06, A07, A11 | Local privileges/RLS in labs 23–26; draft 34 adds exposed-schema/grant/policy comparisons. SQL checks passed; live Data API verification is pending. |
 | 5 | Distinguish USING and WITH CHECK | A07 | Planned; separate SELECT/INSERT/UPDATE/DELETE role tests. |
-| 5 | Trace login, JWT identity and auth.uid(); compare authenticated calls with editor execution | A01–A04, A11, A13 | Planned; record actual identity and role for each environment. |
+| 5 | Trace login, JWT identity and auth.uid(); compare authenticated calls with editor execution | A01–A04, A11, A13 | Explained in draft 33 with an implemented integration checker; actual Auth/API and editor/helper observations remain pending. |
 | 5 | Hand-trace staff/admin visibility through membership and identify permissive placeholder policies | A07, A10 | Planned; replace permissive teaching policies and verify both allowed and forbidden rows in a disposable project. |
 | 6 | Compare invoker/definer execution identity and when RLS can be bypassed | A08, A09 | Planned; verify ownership, privileges, search_path and caller role rather than assuming unconditional bypass. |
 | 6 | Reject a cross-tenant pair inside a privileged function; distinguish role validity from authorization | A09, A10, B01, B10 | Role validation example exists; cross-tenant privileged-write lab planned. |
-| 7 | Follow login → request identity → privileges/policy → visible rows | A13, O10 | Planned end-to-end walkthrough using two workspaces and multiple users; no application-source dependency. |
+| 7 | Follow login → request identity → privileges/policy → visible rows | A13, O10 | Drafts 33–34 supply a standalone multi-user/store trace; SQL-only policy evidence exists, live end-to-end execution remains pending. |
 | 8a | Verify happy path and owner role rejection by execution | B10, O14 | Labs 01/02 cover simplified cases; original application verification is not claimed. |
 | 8a | Verify branch isolation, cross-tenant rejection and admin visibility | A07, A10, A13, O14 | Planned identity matrix with explicit successful and rejected operations. Supabase run deferred. |
 | 8b | Evaluate whether a referring person should be free text or a separate table | R07, R13, D03, D12, D13 | Planned contact/catalog modelling comparison; course does not settle the clinic's product decision. |
@@ -119,6 +119,12 @@ The [publication queue](PUBLICATION.md#later-branches) now groups the remaining 
 ## Reliable writes implementation — 2026-11-02
 
 Lessons 30–32 extend the catalog and transaction routes. A learner guards a stale edit, orders two resource locks, and replays a committed receipt under a scoped key. The [inventory](TOPIC_INVENTORY.md#transactions-and-concurrency) advances the demonstrated parts of T09 and T11–T15. Savepoints, external effects, production key expiry and real transport failures remain open. The [verification record](VERIFICATION.md) distinguishes native concurrency, simulated ambiguous delivery and reader evidence.
+
+## Authenticated-access implementation — 2026-11-15
+
+Drafts 33–35 connect Auth identity, direct table authorization and authorized order/receipt recovery. Each supplies its own schema, reference solution, Node caller, changed-setting exercise and return prompts. The [inventory](TOPIC_INVENTORY.md#identity-and-access) advances only explained sub-outcomes of A01–A04, A08, A10–A11 and A13, with related T12–T13/O10/O12 distinctions. A12 onboarding, custom API comparison, request-key expiry and broader lifecycle work remain open.
+
+The user chose repository-only work and hosted placeholders. The new SQL-only checker passed 71 assertions with synthetic claims, and the earlier 496 embedded assertions passed. The separate Auth/API/concurrency/transport checker is implemented but unexecuted. Earlier local access or concurrency evidence cannot be transferred to this new boundary. [Verification](VERIFICATION.md#authenticated-access--2026-11-15), hosted repetition and a real learner attempt remain separate gates.
 
 ## Coverage acceptance
 

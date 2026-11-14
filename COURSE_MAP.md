@@ -33,11 +33,13 @@ After transactions and [CTEs](articles/12-query-shapes.md), continue to [competi
 
 After query correctness, follow [execution plans](articles/18-query-plans.md) → [index decisions](articles/19-index-decisions.md) → [deep pages](articles/20-deep-pages.md). Branch to [statistics and maintenance](articles/21-statistics-maintenance.md) after transaction snapshots, or to [request work](articles/22-request-work.md) after joins. The request harness uses the existing Node/pg tooling; it adds no web framework.
 
-For access control, follow [database roles](articles/23-database-roles.md) → [row policies](articles/24-row-policies.md) → [tenant membership](articles/25-tenant-membership.md) → [privileged functions and views](articles/26-privileged-code.md). Membership lookups use EXISTS; the revocation exercise also needs transaction snapshots. The local labs compare restricted identities explicitly. Supabase login/JWT/Data API integration remains planned.
+For access control, follow [database roles](articles/23-database-roles.md) → [row policies](articles/24-row-policies.md) → [tenant membership](articles/25-tenant-membership.md) → [privileged functions and views](articles/26-privileged-code.md). Membership lookups use EXISTS; the revocation exercise also needs transaction snapshots. The local labs compare restricted identities explicitly. Continue to the authenticated-access drafts below for the Supabase request boundary.
 
 For schema design, follow [product and variant keys](articles/27-product-variants.md) → [store offers](articles/28-store-offers.md) → [accepted order lines](articles/29-order-snapshots.md). Start with row identity and joins. Bring transaction boundaries and CTEs to the final write. Finish by [designing a training-centre booking](labs/29-order-snapshots/README.md#independent-transfer) from a brief.
 
 For reliable writes, start with [guarded edits](articles/30-conflicting-edits.md), trace [two transfers in opposite directions](articles/31-lock-order.md), then [recover a committed receipt](articles/32-request-replay.md). Bring the conditional updates and transaction boundaries from lab 16 and the accepted terms from lab 29. The final lab supplies a small Node caller.
+
+For authenticated requests, follow [request identity](articles/33-request-identity.md) → [allowed and denied requests](articles/34-authorized-requests.md) → [authorized receipt recovery](articles/35-authorized-replay.md). Bring roles, membership and privileged functions from labs 23–26; add accepted terms and request replay before lesson 35. Each lab has its own resettable tables and a changed-setting task. These drafts have bounded SQL evidence only. The [Supabase environment guide](supabase/README.md) and separate integration checker are supplied for later live verification; no running stack is needed to read the lessons or run the SQL-only check.
 
 ## The wider course
 
@@ -50,10 +52,10 @@ Topic IDs refer to the [inventory](TOPIC_INVENTORY.md), which records the narrow
 | Query meaning and reporting | Joins, grouping, subqueries, CTEs, windows, sets and pagination; Q | Values and basic SELECT; relationships for joins | Lessons on filtering, joins, grouping, subqueries/sets, CTEs, windows and reusable reports; recursion and specialized query depth remain planned |
 | Rules and automation | Constraints, functions, trigger events, derived values, transitions; B | Writes, constraints; lookups for cross-table rules | Lessons on validation and derivation; remaining coverage planned |
 | Transactions and concurrency | Atomic groups, deferral, counters, locking, isolation, retries; T, R11 | Writes and constraints; CTEs for the claim | Rollback, deferral, competing claims, version checks, ordered transfers, bounded retries and database-only receipt replay. Savepoints and coordination with external services remain planned |
-| Identity and access | Authentication, privileges, RLS, function execution identity, tenants; A | Filtering, relationships/EXISTS; snapshots for revocation; functions/views for helper checks | Lessons on local grants, row-policy matrices, membership and privileged code; Supabase auth/JWT/Data API integration and onboarding remain planned |
+| Identity and access | Authentication, privileges, RLS, function execution identity, tenants; A | Filtering, relationships/EXISTS; snapshots for revocation; functions/views for helper checks | Local grants, row-policy matrices, membership and privileged code; authenticated-request drafts with live verification pending. Account onboarding remains planned |
 | Data over time | Generated values, views, snapshots, exact money, calendars and audits; D | Expressions; joins and grouping for reports | Historical price reporting and capture, exact minor units, period boundaries and views. Wider lifecycle and calendar rules remain planned. |
 | Performance and recovery | Indexes, query plans, statistics, pooling, imports, backup restoration; O01–O06, O15–O19 | Queries; transactions for locks, cleanup and recovery | Lessons on plans, measured index choices, pagination, statistics/maintenance and request/pool work; specialized indexes, deployment-scale tuning and backup restoration remain planned |
-| Evolution and integration | Versioned migrations, compatibility, APIs, safe parameters, useful errors; O07–O14, O20–O21 | Constraints, transactions and locks; access for API work | Lesson on additive migration with backfill and old/new SQL callers; renames, removal, restore and full API workflow remain planned |
+| Evolution and integration | Versioned migrations, compatibility, APIs, safe parameters, useful errors; O07–O14, O20–O21 | Constraints, transactions and locks; access for API work | Additive migration with old/new SQL callers; table-request and RPC drafts with live checks pending. Renames, removal, restore and custom API implementation remain planned |
 
 The scope is application-focused SQL/PostgreSQL, from foundations through maintaining a database-backed service. Full database administration, replication, and sharding are optional future case-study directions, not hidden requirements for finishing this course. The inventory can grow when new learning questions justify it.
 
@@ -129,6 +131,9 @@ For the advanced branches, learn concurrency before implementing concurrent retr
 | An editor submits a stale price | Two centres share a workshop code | Choose the row identity and expected revision. Lab 30. |
 | Workers move stock in opposite directions | A workshop needs a room and a projector | Acquire both resources in order and inspect a partial attempt after failure. Lab 31. |
 | North loses an order response | A booking confirmation disappears before a fee increase | Recover the original receipt while allowing an intentional second booking. Lab 32. |
+| A signed-in assistant sees no store | Two library members enter different branches | Separate account, display profile and admission. Draft lab 33; live verification pending. |
+| A read-only member owns a draft | A clinic branch grants that member booking-draft edits | Change permission without removing ownership or branch boundaries. Draft lab 34; live verification pending. |
+| Placement permission changes after acceptance | A repriced workshop booking needs its original confirmation | Recover the caller's receipt without admitting another booking. Draft lab 35; live verification pending. |
 
 Every planned route needs a worked example, a changed-setting task with feedback, and a later retrieval prompt. The table is the authoring contract for future lessons, not a claim those SQL labs already exist.
 
@@ -169,8 +174,11 @@ Every planned route needs a worked example, a changed-setting task with feedback
 | Conflicting edits | Compare the version read with the current version | Conditional UPDATE RETURNING and Read Committed recheck | None |
 | Lock order | Coordinate access to two resources | Row locks, blocker inspection and 40P01 victim rollback | None |
 | Request replay | Identify one purchase across attempts | Unique pair, locking read, atomic receipt and bounded Node transaction retry | None |
+| Request identity (draft) | Separate account, profile and admission | Role versus subject; policy predicates and protected membership | Auth, project/user credentials, JWT validation and auth.uid(); live checks pending |
+| Authorized requests (draft) | Permission depends on action and resource | Object grants, RLS USING/WITH CHECK and affected rows | Exposed schemas, Data API CRUD and request identity; live checks pending |
+| Authorized replay (draft) | Separate accepting a command from reading its result | Actor-scoped unique key, atomic receipt and shared membership lock | POST RPC and structured failure recovery; live checks pending |
 
-These labels do not certify cross-database portability. Future Supabase identity/Data API lessons will name the platform explicitly; PostgreSQL roles and RLS will first get their own explanation.
+These labels do not certify cross-database portability. The authenticated-access drafts name Supabase explicitly and build on the earlier PostgreSQL roles/RLS lessons. Their SQL-only checks do not certify the live platform behavior.
 
 ## Reader controls
 
