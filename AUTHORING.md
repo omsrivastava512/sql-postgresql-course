@@ -71,6 +71,17 @@ Distinguish completing with help from explaining and solving independently. Late
 
 The [practical reference decisions](SOURCES.md#practical-course-reference-decisions) record the selected teaching ideas. The course uses its own synthetic datasets and exercises.
 
+## Keep the collection connected
+
+Shared navigation is part of each lesson or research delivery. Before calling a change ready to commit, check the actual repository contents against these reader entry points:
+
+- Keep the README's lesson list, research index, counts and evidence summaries current when the available material changes. Link research reports and their logs; label interim experiments and pending integration explicitly.
+- Connect the new material to relevant lessons and related guides in the course map. Explain the connection instead of adding an unexplained link, and keep required prior knowledge separate from optional deeper reading.
+- Update affected coverage, source, verification, publication and file records when their facts change. Research breadth does not establish completed lesson coverage; preserve historical execution records with their original dates.
+- Check incoming and outgoing links, then run the navigation checker for the delivery. Technical checks and shared summaries must agree about what was executed and what remains pending.
+
+If a necessary shared-document update falls outside the approved scope, identify the exact follow-up rather than silently omitting it or describing the collection as up to date. Keep private learning records outside a course/research delivery unless the user includes them.
+
 ## Evidence and publication
 
 Every technical claim needs an executed example or an authoritative reference. Every company anecdote needs the original account, attribution, date, and a clear limit on the inference.
